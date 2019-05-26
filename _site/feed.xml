@@ -1,0 +1,730 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="https://www.w3.org/2005/Atom">
+	<channel>
+		<title>BLOG</title>
+		<description>fromChinaBoy</description>
+		<link>/</link>
+		<atom:link href="/" rel="self" type="application/rss+xml" />
+		
+			<item>
+				<title>搭建私有的Composer Packagist</title>
+				<description>&lt;h3 id=&quot;官方文档和官方源&quot;&gt;官方文档和官方源&lt;/h3&gt;
+&lt;p&gt;官方文档：https://getcomposer.org/doc/articles/handling-private-packages-with-satis.md&lt;/p&gt;
+
+&lt;p&gt;github地址：https://github.com/composer/satis&lt;/p&gt;
+
+&lt;h3 id=&quot;下载源&quot;&gt;下载源&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;方法一&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;git clone https://github.com/composer/satis.git
+
+&lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;satis &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; composer update
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;方法二&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;composer create-project composer/satis:dev-master
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;写satisjson配置&quot;&gt;写satis.json配置&lt;/h3&gt;
+&lt;ul&gt;
+  &lt;li&gt;生成satis.json文件&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;touch &lt;/span&gt;satis.json
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;写入配置&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;language-json highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;w&quot;&gt;    &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+      &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;name&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;zzhpeng/onehourx&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+      &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;homepage&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;http://packages.example.org&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; 
+      &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;repositories&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+        &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+          &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;type&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;git&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+          &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;url&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;https://gitlab.01hour.com/onehourx/backend/plugin/saas-rpc-client.git&quot;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+        &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+        &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+          &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;type&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;composer&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+          &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;url&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;https://packagist.laravel-china.org&quot;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+        &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+      &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+      &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;require&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+        &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;onehourx/saas-rpc-client&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;dev-master&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+        &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;topthink/framework&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;5.1.*&quot;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+      &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+    &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;运行&quot;&gt;运行&lt;/h3&gt;
+&lt;ul&gt;
+  &lt;li&gt;生成静态页面和更新源&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;php bin/satis build satis.json ./public
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;执行命令后会生成public文件夹，下面有静态文件&lt;/p&gt;
+
+&lt;h3 id=&quot;部署站点&quot;&gt;部署站点&lt;/h3&gt;
+&lt;ul&gt;
+  &lt;li&gt;php cli部署&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;php &lt;span class=&quot;nt&quot;&gt;-S&lt;/span&gt; localhost:8866 &lt;span class=&quot;nt&quot;&gt;-t&lt;/span&gt; ./public
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;nginx 部署&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;略&lt;/p&gt;
+
+&lt;h3 id=&quot;额外&quot;&gt;额外&lt;/h3&gt;
+&lt;ul&gt;
+  &lt;li&gt;linux crontab定时器实时更新&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;略&lt;/p&gt;
+
+</description>
+				<pubDate>Fri, 24 May 2019 00:00:00 +0800</pubDate>
+				<link>/private-composer-packagist.html</link>
+				<guid isPermaLink="true">/private-composer-packagist.html</guid>
+			</item>
+		
+			<item>
+				<title>gitlab搭建和数据迁移</title>
+				<description>&lt;h2 id=&quot;ubuntu-搭建-gitlab&quot;&gt;Ubuntu 搭建 gitlab&lt;/h2&gt;
+
+&lt;h3 id=&quot;1首先是安装一些依赖服务&quot;&gt;1.首先是安装一些依赖服务&lt;/h3&gt;
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;apt-get &lt;span class=&quot;nb&quot;&gt;install &lt;/span&gt;curl openssh-server ca-certificates postfix
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;2安装gitlab&quot;&gt;2.安装gitlab&lt;/h3&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;注意：如果有旧gitlab要数据迁移的话，需要和旧gitlab的版本一致。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;我下的是Ubuntu18
+2.1、更新源&lt;/p&gt;
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;curl &lt;span class=&quot;nt&quot;&gt;-s&lt;/span&gt; https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.deb.sh | &lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;bash
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;2.2、安装&lt;/p&gt;
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;apt-get &lt;span class=&quot;nb&quot;&gt;install &lt;/span&gt;gitlab-ce&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;11.7.0-ce.0
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;3配置&quot;&gt;3.配置&lt;/h3&gt;
+&lt;p&gt;打开/etc/gitlab/gitlab.rb,将external_url = ‘http://git.example.com’修改为自己的域名地址：http://example.com，默认为80端口，如要使用其他端口后面加上端口号，如：http://127.0.0.1:8080。
+更新配置&lt;/p&gt;
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;gitlab-ctl reconfigure
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;4操作&quot;&gt;4.操作&lt;/h3&gt;
+&lt;ul&gt;
+  &lt;li&gt;sudo gitlab-ctl stop&lt;/li&gt;
+  &lt;li&gt;sudo gitlab-ctl start&lt;/li&gt;
+  &lt;li&gt;sudo gitlab-ctl restart&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;参考：https://www.cnblogs.com/m2ez/p/7063606.html&lt;/p&gt;
+
+&lt;h2 id=&quot;gitlab搭建的数据迁移&quot;&gt;gitlab搭建的数据迁移&lt;/h2&gt;
+
+&lt;h3 id=&quot;1查看版本&quot;&gt;1.查看版本&lt;/h3&gt;
+&lt;p&gt;cat /opt/gitlab/embedded/service/gitlab-rails/VERSION&lt;/p&gt;
+
+&lt;h3 id=&quot;2备份旧gitlab数据&quot;&gt;2.备份旧gitlab数据&lt;/h3&gt;
+&lt;p&gt;2.1、备份原a服务器上的的数据
+gitlab-rake gitlab:backup:create RAILS_ENV=production&lt;/p&gt;
+
+&lt;p&gt;PS: 备份后的文件一般是位于/var/opt/gitlab/backups下, 自动生成文件名文件名如1481529483_gitlab_backup.tar&lt;/p&gt;
+
+&lt;h3 id=&quot;3旧gitlab数据转移到新&quot;&gt;3.旧gitlab数据转移到新&lt;/h3&gt;
+&lt;p&gt;将步骤2生成的tar文件拷贝到b服务器上相应的backups目录下
+可以利用scp或者用ftp进行直接拷贝.
+scp username@src_ip:/var/opt/gitlab/backups/1481529483_gitlab_backup.tar /var/opt/gitlab/backups
+PS: username为原服务器的用户名，src_ip原服务器IP地址&lt;/p&gt;
+
+&lt;h3 id=&quot;4-在新服务器恢复数据&quot;&gt;4. 在新服务器恢复数据&lt;/h3&gt;
+&lt;p&gt;gitlab-rake gitlab:backup:restore RAILS_ENV=production BACKUP=1481529483
+PS：BACKUP的时间点必须与原服务器备份后的文件名一致&lt;/p&gt;
+
+&lt;p&gt;参考：https://www.cnblogs.com/wenwei-blog/p/6362829.html&lt;/p&gt;
+</description>
+				<pubDate>Fri, 17 May 2019 00:00:00 +0800</pubDate>
+				<link>/mysql_union_index.html</link>
+				<guid isPermaLink="true">/mysql_union_index.html</guid>
+			</item>
+		
+			<item>
+				<title>unix bash快捷键</title>
+				<description>&lt;h2 id=&quot;linuxunix下shell快捷键操作集合&quot;&gt;Linux/Unix下Shell快捷键操作集合&lt;/h2&gt;
+
+&lt;h3 id=&quot;快速搜索&quot;&gt;快速搜索&lt;/h3&gt;
+&lt;p&gt;1) ctrl + r 组合键来进入历史搜索模式在history表中查询某条过往指令，找到需要重复执行的命令后，按回车键即可。
+2) !!：重复执行上一条指令
+3) !a：重复执行上一条以a为首的指令
+4) !number：重复执行上一条在history表中记录号码为number的指令
+5) !-number：重复执行前第number条指令
+6) !$：表示获得上一条命令中的最后一项内容。e.g 先来看一个例子： mkdir /exampledir  &amp;amp;&amp;amp; cd !$&lt;/p&gt;
+
+&lt;h3 id=&quot;编辑的快捷键&quot;&gt;编辑的快捷键&lt;/h3&gt;
+&lt;p&gt;1) Ctrl + a：将光标定位到命令的开头
+2) Ctrl + e：将光标定位到命令的结尾，与上一个快捷键相反
+3) Ctrl + u：剪切光标之前的内容
+4) Ctrl + k：剪切光标之后的内容，与上一个快捷键相反
+5) Ctrl + y：粘贴Ctrl + u和Ctrl + k所剪切的内容
+6) Ctrl + t：交换光标之前两个字符的顺序
+7) Ctrl + w：删除光标左边的参数（选项）或内容
+8) Ctrl + l：清屏
+9) Ctrl + d：输入已结束。在shell下相当于一个exit
+10) Ctrl + c：键盘中断请求。
+11) Ctrl + s &amp;amp; Ctrl + q：暂停/恢复屏幕输出
+12) Ctrl + n(↓)：显示下一条命令
+13) Ctrl + p(↑)：显示上一条命令
+14) Ctrl + b：向回移动
+15) Ctrl + f： 向前移动
+16) Ctrl + shift +↓：终端向下滚动
+17) Ctrl + shift +↑：终端向上滚动
+18) Shift+pgup/pgdown：终端上下翻页滚动&lt;/p&gt;
+
+&lt;h3 id=&quot;处理作业&quot;&gt;处理作业&lt;/h3&gt;
+&lt;p&gt;首先，使用 Ctrl + z 快捷键可以让正在执行的命令挂起。如果要让该进程在后台执行，那么可以执行 bg 命令。而 fg 命令则可以让该进程重新回到前台来。使用 jobs 命令能够查看到哪些进程在后台执行。 你也可以在 fg 或 bg 命令中使用作业 id，如： fg %3 又如： bg %7&lt;/p&gt;
+
+&lt;h3 id=&quot;使用管道grep&quot;&gt;使用管道grep&lt;/h3&gt;
+&lt;p&gt;例子：&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;table&gt;
+      &lt;tbody&gt;
+        &lt;tr&gt;
+          &lt;td&gt;ps aux&lt;/td&gt;
+          &lt;td&gt;grep init&lt;/td&gt;
+        &lt;/tr&gt;
+      &lt;/tbody&gt;
+    &lt;/table&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;table&gt;
+      &lt;tbody&gt;
+        &lt;tr&gt;
+          &lt;td&gt;ps aux&lt;/td&gt;
+          &lt;td&gt;tee filename&lt;/td&gt;
+          &lt;td&gt;grep init&lt;/td&gt;
+        &lt;/tr&gt;
+      &lt;/tbody&gt;
+    &lt;/table&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;table&gt;
+      &lt;tbody&gt;
+        &lt;tr&gt;
+          &lt;td&gt;ps aux&lt;/td&gt;
+          &lt;td&gt;tee -a filename&lt;/td&gt;
+          &lt;td&gt;grep init&lt;/td&gt;
+        &lt;/tr&gt;
+      &lt;/tbody&gt;
+    &lt;/table&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;将标准输出保存为文件&quot;&gt;将标准输出保存为文件&lt;/h3&gt;
+&lt;p&gt;你可以将命令的标准输出内容保存到一个文件中，举例如下： ps aux &amp;gt; filename 注意其中的“&amp;gt;”符号。 你也可以将这些输出内容追加到一个已存在的文件中： ps aux » filename&lt;/p&gt;
+</description>
+				<pubDate>Fri, 17 May 2019 00:00:00 +0800</pubDate>
+				<link>/linux-quick-button.html</link>
+				<guid isPermaLink="true">/linux-quick-button.html</guid>
+			</item>
+		
+			<item>
+				<title>mysql联合索引</title>
+				<description>&lt;h2 id=&quot;mysql联合索引中&quot;&gt;mysql联合索引中&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;1、select * from table where a=1, b=2&lt;/li&gt;
+  &lt;li&gt;2、select * from table where b=1, a=2&lt;/li&gt;
+  &lt;li&gt;3、select * from table where b=1
+以上哪一句不会触发索引？为什么？&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;答曰：3，因为联合索引的最左匹配原则，详细如下。&lt;/p&gt;
+
+&lt;h2 id=&quot;mysql中联合索引的最左匹配原则&quot;&gt;Mysql中联合索引的最左匹配原则&lt;/h2&gt;
+
+&lt;p&gt;在Mysql建立多列索引（联合索引）有最左前缀的原则，即最左优先。如果我们建立了一个2列的联合索引(col1,col2),实际上已经建立了两个联合索引(col1)、(col1,col2）;如果有一个3列索引(col1,col2,col3)，实际上已经建立了三个联合索引(col1)、(col1,col2)、(col1,col2,col3)。并且最左优先原则是基于BTREE算法,HASH算法不行,因为简单地说，哈希索引就是采用一定的哈希算法，把键值换算成新的哈希值，检索时不需要类似B+树那样从根节点到叶子节点逐级查找，只需一次哈希算法即可立刻定位到相应的位置，速度非常快。具体原理看这篇&lt;a href=&quot;https://www.cnblogs.com/heiming/p/5865101.html&quot;&gt;MySQL B+树索引和哈希索引的区别 - 梦中山河 - 博客园&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;为什么上面例子3不会触发索引&quot;&gt;为什么上面例子3不会触发索引&lt;/h2&gt;
+&lt;p&gt;b+树的数据项是复合的数据结构，比如(name,age,sex)的时候，b+树是按照从左到右的顺序来建立搜索树的，比如当(张三,20,F)这样的数据来检索的时候，b+树会优先比较name来确定下一步的所搜方向，如果name相同再依次比较age和sex，最后得到检索的数据；但当(20,F)这样的没有name的数据来的时候，b+树就不知道第一步该查哪个节点，因为建立搜索树的时候name就是第一个比较因子，必须要先根据name来搜索才能知道下一步去哪里查询。详情查看：&lt;a href=&quot;http://www.cnblogs.com/wangkaihua/p/10220462.html&quot;&gt;Mysql中联合索引的最左匹配原则 - 王凯华 - 博客园&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;实践验证真理&quot;&gt;实践验证真理&lt;/h2&gt;
+&lt;h3 id=&quot;建表&quot;&gt;建表&lt;/h3&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;CREATE TABLE `user` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(10) DEFAULT NULL,
+  `sex` tinyint(1) DEFAULT NULL,
+  `age` tinyint(2) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `Index_user` (`name`,`age`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4;
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;测试&quot;&gt;测试&lt;/h3&gt;
+
+&lt;p&gt;1) explain select * from user where name = ‘zzhpeng’
+&lt;img src=&quot;http://img.zzhpeng.cn/FkHS_EVmThc5fAnvhwtxR89MEKbV&quot; alt=&quot;FkHS_EVmThc5fAnvhwtxR89MEKbV&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;2) explain select * from user where name = ‘zzhpeng’ and age = 18
+&lt;img src=&quot;http://img.zzhpeng.cn/FhBY0qcm_j1pxEEqBW77-saLXQVh&quot; alt=&quot;FhBY0qcm_j1pxEEqBW77-saLXQVh&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;3) explain select * from user where age = 18
+&lt;img src=&quot;http://img.zzhpeng.cn/FqQgNo2OIMtFZ5N3er2aFYipS-7p&quot; alt=&quot;FqQgNo2OIMtFZ5N3er2aFYipS-7p&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;4) explain select * from user where age = 18 and name = ‘zzhpeng’
+&lt;img src=&quot;http://img.zzhpeng.cn/FhEoYAWN1gVc7D3Y5UBi9Hqeqg0j&quot; alt=&quot;FhEoYAWN1gVc7D3Y5UBi9Hqeqg0j&quot; /&gt;&lt;/p&gt;
+</description>
+				<pubDate>Tue, 23 Apr 2019 00:00:00 +0800</pubDate>
+				<link>/mysql_union_index.html</link>
+				<guid isPermaLink="true">/mysql_union_index.html</guid>
+			</item>
+		
+			<item>
+				<title>docker 入门</title>
+				<description>&lt;h1 id=&quot;简介&quot;&gt;简介&lt;/h1&gt;
+&lt;p&gt;官网 &lt;a href=&quot;https://www.docker.com/&quot;&gt;Enterprise Container Platform | Docker&lt;/a&gt;
+手册 &lt;a href=&quot;https://docs.docker.com/&quot;&gt;Docker Documentation | Docker Documentation&lt;/a&gt;&lt;/p&gt;
+
+&lt;h1 id=&quot;虚拟机与docker对比&quot;&gt;虚拟机与docker对比&lt;/h1&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.docker.com/resources/what-container&quot;&gt;What is a Container | Docker&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://img.zzhpeng.cn/FlUbUkJUdU9WSBqD9IBYzHZ3gkSp&quot; alt=&quot;FlUbUkJUdU9WSBqD9IBYzHZ3gkSp&quot; /&gt;&lt;/p&gt;
+&lt;h1 id=&quot;docker-ce-和-docker-ee&quot;&gt;docker-ce 和 docker-ee&lt;/h1&gt;
+&lt;h3 id=&quot;about-docker-cecommunity-edition&quot;&gt;About Docker CE（Community Edition）&lt;/h3&gt;
+&lt;p&gt;Docker Community Edition (CE) is ideal for developers and small teams looking to get started with Docker and experimenting with container-based apps. Docker CE has three types of update channels, stable, test, and nightly:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Stable gives you latest releases for general availability.&lt;/li&gt;
+  &lt;li&gt;Test gives pre-releases that are ready for testing before general availability.&lt;/li&gt;
+  &lt;li&gt;Nightly gives you latest builds of work in progress for the next major release.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;For more information about Docker CE, see Docker &lt;a href=&quot;https://www.docker.com/community-edition/&quot;&gt;click me&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Releases： 每六个月发布一个大版本&lt;/p&gt;
+
+&lt;h3 id=&quot;about-docker-eeenterprise-edition&quot;&gt;About Docker EE（Enterprise Edition）&lt;/h3&gt;
+&lt;p&gt;Docker Enterprise is designed for enterprise development as well as IT teams who build, ship, and run business-critical applications in production and at scale. Docker Enterprise is integrated, certified, and supported to provide enterprises with the most secure container platform in the industry. For more info about Docker Enterprise, including purchasing options, see&lt;a href=&quot;https://www.docker.com/enterprise-edition/&quot;&gt; Docker Enterprise&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h3 id=&quot;docker-ce-和-docker-ee-对比&quot;&gt;Docker CE 和 Docker EE 对比&lt;/h3&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://img.zzhpeng.cn/FrnYjbS3hXBqxik_zQFpF-SiH-c5&quot; alt=&quot;FrnYjbS3hXBqxik_zQFpF-SiH-c5&quot; /&gt;&lt;/p&gt;
+
+&lt;h1 id=&quot;docker安装&quot;&gt;docker安装&lt;/h1&gt;
+&lt;p&gt;原始镜像地址会慢，可以用阿里、163等等提供的，不过要注册阿里等账号。&lt;/p&gt;
+&lt;h3 id=&quot;1docker--get-docker-ce-for-ubuntu--docker-documentation&quot;&gt;1、docker : &lt;a href=&quot;https://docs.docker.com/install/linux/docker-ce/ubuntu/&quot;&gt;Get Docker CE for Ubuntu | Docker Documentation&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;有很多安装途径，实在找不到对应的系统可以用 Binaries 包安装&lt;/p&gt;
+
+&lt;h3 id=&quot;2docker-compose--install-docker-compose--docker-documentation&quot;&gt;2、docker-compose : &lt;a href=&quot;https://docs.docker.com/compose/install/&quot;&gt;Install Docker Compose | Docker Documentation&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;docker-compose 镜像组合技术 组合成服务service&lt;/p&gt;
+
+&lt;h1 id=&quot;dockerfile-镜像构建&quot;&gt;dockerfile 镜像构建&lt;/h1&gt;
+&lt;p&gt;&lt;a href=&quot;https://docs.docker.com/engine/reference/builder/&quot;&gt;| Docker Documentation&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id=&quot;案例1构建一小时nodejs镜像&quot;&gt;案例1，构建一小时nodejs镜像&lt;/h3&gt;
+&lt;ul&gt;
+  &lt;li&gt;1、docker build –rm –tag nodejs_test .  （基于官网node:11-alpine镜像，构建镜像）&lt;/li&gt;
+  &lt;li&gt;2、docker run -it –rm –name node_test -v “$PWD/store_system/”:/usr/src/app -w /usr/src/app nodejs_test npm run dev&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://img.zzhpeng.cn/Frlszrq6fwzOO7WJjCdeIaEB80rG&quot; alt=&quot;Frlszrq6fwzOO7WJjCdeIaEB80rG&quot; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;案例2构建一小时后端phpnginx开发环境&quot;&gt;案例2，构建一小时后端php&amp;amp;nginx开发环境&lt;/h3&gt;
+&lt;p&gt;php 相关资料 如何加扩展 &lt;a href=&quot;https://hub.docker.com/_/php&quot;&gt;Docker Hub&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;#创建镜像
+#docker build –rm -t myphp:7.2-fpm .&lt;/p&gt;
+
+&lt;p&gt;#建立网络
+#docker network create –subnet=172.23.0.0/16 net1&lt;/p&gt;
+
+&lt;p&gt;#启动容器
+#docker run –rm -p 9000:9000 –name myphp -v $PWD/www/:/var/www/html/ -v $PWD/conf/php-fpm.conf:/usr/local/etc/php/php-fpm.d/php-fpm.conf -v $PWD/conf/php.ini:/usr/local/etc/php/php.ini –net=net1 –ip 172.23.0.2 -d myphp:7.2-fpm
+#docker run –rm -p 8088:80 –name mynginx -v $PWD/www:/www -v $PWD/conf/nginx.conf:/etc/nginx/nginx.conf -v $PWD/conf/conf.d:/etc/nginx/conf.d/ -v $PWD/logs/:/var/log/nginx/ –net=net1 –ip 172.23.0.3 –link myphp:7.2-fpm -d nginx&lt;/p&gt;
+
+&lt;h3 id=&quot;案例3构建python开发环境&quot;&gt;案例3，构建python开发环境&lt;/h3&gt;
+&lt;p&gt;scrapy爬虫项目 &lt;a href=&quot;https://github.com/LittleLory/codePool/tree/master/python/autohome_spider&quot;&gt;codePool/python/autohome_spider at master · LittleLory/codePool · GitHub&lt;/a&gt;
+&lt;img src=&quot;http://img.zzhpeng.cn/Fg7kWIhRoHX5GSrOs_Jl1VDXWla8&quot; alt=&quot;Fg7kWIhRoHX5GSrOs_Jl1VDXWla8&quot; /&gt;&lt;/p&gt;
+
+&lt;h1 id=&quot;docker-compose-镜像组建管理工具&quot;&gt;docker-compose 镜像组建管理工具&lt;/h1&gt;
+&lt;p&gt;Compose is a tool for defining and running complex applications with Docker. With Compose, you define a multi-container application in a single file, then spin your application up in a single command which does everything that needs to be done to get it running.
+手册：&lt;a href=&quot;https://docs.docker.com/compose/compose-file/&quot;&gt;Compose file version 3 reference | Docker Documentation&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;项目地址：&lt;a href=&quot;https://github.com/FromChinaBoy/dnmp&quot;&gt;GitHub - FromChinaBoy/dnmp: Docker LNMP (Nginx, PHP7/PHP5, MySQL, Redis)&lt;/a&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;有关php72配置参数的解释
+cap_add:
+      - SYS_PTRACE&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;因为有用到xdebug打断点，需要获取sys的拦截系统能力。&lt;/p&gt;
+
+&lt;p&gt;参考：&lt;a href=&quot;https://www.cnblogs.com/catch/p/3476280.html&quot;&gt;[译] 玩转ptrace (一) - twoon - 博客园&lt;/a&gt;&lt;/p&gt;
+
+&lt;h1 id=&quot;docker-网络&quot;&gt;docker 网络&lt;/h1&gt;
+&lt;p&gt;创建网段&lt;br /&gt;
+docker network create –subnet=172.18.0.0/16 net1&lt;/p&gt;
+
+&lt;h3 id=&quot;docker的bridge网桥和虚拟机的网桥是不同的&quot;&gt;docker的bridge网桥和虚拟机的网桥是不同的&lt;/h3&gt;
+&lt;p&gt;&lt;a href=&quot;https://docs.docker.com/network/bridge/&quot;&gt;Use bridge networks | Docker Documentation&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;docker-compose下的设置&quot;&gt;docker-compose下的设置&lt;/h3&gt;
+&lt;p&gt;&lt;img src=&quot;http://img.zzhpeng.cn/FgW7P1v9FCatiIQMo-4xmqOx26Gm&quot; alt=&quot;FgW7P1v9FCatiIQMo-4xmqOx26Gm&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;参考文献
+&lt;a href=&quot;https://github.com/buxiaomo/MarkdownBooks/blob/master/Docker%E5%85%A5%E9%97%A8%E7%BA%A7%E7%AE%80%E6%98%93%E6%89%8B%E5%86%8C.md&quot;&gt;https://github.com/buxiaomo/MarkdownBooks/blob/master/Docker%E5%85%A5%E9%97%A8%E7%BA%A7%E7%AE%80%E6%98%93%E6%89%8B%E5%86%8C.md&lt;/a&gt;&lt;/p&gt;
+
+</description>
+				<pubDate>Wed, 06 Mar 2019 00:00:00 +0800</pubDate>
+				<link>/docker_introduction.html</link>
+				<guid isPermaLink="true">/docker_introduction.html</guid>
+			</item>
+		
+			<item>
+				<title>mysql5.7创建用户</title>
+				<description>&lt;p&gt;今天把自己服务器的mysql5.7用户误删除了root,所以整理了,如何添加用户。&lt;/p&gt;
+&lt;h3 id=&quot;1mysql57加用户或者误删root&quot;&gt;1、mysql5.7加用户或者误删root&lt;/h3&gt;
+&lt;ul&gt;
+  &lt;li&gt;创建一个新账号
+    &lt;div class=&quot;language-sql highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;use&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mysql&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;insert&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;into&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;user&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;set&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;user&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'root'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ssl_cipher&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;''&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x509_issuer&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;''&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x509_subject&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;''&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;设置默认参数
+    &lt;div class=&quot;language-sql highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;update&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;user&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;set&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;Host&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'localhost'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;select_priv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'y'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;insert_priv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'y'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;update_priv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'y'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Alter_priv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'y'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;delete_priv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'y'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;create_priv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'y'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;drop_priv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'y'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;reload_priv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'y'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;shutdown_priv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'y'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Process_priv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'y'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;file_priv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'y'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;grant_priv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'y'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;References_priv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'y'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;index_priv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'y'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;create_user_priv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'y'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;show_db_priv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'y'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;super_priv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'y'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;create_tmp_table_priv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'y'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Lock_tables_priv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'y'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;execute_priv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'y'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;repl_slave_priv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'y'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;repl_client_priv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'y'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;create_view_priv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'y'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;show_view_priv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'y'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;create_routine_priv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'y'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;alter_routine_priv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'y'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;create_user_priv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'y'&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;where&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;user&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'root'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;设置密码
+    &lt;div class=&quot;language-sql highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;update&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;user&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;set&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;authentication_string&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;password&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'root'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;where&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;user&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'root'&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;flush&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;privileges&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;参考：&lt;a href=&quot;https://blog.csdn.net/cywosp/article/details/42145779&quot;&gt;点滴记录——Linux Mysql数据库误删root用户 - CSDN博客&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id=&quot;2扩展&quot;&gt;2、扩展&lt;/h3&gt;
+&lt;p&gt;mysql -uroot -p 默认是验证mysql.user的host 等于 localhost的而不是127.0.0.1
+&lt;a href=&quot;https://blog.csdn.net/love2377/article/details/78249233?locationNum=10&amp;amp;fps=1&quot;&gt;不是你想像的简单！配置mysql连接方式的时候，localhost和127.0.0.1的区别。 - CSDN博客&lt;/a&gt;&lt;/p&gt;
+
+</description>
+				<pubDate>Thu, 30 Aug 2018 00:00:00 +0800</pubDate>
+				<link>/mysql_create_user.html</link>
+				<guid isPermaLink="true">/mysql_create_user.html</guid>
+			</item>
+		
+			<item>
+				<title>面试！面试！</title>
+				<description>&lt;blockquote&gt;
+  &lt;p&gt;介绍&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Daemontools是管理Unix服务的工具，它提供一组工具来管理一系列用户进程，当进程由于某些原因down掉之后，daemontools会自动重启进程。主要的功能是Supervisor。&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;安装&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;mkdir&lt;/span&gt;  ~/tools
+&lt;span class=&quot;nb&quot;&gt;cd&lt;/span&gt; /tools
+wget http://cr.yp.to/daemontools/daemontools-0.76.tar.gz
+&lt;span class=&quot;nb&quot;&gt;tar &lt;/span&gt;xvzf daemontools-0.76.tar.gz
+&lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;admin/daemontools-0.76
+package/install
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;如果安装出现错误&quot;&gt;如果安装出现错误&lt;/h3&gt;
+
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;/usr/bin/ld: errno: TLS defini  tion &lt;span class=&quot;k&quot;&gt;in&lt;/span&gt; /lib/libc.so.6 section .tbss mismatches non-TLS 
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;how-to-fix-it&quot;&gt;How to fix it&lt;/h3&gt;
+
+&lt;p&gt;将admin/daemontools-0.76/src/error.h中的extern int errno;替换为#include &lt;errno.h&gt;&lt;/errno.h&gt;&lt;/p&gt;
+
+&lt;p&gt;安装完成之后，会创建 /service 和/command两个目录。&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;使用daemontools&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;daemontools是一组service管理工具，其中svscanboot工具用来启动svscan工具。可以通过以下命令启动svscanboot。&lt;/p&gt;
+
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;nohup&lt;/span&gt; /command/svscanboot &amp;amp;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;ul&gt;
+  &lt;li&gt;nohup为终端断开还在后台运行&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;启动之后，查看进程，可以发现svscan做为svscanboot的子进程在运行。&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://www.zzhpeng.cn/wp-content/uploads/2018/05/ps_svs.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;实战&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;启动svscanboot之后，相应的svscan进程也启动起来，其中参数/service 就是管理配置文件的目录。&lt;/p&gt;
+
+&lt;h3 id=&quot;1创建脚本目录&quot;&gt;1、创建脚本目录&lt;/h3&gt;
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;mkdir&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-p&lt;/span&gt; /opt/svc/nginx
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;2在目录创建run脚本名字必须是run而且权限是755&quot;&gt;2、在目录创建run脚本(名字必须是run而且权限是755)&lt;/h3&gt;
+
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;touch&lt;/span&gt; /opt/svc/nginx/run  &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;chmod &lt;/span&gt;755 /opt/svc/nginx/run
+&lt;span class=&quot;nb&quot;&gt;cat&lt;/span&gt; /opt/svc/nginx/run
+&lt;span class=&quot;c&quot;&gt;#!/bin/sh&lt;/span&gt;
+&lt;span class=&quot;nb&quot;&gt;exec&lt;/span&gt; /usr/local/nginx/sbin/nginx   &lt;span class=&quot;c&quot;&gt;#启动进程命令&lt;/span&gt;
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;3创建symbol-link映射到service下&quot;&gt;3、创建symbol link，映射到/service下&lt;/h3&gt;
+
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;ln&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-s&lt;/span&gt; /opt/svc/nginx/  /service/
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;之后svscan会自动检测，并添加任务，每隔几秒执行一次该文件。
+查看进程树形图
+&lt;img src=&quot;http://www.zzhpeng.cn/wp-content/uploads/2018/05/pstree.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;从中可以看出来，svscanboot负责启动svscan服务，svscan管理supervise进程。而具体的客户进程，是通过supervise进程来统一管理的。&lt;/p&gt;
+
+&lt;p&gt;现在nginx被daemontool管理起来了，试试看杀掉nginx应用进程看看。&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;扩展&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;1、启动被管理的进程 (配置完后无需执行svc命令)
+svc -u /service/nginx/  (启动之后，如果nginx挂掉，daemontools会自动重启nginx)&lt;/p&gt;
+
+&lt;p&gt;2、关闭被管理的进程（不会关闭daemontools supervise进程）
+svc -d /service/nginx/&lt;/p&gt;
+
+&lt;p&gt;3、查看service状态
+svstat /service/nginx/&lt;/p&gt;
+
+&lt;p&gt;4、移除service
+rm  /service/nginx   #移除软连接&lt;br /&gt;
+svc -dx /opt/svc/nginx/&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;实战2 与tp5的think-queue结合&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;run如下：&lt;/p&gt;
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;#!/bin/sh&lt;/span&gt;
+&lt;span class=&quot;nb&quot;&gt;exec&lt;/span&gt; /usr/local/php/bin/php /home/wwwroot/thinkphp/think queue:listen &lt;span class=&quot;nt&quot;&gt;--queue&lt;/span&gt; helloJobQueue   &lt;span class=&quot;c&quot;&gt;#启动进程命令&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;注意&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;1、被管理的进程不能以daemon形式运行，例如nginx.conf 必须关闭daemon， daemon off。&lt;/li&gt;
+  &lt;li&gt;2、不要在/service/建任何目录， /service/只存放一些symbol link。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;参考文献
+http://kavy.iteye.com/blog/2119978&lt;/p&gt;
+
+</description>
+				<pubDate>Sat, 21 Jul 2018 00:00:00 +0800</pubDate>
+				<link>/interview.html</link>
+				<guid isPermaLink="true">/interview.html</guid>
+			</item>
+		
+			<item>
+				<title>关于php的运行方式</title>
+				<description>&lt;p&gt;好久好久前有个同事问我，同一台服务器怎么用两个php版本，当时解决了，只是简单的教他怎么切换。如今空闲觉得有必要整理下相关的知识。&lt;/p&gt;
+&lt;h2 id=&quot;常见的五大运行模式&quot;&gt;常见的五大运行模式&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;1）CGI（通用网关接口/ Common Gateway Interface）&lt;/li&gt;
+  &lt;li&gt;2）FastCGI（常驻型CGI / Long-Live CGI）&lt;/li&gt;
+  &lt;li&gt;3）CLI（命令行运行 / Command Line Interface）&lt;/li&gt;
+  &lt;li&gt;4）Web模块模式（Apache等Web服务器运行的模式）&lt;/li&gt;
+  &lt;li&gt;5）ISAPI（Internet Server Application Program Interface）&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;备注：在PHP5.3以后，PHP不再有ISAPI模式，安装后也不再有php5isapi.dll这个文件。要在IIS6上使用高版本PHP，必须安装FastCGI 扩展，然后使IIS6支持FastCGI。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h3 id=&quot;1cgi&quot;&gt;1）Cgi&lt;/h3&gt;
+&lt;p&gt;CGI全称是“公共网关接口”(Common Gateway Interface)，是一个跨语言沟通的标准(协议)。例如，HTTP请求和WEB服务器沟通是没有问题的，但是请求带有动态文件的时候，WEB服务器是无法处理的。所以需要找合伙人（会处理动态文件的人），合作的话，双方需要达成协议。这个协议标准就是Cgi啦。&lt;/p&gt;
+
+&lt;h3 id=&quot;2fastcgi&quot;&gt;2）FastCGI&lt;/h3&gt;
+&lt;p&gt;FastCGI是在CGI基础上加上了Fast，快速达成协议。CGI这种合作，是一笔短暂的交易。若想要长期合作就需要加强下协议的细节了。所以就有了FastCGI，它也是CGI的加强版。&lt;/p&gt;
+
+&lt;h3 id=&quot;3cli&quot;&gt;3）CLI&lt;/h3&gt;
+&lt;p&gt;命令行模式,在CLI直接运行文件。&lt;/p&gt;
+
+&lt;h3 id=&quot;4web模块模式&quot;&gt;4）Web模块模式&lt;/h3&gt;
+&lt;p&gt;相当于合伙人驻场了，合作密切，工作作息时间一致了。在linux上，apache有如下这段代码。
+httpd.conf文件&lt;/p&gt;
+
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;LoadModule alias_module modules/mod_alias.so
+LoadModule rewrite_module modules/mod_rewrite.so
+LoadModule php5_module        modules/libphp5.so
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;windows下phpstudy&lt;/p&gt;
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;LoadFile &lt;span class=&quot;s2&quot;&gt;&quot;D:/phpstudy2/php/php-5.5.38/php5ts.dll&quot;&lt;/span&gt;
+LoadModule php5_module &lt;span class=&quot;s2&quot;&gt;&quot;D:/phpstudy2/php/php-5.5.38/php5apache2_4.dll&quot;&lt;/span&gt;
+&amp;lt;IfModule php5_module&amp;gt;
+PHPIniDir &lt;span class=&quot;s2&quot;&gt;&quot;D:/phpstudy2/php/php-5.5.38/&quot;&lt;/span&gt;
+&amp;lt;/IfModule&amp;gt;
+LoadFile &lt;span class=&quot;s2&quot;&gt;&quot;D:/phpstudy2/php/php-5.5.38/libssh2.dll&quot;&lt;/span&gt;
+&amp;lt;FilesMatch &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\.&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;php$&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+    SetHandler application/x-httpd-php
+&amp;lt;/FilesMatch&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;详细解说可以查看下面的参考文献&lt;/p&gt;
+
+&lt;h2 id=&quot;图说-php-cgi和-php-fpm&quot;&gt;图说 php-cgi和 php-fpm&lt;/h2&gt;
+&lt;h3 id=&quot;php-cgi&quot;&gt;php-cgi&lt;/h3&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://s1.ax1x.com/2018/07/15/PMfbeH.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;php-fpm&quot;&gt;php-fpm&lt;/h3&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://s1.ax1x.com/2018/07/15/PMf7Oe.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;nginx与php-fpm通信的两种方式&quot;&gt;nginx与php-fpm通信的两种方式&lt;/h2&gt;
+&lt;p&gt;在Linux中，nginx服务器和PHP-fpm可以通过tcp socket和unix socket两种方式实现。&lt;/p&gt;
+
+&lt;p&gt;unix socket是一种终端，可以使同一台操作系统上的两个或多个进程进行数据通信。这种方式需要再nginx配置文件中填写php-fpm的pid文件位置，效率要比tcp socket高。&lt;/p&gt;
+
+&lt;p&gt;tcp socket的优点是可以跨服务器，当nginx和php-fpm不在同一台机器上时，只能使用这种方式。&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;windows系统只能使用tcp socket的通信方式&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;配置方法&quot;&gt;配置方法&lt;/h3&gt;
+&lt;h4 id=&quot;tcp-socket&quot;&gt;tcp socket&lt;/h4&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;tcp socket通信方式，需要在nginx配置文件中填写php-fpm运行的ip地址和端口号。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;location ~ &lt;span class=&quot;se&quot;&gt;\.&lt;/span&gt;php&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+    include fastcgi_params&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    fastcgi_param SCRIPT_FILENAME /var/www/website&lt;span class=&quot;nv&quot;&gt;$fastcgi_script_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    fastcgi_pass 127.0.0.1:9000&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    fastcgi_index index.php&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;h4 id=&quot;unix-socket&quot;&gt;unix socket&lt;/h4&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;unix socket通信方式，需要在nginx配置文件中填写php-fpm运行的pid文件地址。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;location ~ &lt;span class=&quot;se&quot;&gt;\.&lt;/span&gt;php&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+    include fastcgi_params&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    fastcgi_param SCRIPT_FILENAME /var/www/website&lt;span class=&quot;nv&quot;&gt;$fastcgi_script_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    fastcgi_pass unix:/var/run/php5-fpm.sock&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    fastcgi_index index.php&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;php-fpm的运行端口号和pid文件的地址都是在php-fpm.conf中配置的。
+php-fpm.conf文件在php安装文件的/etc目录下，比如你的php安装在/opt/php目录，则应该是/opt/php/php-fpm.conf。&lt;/p&gt;
+
+&lt;h2 id=&quot;php的nts-和-ztsts&quot;&gt;PHP的nts 和 zts(ts)&lt;/h2&gt;
+&lt;p&gt;nts是non-thread-safe,ts是thread-safe
+nts和zts用过windows的同学都有看见过。Linux上的PHP同样有NTS和TS版本的区别,默认是NTS版本,configure时加上–enable-maintainer-zts则编译为TS版本.什么时候需要TS版本呢?比如你要使用pthreads这个多线程的PECL扩展时,或者PHP以MOD_PHP嵌入多线程运行下的Apache,比如Apache在Linux上提供的Event MPM就是一个多进程多线程的工作模型,Windows上Apache采用的WinNT MPM也是一个多线程模型,这时都需要TS版本的PHP。
+而如果以PHP-FPM(比如搭配Nginx或者Apache的mod_fastcgi)或者PHP-CGI(比如搭配Apache的mod_fcgid或者Win上的IIS)来运行PHP,则一般都不需要TS线程安全版本的PHP.&lt;/p&gt;
+
+&lt;p&gt;参考文献
+[1] https://blog.csdn.net/xiaoxiaoqiye/article/details/52094004
+[2] https://blog.csdn.net/koastal/article/details/52303316
+[3] https://segmentfault.com/q/1010000002974864&lt;/p&gt;
+
+</description>
+				<pubDate>Sun, 15 Jul 2018 00:00:00 +0800</pubDate>
+				<link>/php-runtime-type.html</link>
+				<guid isPermaLink="true">/php-runtime-type.html</guid>
+			</item>
+		
+			<item>
+				<title>关于nginx和php-fpm</title>
+				<description>&lt;h3 id=&quot;1网友一&quot;&gt;1、网友一&lt;/h3&gt;
+&lt;p&gt;Nginx 是非阻塞IO &amp;amp; IO复用模型，通过操作系统提供的类似 epoll 的功能，可以在一个线程里处理多个客户端的请求。
+Nginx 的进程就是线程，即每个进程里只有一个线程，但这一个线程可以服务多个客户端。&lt;/p&gt;
+
+&lt;p&gt;PHP-FPM 是阻塞的单线程模型，pm.max_children 指定的是最大的进程数量，pm.max_requests 指定的是每个进程处理多少个请求后重启(因为 PHP 偶尔会有内存泄漏，所以需要重启).
+PHP-FPM 的每个进程也只有一个线程，但是一个进程同时只能服务一个客户端。&lt;/p&gt;
+
+&lt;p&gt;大多数的 Linux 程序都倾向于使用进程而不是线程，因为 Linux 下相对来说创建进程的开销比较小，而 Linux 的线程功能又不是很强大。&lt;/p&gt;
+&lt;h3 id=&quot;2网友二&quot;&gt;2、网友二&lt;/h3&gt;
+&lt;p&gt;php-fpm 是多进程的 fast-cgi 管理服务&lt;/p&gt;
+
+&lt;p&gt;nginx 主进程是单线程的， master 进程会 fork 出多个 worker 进程，每个 worker 进程也同样是单线程模式，worker 进程采用的是 epoll 模型，异步非阻塞/事件驱动/IO多路复用，所以 nginx 比较适用于处理高并发请求的场景，就像现在的 nodejs，nodejs 是单进程且单线程模式，master 进程只有一个线程，负责请求调度和轮询回调事件的处理工作。&lt;/p&gt;
+
+&lt;p&gt;在 nginx + php-fpm 的架构模式下&lt;/p&gt;
+
+&lt;p&gt;nginx 的 worker 服务进程会把请求转发给 php-fpm 服务，它们是通过 unix socket 或 tcp socket 进行通信的，worker 把 request_1 发送给 php-fpm 后并不会同步阻塞等待 php-fpm 返回数据，而是将此次请求放入事件队列，接着去处理新的请求 request_2，同时会监测有没有回调事件触发了，这里的回调事件便是 request_1 的请求处理好了并已经返回了数据，worker 只需要把数据返回给客户端即可。
+php-fpm 相当于一个进程池，里面维系着一定数量的php服务进程，等待 nginx 的 worker 发送任务，处理完成后返回给 nginx 的 worker。&lt;/p&gt;
+&lt;h3 id=&quot;联想&quot;&gt;联想&lt;/h3&gt;
+&lt;h3 id=&quot;如何查看进程数&quot;&gt;如何查看进程数&lt;/h3&gt;
+&lt;p&gt;1、ps -ef | wc -l
+2、ps -ef | grep httpd | wc -l&lt;/p&gt;
+
+&lt;h3 id=&quot;如何查看某进程数的线程数&quot;&gt;如何查看某进程数的线程数&lt;/h3&gt;
+&lt;p&gt;1、pstree -p 4761（pid）
+2、cat /proc/4761（pid）/status
+3、top -p 4761（pid），然后按H。&lt;/p&gt;
+
+&lt;p&gt;[1] https://segmentfault.com/q/1010000000326510.
+[2] https://segmentfault.com/q/1010000004621209&lt;/p&gt;
+
+</description>
+				<pubDate>Sun, 15 Jul 2018 00:00:00 +0800</pubDate>
+				<link>/nginx-and-php-fpm.html</link>
+				<guid isPermaLink="true">/nginx-and-php-fpm.html</guid>
+			</item>
+		
+			<item>
+				<title>sshd预防被暴力破解</title>
+				<description>&lt;p&gt;今天服务器出现了被攻击的现象，登录的时候很慢，登录成功后出现了有10w多的尝试登陆。&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://img.zzhpeng.cn/FpXkldTl5Jw2t77T_O3cKV4359kv&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;查看失败登录情况&lt;/p&gt;
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;lastb | less
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;&lt;img src=&quot;http://img.zzhpeng.cn/FjvMrfFakXiE2cgz0nzhvteJFqNp&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;应对办法还是有的，我暂时选择了修改默认端口22。如果还有过多的尝试登录，日后在弄其他办法。
+修改端口地方/etc/ssh/sshd_config，重启应用service sshd restart&lt;/p&gt;
+
+&lt;p&gt;参考链接 https://yq.aliyun.com/articles/195078。&lt;/p&gt;
+
+</description>
+				<pubDate>Tue, 29 May 2018 00:00:00 +0800</pubDate>
+				<link>/sshd-hacker.html</link>
+				<guid isPermaLink="true">/sshd-hacker.html</guid>
+			</item>
+		
+	</channel>
+</rss>

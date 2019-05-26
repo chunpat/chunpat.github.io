@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="fromChinaBoy">
+
+    <title>BLOG</title>
+
+    <link rel="canonical" href="http://localhost:4000/">
+
+    <!-- Icons -->
+  <link rel="shortcut icon" href="img/favicon.ico">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/clean-blog.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    <!-- Custom Fonts -->
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href='//fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+
+
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">BLOG</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a href="/">Home</a>
+                </li>
+                
+                <li>
+                    <a href="/About.html">About</a>
+                </li>
+                
+                <li>
+                    <a href="/Tools.html">Tools</a>
+                </li>
+                
+                <li>
+                    <a href="/tags.html">Tags</a>
+                </li>
+                
+
+            </ul>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+
+
+    <!-- Page Header -->
+<header class="intro-header" style="background-image: url('/img/autumn2.jpg')">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="site-heading">
+                    <h1>BLOG</h1>
+                    <hr class="small">
+                    <span class="subheading">在遙遠的地方 一切虔誠終必相遇</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Main Content -->
+<div class="container">
+	<div class="row">
+		<div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+			
+<div class="post-preview">
+    <a href="/private-composer-packagist.html">
+        <h2 class="post-title">            
+            搭建私有的Composer Packagist
+        </h2>
+        
+        <div class="post-content-preview">
+            官方文档和官方源
+官方文档：https://getcomposer.org/doc/articles/handling-private-packages-with-satis.md
+
+github地址：https://github.com/composer/satis
+
+下载源
+
+
+  方法一...
+        </div>
+    </a>
+    <p class="post-meta">Posted by zzhpeng on May 24, 2019</p>
+</div>
+
+<hr>
+
+<div class="post-preview">
+    <a href="/mysql_union_index.html">
+        <h2 class="post-title">            
+            gitlab搭建和数据迁移
+        </h2>
+        
+        <div class="post-content-preview">
+            Ubuntu 搭建 gitlab
+
+1.首先是安装一些依赖服务
+sudo apt-get install curl openssh-server ca-certificates postfix
+
+
+
+2.安装gitlab
+
+  注意：如果有旧gitlab要数据迁移的话，需要和旧gitlab的版...
+        </div>
+    </a>
+    <p class="post-meta">Posted by zzhpeng on May 17, 2019</p>
+</div>
+
+<hr>
+
+<div class="post-preview">
+    <a href="/linux-quick-button.html">
+        <h2 class="post-title">            
+            unix bash快捷键
+        </h2>
+        
+        <div class="post-content-preview">
+            Linux/Unix下Shell快捷键操作集合
+
+快速搜索
+1) ctrl + r 组合键来进入历史搜索模式在history表中查询某条过往指令，找到需要重复执行的命令后，按回车键即可。
+2) !!：重复执行上一条指令
+3) !a：重复执行上一条以a为首的指令
+4) !number：重复执行上...
+        </div>
+    </a>
+    <p class="post-meta">Posted by zzhpeng on May 17, 2019</p>
+</div>
+
+<hr>
+
+<div class="post-preview">
+    <a href="/mysql_union_index.html">
+        <h2 class="post-title">            
+            mysql联合索引
+        </h2>
+        
+        <div class="post-content-preview">
+            mysql联合索引中
+
+  1、select * from table where a=1, b=2
+  2、select * from table where b=1, a=2
+  3、select * from table where b=1
+以上哪一句不会触发索引？为什么？
+
+
+答曰：3...
+        </div>
+    </a>
+    <p class="post-meta">Posted by zzhpeng on April 23, 2019</p>
+</div>
+
+<hr>
+
+<div class="post-preview">
+    <a href="/docker_introduction.html">
+        <h2 class="post-title">            
+            docker 入门
+        </h2>
+        
+        <div class="post-content-preview">
+            简介
+官网 Enterprise Container Platform | Docker
+手册 Docker Documentation | Docker Documentation
+
+虚拟机与docker对比
+What is a Container | Docker
+
+
+docker-ce ...
+        </div>
+    </a>
+    <p class="post-meta">Posted by zzhpeng on March 6, 2019</p>
+</div>
+
+<hr>
+
+<div class="post-preview">
+    <a href="/mysql_create_user.html">
+        <h2 class="post-title">            
+            mysql5.7创建用户
+        </h2>
+        
+        <div class="post-content-preview">
+            今天把自己服务器的mysql5.7用户误删除了root,所以整理了,如何添加用户。
+1、mysql5.7加用户或者误删root
+
+  创建一个新账号
+    use mysql;
+insert into user set user='root',ssl_cipher='',x509_issue...
+        </div>
+    </a>
+    <p class="post-meta">Posted by zzhpeng on August 30, 2018</p>
+</div>
+
+<hr>
+
+<div class="post-preview">
+    <a href="/interview.html">
+        <h2 class="post-title">            
+            面试！面试！
+        </h2>
+        
+        <div class="post-content-preview">
+            
+  介绍
+
+
+Daemontools是管理Unix服务的工具，它提供一组工具来管理一系列用户进程，当进程由于某些原因down掉之后，daemontools会自动重启进程。主要的功能是Supervisor。
+
+
+  安装
+
+
+mkdir  ~/tools
+cd /tools
+wget http...
+        </div>
+    </a>
+    <p class="post-meta">Posted by zzhpeng on July 21, 2018</p>
+</div>
+
+<hr>
+
+<div class="post-preview">
+    <a href="/php-runtime-type.html">
+        <h2 class="post-title">            
+            关于php的运行方式
+        </h2>
+        
+        <div class="post-content-preview">
+            好久好久前有个同事问我，同一台服务器怎么用两个php版本，当时解决了，只是简单的教他怎么切换。如今空闲觉得有必要整理下相关的知识。
+常见的五大运行模式
+
+
+  1）CGI（通用网关接口/ Common Gateway Interface）
+  2）FastCGI（常驻型CGI / Long-L...
+        </div>
+    </a>
+    <p class="post-meta">Posted by zzhpeng on July 15, 2018</p>
+</div>
+
+<hr>
+
+
+<!-- Pager -->
+
+<ul class="pager">
+    
+    
+    <li class="next">
+        <a href="/page2">Older Posts &rarr;</a>
+    </li>
+    
+</ul>
+
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-66863061-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+
+
+
+		</div>
+	</div>
+</div>
+
+<hr>
+
+  
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    <!-- kill the Facebook and Weibo -->
+                    <li>
+                        <a href="/feed.xml">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+
+                    
+                    <li>
+                        <a href="https://twitter.com/Azeril_Lapland">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+
+                    
+                    <li>
+                        <a href="https://github.com/Azeril">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <!--
+                    
+                    <li>
+                        <a href="http://www.douban.com/people/Azeril">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-douban fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    -->
+
+                    <!--
+                    
+                    <li>
+                        <a href="https://www.facebook.com/Azeril_Lapland">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    -->
+
+                    
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/Azeril">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                    
+
+                    <!--
+                    
+                    <li>
+                        <a target="_blank" href="http://weibo.com/Azeril">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    -->
+
+                </ul>
+                <p class="copyright text-muted">
+                &copy; 2011~2019 zzhpeng ♪ Powered by Jekyll.
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js "></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js "></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/clean-blog.min.js "></script>
+
+
+
+
+<!-- Highlight.js -->
+<script>
+    async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js",function(){
+        hljs.initHighlightingOnLoad();
+    })
+</script>
+<link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+
+
+</body>
+
+</html>

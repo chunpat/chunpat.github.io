@@ -1,0 +1,589 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="eec1eb77-9efe-4ada-9fef-5a49d367fd89" name="Default" comment="">
+      <change beforePath="$PROJECT_DIR$/About.md" beforeDir="false" afterPath="$PROJECT_DIR$/About.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/_config.yml" beforeDir="false" afterPath="$PROJECT_DIR$/_config.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/_layouts/post.html" beforeDir="false" afterPath="$PROJECT_DIR$/_layouts/post.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2011-04-24-Translation-Version.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2011-05-12-Yesterday-Jigsaw.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2011-11-02-Rule-of-Search.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2013-09-01-Track-of-The-Year-2013.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2014-11-27-Molana-Rumi.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2014-11-29-pessoa.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2014-12-29-With-the-Books.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2015-01-27-ideas.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2015-01-27-my-sight.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2015-03-08-A-Cat.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2015-03-22-Lover-Letters.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2015-03-23-Azure.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2015-03-24-A-Dream-Within-a-Dream.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2015-03-26-First-Movie-GIF-Work.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2015-03-30-Puzzle.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2015-04-01-Minus.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2015-04-14-Light-of-The-Bookstore.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2015-05-21-Love-Letters.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2015-05-31-Safari-Extensions.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2015-06-01-High-Quality-PopClip-Extensions.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2015-07-07-Just-Some-Words-A-Moment.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2015-08-08-Checklist-With-Anything-Todo.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2015-08-13-Chinese-Typesetting.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2015-08-18-Github-Pages-Blog.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2015-08-19-Markdown-Syntax.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2015-08-20-Office-Tools.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2015-08-29-Mobile-Phone.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2015-08-30-The-Rule-of-Chinese-Writing-Style.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2015-09-01-The-Unique-Day.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2015-09-01-iOS-Apps-List.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2015-09-04-Love-Is.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2015-09-11-Skills-Of-Mac-OSX.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2015-10-16-Selected-Collection-of-Jekyll-Themes.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2015-10-19-Build-Your-First-GitHub-Pages-Blog.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2015-10-23-Build-A-Hugo-Blog.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2015-11-19-Homebrew.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2015-11-19-OS-Basic-Configure.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2015-11-20-The-Best-Chrome-Extensions.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2015-12-07-Learning-By-Learning.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2015-12-09-How-To-Use-Image-Hosting-Quickly.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2015-12-10-Repair-Jekyll-Serve-Problems.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2015-12-10-The-Tips-Of-Doc-Naming.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2015-12-12-Broken-And-Ashes.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2015-12-14-Workflowy.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2015-12-15-Multidimensional-Accounts-System.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2015-12-20-The-Best-New-Tools.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2016-01-01-Films-Review.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2016-01-01-Reading-Review.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2016-01-24-Aria2.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2016-02-17-Final-Cut-Pro-X-Shortcuts.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2016-02-28-Words-With-Saikou-no-Rikon.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2016-04-25-Proust-Questionnaire.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2016-06-06-Your-Zsh.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2016-08-20-Cola-Chicken-Wings.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2016-11-02-One-Writing-Style.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2017-01-01-Mango-Film-Festival-2016.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2017-01-11-Quick-Start-Guide-For-Writing-Environment.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2017-03-13-Start-With-My-First-VPS.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2017-03-29-JavaScript-Getting-Start-Basic-Concept-and-Knowledge.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2017-03-30-Two-Presents-of-Today.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2017-03-31-How-To-Order-the-Tickets-You-Liked.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2017-03-31-Memories-of-BJIFF-2016.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2017-04-05-Make-a-Travel-Plan-With-Trello.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2017-04-09-Course-Notes-of-Codecademy-Introduction-to-JavaScript.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2017-04-16-Cook-With-Potatoes.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2017-04-20-After-Beijing-International-Film-Festival-2017.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2017-04-27-How-To-Break-Google-Scholar-Blockade.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/ASCII-IMG-jp2a.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/less/clean-blog.less" beforeDir="false" afterPath="$PROJECT_DIR$/less/clean-blog.less" afterDir="false" />
+    </list>
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="TRACKING_ENABLED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileEditorManager">
+    <leaf>
+      <file leaf-file-name="grass.jpg" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/img/grass.jpg">
+          <provider selected="true" editor-type-id="images" />
+        </entry>
+      </file>
+      <file leaf-file-name="seagulls.jpg" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/img/seagulls.jpg">
+          <provider selected="true" editor-type-id="images" />
+        </entry>
+      </file>
+      <file leaf-file-name="plane.jpg" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/img/plane.jpg">
+          <provider selected="true" editor-type-id="images" />
+        </entry>
+      </file>
+      <file leaf-file-name="umbrella.jpg" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/img/umbrella.jpg">
+          <provider selected="true" editor-type-id="images" />
+        </entry>
+      </file>
+      <file leaf-file-name="sky2.jpg" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/img/sky2.jpg">
+          <provider selected="true" editor-type-id="images" />
+        </entry>
+      </file>
+      <file leaf-file-name="Zero.png" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/img/Zero.png">
+          <provider selected="true" editor-type-id="images" />
+        </entry>
+      </file>
+      <file leaf-file-name="alone.jpg" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/img/alone.jpg">
+          <provider selected="true" editor-type-id="images" />
+        </entry>
+      </file>
+      <file leaf-file-name="autumn2.jpg" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/img/autumn2.jpg">
+          <provider selected="true" editor-type-id="images" />
+        </entry>
+      </file>
+      <file leaf-file-name="favicon.png" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/img/favicon.png">
+          <provider selected="true" editor-type-id="images" />
+        </entry>
+      </file>
+      <file leaf-file-name="insta7.jpg" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/img/instagram/insta7.jpg">
+          <provider selected="true" editor-type-id="images" />
+        </entry>
+      </file>
+    </leaf>
+  </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>请注明原作者 Azeril 及本文源链接。</find>
+    </findStrings>
+    <dirStrings>
+      <dir>$PROJECT_DIR$</dir>
+    </dirStrings>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="IdeDocumentHistory">
+    <option name="CHANGED_PATHS">
+      <list>
+        <option value="$PROJECT_DIR$/less/clean-blog.less" />
+        <option value="$PROJECT_DIR$/About.md" />
+        <option value="$PROJECT_DIR$/_layouts/post.html" />
+        <option value="$PROJECT_DIR$/_config.yml" />
+      </list>
+    </option>
+  </component>
+  <component name="JsBuildToolGruntFileManager" detection-done="true" sorting="DEFINITION_ORDER">
+    <gruntfile path="$PROJECT_DIR$/Gruntfile.js" />
+  </component>
+  <component name="JsBuildToolPackageJson" detection-done="true" sorting="DEFINITION_ORDER" />
+  <component name="JsGulpfileManager">
+    <detection-done>true</detection-done>
+    <sorting>DEFINITION_ORDER</sorting>
+  </component>
+  <component name="NodePackageJsonFileManager">
+    <packageJsonPaths>
+      <path value="$PROJECT_DIR$/package.json" />
+    </packageJsonPaths>
+  </component>
+  <component name="ProjectFrameBounds">
+    <option name="x" value="296" />
+    <option name="y" value="42" />
+    <option name="width" value="1440" />
+    <option name="height" value="827" />
+  </component>
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="1" id="Add" />
+  </component>
+  <component name="ProjectView">
+    <navigator proportions="" version="1">
+      <foldersAlwaysOnTop value="true" />
+    </navigator>
+    <panes>
+      <pane id="Scope" />
+      <pane id="ProjectPane">
+        <subPane>
+          <expand>
+            <path>
+              <item name="azeril.github.io" type="b2602c69:ProjectViewProjectNode" />
+              <item name="azeril.github.io" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="azeril.github.io" type="b2602c69:ProjectViewProjectNode" />
+              <item name="azeril.github.io" type="462c0819:PsiDirectoryNode" />
+              <item name="img" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="azeril.github.io" type="b2602c69:ProjectViewProjectNode" />
+              <item name="azeril.github.io" type="462c0819:PsiDirectoryNode" />
+              <item name="img" type="462c0819:PsiDirectoryNode" />
+              <item name="instagram" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="azeril.github.io" type="b2602c69:ProjectViewProjectNode" />
+              <item name="azeril.github.io" type="462c0819:PsiDirectoryNode" />
+              <item name="img" type="462c0819:PsiDirectoryNode" />
+              <item name="Themes" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="azeril.github.io" type="b2602c69:ProjectViewProjectNode" />
+              <item name="azeril.github.io" type="462c0819:PsiDirectoryNode" />
+              <item name="js" type="462c0819:PsiDirectoryNode" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
+    </panes>
+  </component>
+  <component name="PropertiesComponent">
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
+    <property name="nodejs_npm_path_reset_for_default_project" value="true" />
+    <property name="nodejs_package_manager_path" value="npm" />
+    <property name="settings.editor.selected.configurable" value="preferences.sourceCode.PHP" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/_posts" />
+    </key>
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="eec1eb77-9efe-4ada-9fef-5a49d367fd89" name="Default" comment="" />
+      <created>1558869275926</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1558869275926</updated>
+      <workItem from="1558869277108" duration="2909000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TimeTrackingManager">
+    <option name="totallyTimeSpent" value="2909000" />
+  </component>
+  <component name="ToolWindowManager">
+    <frame x="283" y="52" width="1440" height="827" extended-state="0" />
+    <editor active="true" />
+    <layout>
+      <window_info anchor="bottom" id="TODO" order="6" />
+      <window_info anchor="bottom" id="Event Log" side_tool="true" />
+      <window_info anchor="bottom" id="Database Changes" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Run" order="2" />
+      <window_info anchor="bottom" id="Version Control" />
+      <window_info anchor="bottom" id="Terminal" visible="true" weight="0.32876712" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.24964234" />
+      <window_info anchor="bottom" id="Docker" show_stripe_button="false" />
+      <window_info id="Grunt " side_tool="true" />
+      <window_info anchor="right" id="Database" />
+      <window_info anchor="bottom" id="Find" order="1" />
+      <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
+      <window_info id="Favorites" side_tool="true" />
+      <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
+      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
+      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+      <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+    </layout>
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="VcsContentAnnotationSettings">
+    <option name="myLimit" value="2678400000" />
+  </component>
+  <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/_includes/gallery">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_includes/footer.html">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_includes/alert">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_includes/list-collection">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_layouts/default.html">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_layouts/gallery_index.html">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_layouts/gallery_page.html">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_layouts/pages.html">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_layouts/page.html">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_posts/2016-08-20-Cola-Chicken-Wings.md">
+      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+        <state split_layout="SPLIT">
+          <first_editor />
+          <second_editor />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_posts/2011-04-24-Translation-Version.md">
+      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+        <state split_layout="SPLIT">
+          <first_editor relative-caret-position="-2606">
+            <caret line="3" selection-start-line="3" selection-end-line="4" selection-end-column="20" />
+          </first_editor>
+          <second_editor />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_posts/2011-05-12-Yesterday-Jigsaw.md">
+      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+        <state split_layout="SPLIT">
+          <first_editor relative-caret-position="-184" />
+          <second_editor />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_posts/2014-12-29-With-the-Books.md">
+      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+        <state split_layout="SPLIT">
+          <first_editor />
+          <second_editor />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_posts/2015-05-21-Love-Letters.md">
+      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+        <state split_layout="SPLIT">
+          <first_editor />
+          <second_editor />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_posts/2015-08-20-Office-Tools.md">
+      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+        <state split_layout="SPLIT">
+          <first_editor relative-caret-position="-746" />
+          <second_editor />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_posts/2015-09-11-Skills-Of-Mac-OSX.md">
+      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+        <state split_layout="SPLIT">
+          <first_editor relative-caret-position="-356" />
+          <second_editor />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_posts/2015-08-18-Github-Pages-Blog.md">
+      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+        <state split_layout="SPLIT">
+          <first_editor relative-caret-position="-3071" />
+          <second_editor />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_posts/2015-10-23-Vim.md">
+      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+        <state split_layout="SPLIT">
+          <first_editor relative-caret-position="-1166" />
+          <second_editor />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_posts/2015-08-13-Chinese-Typesetting.md">
+      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+        <state split_layout="SPLIT">
+          <first_editor relative-caret-position="-226" />
+          <second_editor />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_posts/2015-08-19-Markdown-Syntax.md">
+      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+        <state split_layout="SPLIT">
+          <first_editor relative-caret-position="-8261" />
+          <second_editor />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_posts/2015-11-19-Homebrew.md">
+      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+        <state split_layout="SPLIT">
+          <first_editor relative-caret-position="-1033" />
+          <second_editor />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_posts/2015-11-19-OS-Basic-Configure.md">
+      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+        <state split_layout="SPLIT">
+          <first_editor relative-caret-position="-1451" />
+          <second_editor />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_posts/2016-01-01-Reading-Review.md">
+      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+        <state split_layout="SPLIT">
+          <first_editor relative-caret-position="-836" />
+          <second_editor />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_posts/2017-04-16-Cook-With-Potatoes.md">
+      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+        <state split_layout="SPLIT">
+          <first_editor relative-caret-position="-191" />
+          <second_editor />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_posts/ASCII-IMG-jp2a.md">
+      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+        <state split_layout="SPLIT">
+          <first_editor />
+          <second_editor />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_posts/Sample.markdown">
+      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+        <state split_layout="SPLIT">
+          <first_editor />
+          <second_editor />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_posts/2016-10-20-Video-Post-Processing-Guide.md">
+      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+        <state split_layout="SPLIT">
+          <first_editor relative-caret-position="-1845" />
+          <second_editor />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_posts/2016-10-14-jekyll_tutorials1.md">
+      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+        <state split_layout="SPLIT">
+          <first_editor />
+          <second_editor />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_site/blog/Vim.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="4770">
+          <caret line="318" column="328" selection-start-line="318" selection-start-column="328" selection-end-line="318" selection-end-column="328" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_layouts/post.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="960">
+          <caret line="64" column="47" selection-start-line="64" selection-start-column="47" selection-end-line="64" selection-end-column="47" />
+          <folding>
+            <element signature="n#style#0;n#img#0;n#a#0;n#div#0;n#div#0;n#div#0;n#article#0;n#!!top" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Tools.md">
+      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+        <state split_layout="SPLIT">
+          <first_editor relative-caret-position="-606" />
+          <second_editor />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Gruntfile.js">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_posts/2015-05-31-Mac-OS-Apps.md">
+      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+        <state split_layout="SPLIT">
+          <first_editor />
+          <second_editor />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_config.yml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="15">
+          <caret line="1" column="11" selection-start-line="1" selection-start-column="11" selection-end-line="1" selection-end-column="11" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/img/favicon.ico">
+      <provider selected="true" editor-type-id="images" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/img/hacker.png">
+      <provider selected="true" editor-type-id="images" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/img/instagram/insta2.jpg">
+      <provider selected="true" editor-type-id="images" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/img/instagram/insta3.jpg">
+      <provider selected="true" editor-type-id="images" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/img/instagram/insta4.jpg">
+      <provider selected="true" editor-type-id="images" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/img/instagram/insta5.jpg">
+      <provider selected="true" editor-type-id="images" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/img/instagram/insta6.jpg">
+      <provider selected="true" editor-type-id="images" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/img/instagram/insta7.jpg">
+      <provider selected="true" editor-type-id="images" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/img/alone.jpg">
+      <provider selected="true" editor-type-id="images" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/img/autumn2.jpg">
+      <provider selected="true" editor-type-id="images" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/img/favicon.png">
+      <provider selected="true" editor-type-id="images" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/img/grass.jpg">
+      <provider selected="true" editor-type-id="images" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/img/seagulls.jpg">
+      <provider selected="true" editor-type-id="images" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/img/plane.jpg">
+      <provider selected="true" editor-type-id="images" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/img/umbrella.jpg">
+      <provider selected="true" editor-type-id="images" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/img/sky2.jpg">
+      <provider selected="true" editor-type-id="images" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/img/Zero.png">
+      <provider selected="true" editor-type-id="images" />
+    </entry>
+  </component>
+  <component name="masterDetails">
+    <states>
+      <state key="ScopeChooserConfigurable.UI">
+        <settings>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+    </states>
+  </component>
+</project>
