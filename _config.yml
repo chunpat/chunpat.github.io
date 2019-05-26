@@ -14,19 +14,19 @@ url: https://www.zzhpeng.com
 # About/contact
 owner: 
   name: "zzhpeng"
-  email: zhangzhenpeng@email.com
+  email: zhangzhenpeng008@email.com
   bio: "明朝即長路 惜取此時心"
 
 # Data
 
 # gavatar: 
 favicon: img/favicon.ico
-douban_username: Azeril
-twitter_username: Azeril_Lapland 
-github_username: Azeril  
-facebook_username: Azeril_Lapland 
-weibo_username: Azeril  
-zhihu_username: Azeril  
+douban_username: zzhpeng
+twitter_username: zzhpeng
+github_username: fromChinaBoy
+facebook_username: zzhpeng
+weibo_username: zzhpeng
+zhihu_username: zzhpeng
 
 # Build settings  
 

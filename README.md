@@ -1,27 +1,8 @@
-# Microdust 微尘
+## 学习笔记
+知识积累，学习记录。总结是学习新技能不可或缺的一部分，let`s go! do it!
 
-This is a blog created by Azeril. The blog is live at [Stardust](https://azeril.com/).
+## 本地跑服务
+jekyll serve
 
 ## Thanks
-
-The blog used many tool/service,many thanks to:
-
-* [Github](https://github.com/), all the data based on;
-* [Git](https://git-scm.com/), blogs and code files version control system;
-* [Jekyll](https://jekyllrb.com/), a static site generator;
-* [Clean Blog Theme](https://github.com/IronSummitMedia/startbootstrap-clean-blog-jekyll), a theme by Start Bootstrap;
-* [Markdown](https://daringfireball.net/projects/markdown/), a beautiful lightweight markup language.
-* [DNSPod](https://www.dnspod.cn/), the DNS service provider who surport the domain name resolution;
-* [Utteranc](https://utteranc.cc/), a socialization comments plugin.
-* [Google](https://google.com), the one who tell me how to make it.
-* …
-
-## How To Creat A Jekyll Blog
-
-[Build-Your-First-GitHub-Pages-Blog](https://azeril.com/blog/Build-Your-First-GitHub-Pages-Blog.html)
-
-Build your blog Step by step
-
-## Just write
-
-Start writing now！
+This is a blog theme created by Azeril
