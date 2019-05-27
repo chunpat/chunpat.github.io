@@ -106,72 +106,47 @@
 				<description>&lt;h2 id=&quot;linuxunix下shell快捷键操作集合&quot;&gt;Linux/Unix下Shell快捷键操作集合&lt;/h2&gt;
 
 &lt;h3 id=&quot;快速搜索&quot;&gt;快速搜索&lt;/h3&gt;
-&lt;p&gt;1) ctrl + r 组合键来进入历史搜索模式在history表中查询某条过往指令，找到需要重复执行的命令后，按回车键即可。
-2) !!：重复执行上一条指令
-3) !a：重复执行上一条以a为首的指令
-4) !number：重复执行上一条在history表中记录号码为number的指令
-5) !-number：重复执行前第number条指令
-6) !$：表示获得上一条命令中的最后一项内容。e.g 先来看一个例子： mkdir /exampledir  &amp;amp;&amp;amp; cd !$&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;1) ctrl + r 组合键来进入历史搜索模式在history表中查询某条过往指令，找到需要重复执行的命令后，按回车键即可。&lt;/li&gt;
+  &lt;li&gt;2) !!：重复执行上一条指令&lt;/li&gt;
+  &lt;li&gt;3) !a：重复执行上一条以a为首的指令&lt;/li&gt;
+  &lt;li&gt;4) !number：重复执行上一条在history表中记录号码为number的指令&lt;/li&gt;
+  &lt;li&gt;5) !-number：重复执行前第number条指令&lt;/li&gt;
+  &lt;li&gt;6) !$：表示获得上一条命令中的最后一项内容。e.g 先来看一个例子： mkdir /exampledir  &amp;amp;&amp;amp; cd !$&lt;/li&gt;
+&lt;/ul&gt;
 
 &lt;h3 id=&quot;编辑的快捷键&quot;&gt;编辑的快捷键&lt;/h3&gt;
-&lt;p&gt;1) Ctrl + a：将光标定位到命令的开头
-2) Ctrl + e：将光标定位到命令的结尾，与上一个快捷键相反
-3) Ctrl + u：剪切光标之前的内容
-4) Ctrl + k：剪切光标之后的内容，与上一个快捷键相反
-5) Ctrl + y：粘贴Ctrl + u和Ctrl + k所剪切的内容
-6) Ctrl + t：交换光标之前两个字符的顺序
-7) Ctrl + w：删除光标左边的参数（选项）或内容
-8) Ctrl + l：清屏
-9) Ctrl + d：输入已结束。在shell下相当于一个exit
-10) Ctrl + c：键盘中断请求。
-11) Ctrl + s &amp;amp; Ctrl + q：暂停/恢复屏幕输出
-12) Ctrl + n(↓)：显示下一条命令
-13) Ctrl + p(↑)：显示上一条命令
-14) Ctrl + b：向回移动
-15) Ctrl + f： 向前移动
-16) Ctrl + shift +↓：终端向下滚动
-17) Ctrl + shift +↑：终端向上滚动
-18) Shift+pgup/pgdown：终端上下翻页滚动&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;1) Ctrl + a：将光标定位到命令的开头&lt;/li&gt;
+  &lt;li&gt;2) Ctrl + e：将光标定位到命令的结尾，与上一个快捷键相反&lt;/li&gt;
+  &lt;li&gt;3) Ctrl + u：剪切光标之前的内容&lt;/li&gt;
+  &lt;li&gt;4) Ctrl + k：剪切光标之后的内容，与上一个快捷键相反&lt;/li&gt;
+  &lt;li&gt;5) Ctrl + y：粘贴Ctrl + u和Ctrl + k所剪切的内容&lt;/li&gt;
+  &lt;li&gt;6) Ctrl + t：交换光标之前两个字符的顺序&lt;/li&gt;
+  &lt;li&gt;7) Ctrl + w：删除光标左边的参数（选项）或内容&lt;/li&gt;
+  &lt;li&gt;8) Ctrl + l：清屏&lt;/li&gt;
+  &lt;li&gt;9) Ctrl + d：输入已结束。在shell下相当于一个exit&lt;/li&gt;
+  &lt;li&gt;10) Ctrl + c：键盘中断请求。&lt;/li&gt;
+  &lt;li&gt;11) Ctrl + s &amp;amp; Ctrl + q：暂停/恢复屏幕输出&lt;/li&gt;
+  &lt;li&gt;12) Ctrl + n(↓)：显示下一条命令&lt;/li&gt;
+  &lt;li&gt;13) Ctrl + p(↑)：显示上一条命令&lt;/li&gt;
+  &lt;li&gt;14) Ctrl + b：向回移动&lt;/li&gt;
+  &lt;li&gt;15) Ctrl + f： 向前移动&lt;/li&gt;
+  &lt;li&gt;16) Ctrl + shift +↓：终端向下滚动&lt;/li&gt;
+  &lt;li&gt;17) Ctrl + shift +↑：终端向上滚动&lt;/li&gt;
+  &lt;li&gt;18) Shift+pgup/pgdown：终端上下翻页滚动&lt;/li&gt;
+&lt;/ul&gt;
 
 &lt;h3 id=&quot;处理作业&quot;&gt;处理作业&lt;/h3&gt;
 &lt;p&gt;首先，使用 Ctrl + z 快捷键可以让正在执行的命令挂起。如果要让该进程在后台执行，那么可以执行 bg 命令。而 fg 命令则可以让该进程重新回到前台来。使用 jobs 命令能够查看到哪些进程在后台执行。 你也可以在 fg 或 bg 命令中使用作业 id，如： fg %3 又如： bg %7&lt;/p&gt;
 
 &lt;h3 id=&quot;使用管道grep&quot;&gt;使用管道grep&lt;/h3&gt;
 &lt;p&gt;例子：&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;
-    &lt;table&gt;
-      &lt;tbody&gt;
-        &lt;tr&gt;
-          &lt;td&gt;ps aux&lt;/td&gt;
-          &lt;td&gt;grep init&lt;/td&gt;
-        &lt;/tr&gt;
-      &lt;/tbody&gt;
-    &lt;/table&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;table&gt;
-      &lt;tbody&gt;
-        &lt;tr&gt;
-          &lt;td&gt;ps aux&lt;/td&gt;
-          &lt;td&gt;tee filename&lt;/td&gt;
-          &lt;td&gt;grep init&lt;/td&gt;
-        &lt;/tr&gt;
-      &lt;/tbody&gt;
-    &lt;/table&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;table&gt;
-      &lt;tbody&gt;
-        &lt;tr&gt;
-          &lt;td&gt;ps aux&lt;/td&gt;
-          &lt;td&gt;tee -a filename&lt;/td&gt;
-          &lt;td&gt;grep init&lt;/td&gt;
-        &lt;/tr&gt;
-      &lt;/tbody&gt;
-    &lt;/table&gt;
-  &lt;/li&gt;
-&lt;/ul&gt;
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;ps aux | &lt;span class=&quot;nb&quot;&gt;grep &lt;/span&gt;init
+ps aux | &lt;span class=&quot;nb&quot;&gt;tee &lt;/span&gt;filename | &lt;span class=&quot;nb&quot;&gt;grep &lt;/span&gt;init
+ps aux | &lt;span class=&quot;nb&quot;&gt;tee&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-a&lt;/span&gt; filename | &lt;span class=&quot;nb&quot;&gt;grep &lt;/span&gt;init
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;h3 id=&quot;将标准输出保存为文件&quot;&gt;将标准输出保存为文件&lt;/h3&gt;
 &lt;p&gt;你可以将命令的标准输出内容保存到一个文件中，举例如下： ps aux &amp;gt; filename 注意其中的“&amp;gt;”符号。 你也可以将这些输出内容追加到一个已存在的文件中： ps aux » filename&lt;/p&gt;
@@ -248,57 +223,6 @@ PS：BACKUP的时间点必须与原服务器备份后的文件名一致&lt;/p&gt
 				<pubDate>Fri, 17 May 2019 00:00:00 +0800</pubDate>
 				<link>/gitlab-migration.html</link>
 				<guid isPermaLink="true">/gitlab-migration.html</guid>
-			</item>
-		
-			<item>
-				<title>mysql联合索引</title>
-				<description>&lt;h2 id=&quot;mysql联合索引中&quot;&gt;mysql联合索引中&lt;/h2&gt;
-&lt;ul&gt;
-  &lt;li&gt;1、select * from table where a=1, b=2&lt;/li&gt;
-  &lt;li&gt;2、select * from table where b=1, a=2&lt;/li&gt;
-  &lt;li&gt;3、select * from table where b=1
-以上哪一句不会触发索引？为什么？&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;答曰：3，因为联合索引的最左匹配原则，详细如下。&lt;/p&gt;
-
-&lt;h2 id=&quot;mysql中联合索引的最左匹配原则&quot;&gt;Mysql中联合索引的最左匹配原则&lt;/h2&gt;
-
-&lt;p&gt;在Mysql建立多列索引（联合索引）有最左前缀的原则，即最左优先。如果我们建立了一个2列的联合索引(col1,col2),实际上已经建立了两个联合索引(col1)、(col1,col2）;如果有一个3列索引(col1,col2,col3)，实际上已经建立了三个联合索引(col1)、(col1,col2)、(col1,col2,col3)。并且最左优先原则是基于BTREE算法,HASH算法不行,因为简单地说，哈希索引就是采用一定的哈希算法，把键值换算成新的哈希值，检索时不需要类似B+树那样从根节点到叶子节点逐级查找，只需一次哈希算法即可立刻定位到相应的位置，速度非常快。具体原理看这篇&lt;a href=&quot;https://www.cnblogs.com/heiming/p/5865101.html&quot;&gt;MySQL B+树索引和哈希索引的区别 - 梦中山河 - 博客园&lt;/a&gt;&lt;/p&gt;
-
-&lt;h2 id=&quot;为什么上面例子3不会触发索引&quot;&gt;为什么上面例子3不会触发索引&lt;/h2&gt;
-&lt;p&gt;b+树的数据项是复合的数据结构，比如(name,age,sex)的时候，b+树是按照从左到右的顺序来建立搜索树的，比如当(张三,20,F)这样的数据来检索的时候，b+树会优先比较name来确定下一步的所搜方向，如果name相同再依次比较age和sex，最后得到检索的数据；但当(20,F)这样的没有name的数据来的时候，b+树就不知道第一步该查哪个节点，因为建立搜索树的时候name就是第一个比较因子，必须要先根据name来搜索才能知道下一步去哪里查询。详情查看：&lt;a href=&quot;http://www.cnblogs.com/wangkaihua/p/10220462.html&quot;&gt;Mysql中联合索引的最左匹配原则 - 王凯华 - 博客园&lt;/a&gt;&lt;/p&gt;
-
-&lt;h2 id=&quot;实践验证真理&quot;&gt;实践验证真理&lt;/h2&gt;
-&lt;h3 id=&quot;建表&quot;&gt;建表&lt;/h3&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;CREATE TABLE `user` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(10) DEFAULT NULL,
-  `sex` tinyint(1) DEFAULT NULL,
-  `age` tinyint(2) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `Index_user` (`name`,`age`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4;
-
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h3 id=&quot;测试&quot;&gt;测试&lt;/h3&gt;
-
-&lt;p&gt;1) explain select * from user where name = ‘zzhpeng’
-&lt;img src=&quot;http://img.zzhpeng.cn/FkHS_EVmThc5fAnvhwtxR89MEKbV&quot; alt=&quot;FkHS_EVmThc5fAnvhwtxR89MEKbV&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;2) explain select * from user where name = ‘zzhpeng’ and age = 18
-&lt;img src=&quot;http://img.zzhpeng.cn/FhBY0qcm_j1pxEEqBW77-saLXQVh&quot; alt=&quot;FhBY0qcm_j1pxEEqBW77-saLXQVh&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;3) explain select * from user where age = 18
-&lt;img src=&quot;http://img.zzhpeng.cn/FqQgNo2OIMtFZ5N3er2aFYipS-7p&quot; alt=&quot;FqQgNo2OIMtFZ5N3er2aFYipS-7p&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;4) explain select * from user where age = 18 and name = ‘zzhpeng’
-&lt;img src=&quot;http://img.zzhpeng.cn/FhEoYAWN1gVc7D3Y5UBi9Hqeqg0j&quot; alt=&quot;FhEoYAWN1gVc7D3Y5UBi9Hqeqg0j&quot; /&gt;&lt;/p&gt;
-</description>
-				<pubDate>Tue, 23 Apr 2019 00:00:00 +0800</pubDate>
-				<link>/mysql_union_index.html</link>
-				<guid isPermaLink="true">/mysql_union_index.html</guid>
 			</item>
 		
 			<item>
@@ -755,6 +679,28 @@ php-fpm 相当于一个进程池，里面维系着一定数量的php服务进程
 				<pubDate>Sun, 15 Jul 2018 00:00:00 +0800</pubDate>
 				<link>/nginx-and-php-fpm.html</link>
 				<guid isPermaLink="true">/nginx-and-php-fpm.html</guid>
+			</item>
+		
+			<item>
+				<title>sshd预防被暴力破解</title>
+				<description>&lt;p&gt;今天服务器出现了被攻击的现象，登录的时候很慢，登录成功后出现了有10w多的尝试登陆。&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://img.zzhpeng.cn/FpXkldTl5Jw2t77T_O3cKV4359kv&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;查看失败登录情况&lt;/p&gt;
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;lastb | less
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;&lt;img src=&quot;http://img.zzhpeng.cn/FjvMrfFakXiE2cgz0nzhvteJFqNp&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;应对办法还是有的，我暂时选择了修改默认端口22。如果还有过多的尝试登录，日后在弄其他办法。
+修改端口地方/etc/ssh/sshd_config，重启应用service sshd restart&lt;/p&gt;
+
+&lt;p&gt;参考链接 https://yq.aliyun.com/articles/195078。&lt;/p&gt;
+
+</description>
+				<pubDate>Tue, 29 May 2018 00:00:00 +0800</pubDate>
+				<link>/sshd-hacker.html</link>
+				<guid isPermaLink="true">/sshd-hacker.html</guid>
 			</item>
 		
 	</channel>

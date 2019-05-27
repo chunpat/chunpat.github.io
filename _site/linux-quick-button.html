@@ -117,72 +117,47 @@
                 <h2 id="linuxunix下shell快捷键操作集合">Linux/Unix下Shell快捷键操作集合</h2>
 
 <h3 id="快速搜索">快速搜索</h3>
-<p>1) ctrl + r 组合键来进入历史搜索模式在history表中查询某条过往指令，找到需要重复执行的命令后，按回车键即可。
-2) !!：重复执行上一条指令
-3) !a：重复执行上一条以a为首的指令
-4) !number：重复执行上一条在history表中记录号码为number的指令
-5) !-number：重复执行前第number条指令
-6) !$：表示获得上一条命令中的最后一项内容。e.g 先来看一个例子： mkdir /exampledir  &amp;&amp; cd !$</p>
+<ul>
+  <li>1) ctrl + r 组合键来进入历史搜索模式在history表中查询某条过往指令，找到需要重复执行的命令后，按回车键即可。</li>
+  <li>2) !!：重复执行上一条指令</li>
+  <li>3) !a：重复执行上一条以a为首的指令</li>
+  <li>4) !number：重复执行上一条在history表中记录号码为number的指令</li>
+  <li>5) !-number：重复执行前第number条指令</li>
+  <li>6) !$：表示获得上一条命令中的最后一项内容。e.g 先来看一个例子： mkdir /exampledir  &amp;&amp; cd !$</li>
+</ul>
 
 <h3 id="编辑的快捷键">编辑的快捷键</h3>
-<p>1) Ctrl + a：将光标定位到命令的开头
-2) Ctrl + e：将光标定位到命令的结尾，与上一个快捷键相反
-3) Ctrl + u：剪切光标之前的内容
-4) Ctrl + k：剪切光标之后的内容，与上一个快捷键相反
-5) Ctrl + y：粘贴Ctrl + u和Ctrl + k所剪切的内容
-6) Ctrl + t：交换光标之前两个字符的顺序
-7) Ctrl + w：删除光标左边的参数（选项）或内容
-8) Ctrl + l：清屏
-9) Ctrl + d：输入已结束。在shell下相当于一个exit
-10) Ctrl + c：键盘中断请求。
-11) Ctrl + s &amp; Ctrl + q：暂停/恢复屏幕输出
-12) Ctrl + n(↓)：显示下一条命令
-13) Ctrl + p(↑)：显示上一条命令
-14) Ctrl + b：向回移动
-15) Ctrl + f： 向前移动
-16) Ctrl + shift +↓：终端向下滚动
-17) Ctrl + shift +↑：终端向上滚动
-18) Shift+pgup/pgdown：终端上下翻页滚动</p>
+<ul>
+  <li>1) Ctrl + a：将光标定位到命令的开头</li>
+  <li>2) Ctrl + e：将光标定位到命令的结尾，与上一个快捷键相反</li>
+  <li>3) Ctrl + u：剪切光标之前的内容</li>
+  <li>4) Ctrl + k：剪切光标之后的内容，与上一个快捷键相反</li>
+  <li>5) Ctrl + y：粘贴Ctrl + u和Ctrl + k所剪切的内容</li>
+  <li>6) Ctrl + t：交换光标之前两个字符的顺序</li>
+  <li>7) Ctrl + w：删除光标左边的参数（选项）或内容</li>
+  <li>8) Ctrl + l：清屏</li>
+  <li>9) Ctrl + d：输入已结束。在shell下相当于一个exit</li>
+  <li>10) Ctrl + c：键盘中断请求。</li>
+  <li>11) Ctrl + s &amp; Ctrl + q：暂停/恢复屏幕输出</li>
+  <li>12) Ctrl + n(↓)：显示下一条命令</li>
+  <li>13) Ctrl + p(↑)：显示上一条命令</li>
+  <li>14) Ctrl + b：向回移动</li>
+  <li>15) Ctrl + f： 向前移动</li>
+  <li>16) Ctrl + shift +↓：终端向下滚动</li>
+  <li>17) Ctrl + shift +↑：终端向上滚动</li>
+  <li>18) Shift+pgup/pgdown：终端上下翻页滚动</li>
+</ul>
 
 <h3 id="处理作业">处理作业</h3>
 <p>首先，使用 Ctrl + z 快捷键可以让正在执行的命令挂起。如果要让该进程在后台执行，那么可以执行 bg 命令。而 fg 命令则可以让该进程重新回到前台来。使用 jobs 命令能够查看到哪些进程在后台执行。 你也可以在 fg 或 bg 命令中使用作业 id，如： fg %3 又如： bg %7</p>
 
 <h3 id="使用管道grep">使用管道grep</h3>
 <p>例子：</p>
-<ul>
-  <li>
-    <table>
-      <tbody>
-        <tr>
-          <td>ps aux</td>
-          <td>grep init</td>
-        </tr>
-      </tbody>
-    </table>
-  </li>
-  <li>
-    <table>
-      <tbody>
-        <tr>
-          <td>ps aux</td>
-          <td>tee filename</td>
-          <td>grep init</td>
-        </tr>
-      </tbody>
-    </table>
-  </li>
-  <li>
-    <table>
-      <tbody>
-        <tr>
-          <td>ps aux</td>
-          <td>tee -a filename</td>
-          <td>grep init</td>
-        </tr>
-      </tbody>
-    </table>
-  </li>
-</ul>
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ps aux | <span class="nb">grep </span>init
+ps aux | <span class="nb">tee </span>filename | <span class="nb">grep </span>init
+ps aux | <span class="nb">tee</span> <span class="nt">-a</span> filename | <span class="nb">grep </span>init
+
+</code></pre></div></div>
 
 <h3 id="将标准输出保存为文件">将标准输出保存为文件</h3>
 <p>你可以将命令的标准输出内容保存到一个文件中，举例如下： ps aux &gt; filename 注意其中的“&gt;”符号。 你也可以将这些输出内容追加到一个已存在的文件中： ps aux » filename</p>
