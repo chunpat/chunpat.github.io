@@ -102,73 +102,6 @@
 			</item>
 		
 			<item>
-				<title>gitlab搭建和数据迁移</title>
-				<description>&lt;h2 id=&quot;ubuntu-搭建-gitlab&quot;&gt;Ubuntu 搭建 gitlab&lt;/h2&gt;
-
-&lt;h3 id=&quot;1首先是安装一些依赖服务&quot;&gt;1.首先是安装一些依赖服务&lt;/h3&gt;
-&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;apt-get &lt;span class=&quot;nb&quot;&gt;install &lt;/span&gt;curl openssh-server ca-certificates postfix
-
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h3 id=&quot;2安装gitlab&quot;&gt;2.安装gitlab&lt;/h3&gt;
-&lt;blockquote&gt;
-  &lt;p&gt;注意：如果有旧gitlab要数据迁移的话，需要和旧gitlab的版本一致。&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;我下的是Ubuntu18
-2.1、更新源&lt;/p&gt;
-&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;curl &lt;span class=&quot;nt&quot;&gt;-s&lt;/span&gt; https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.deb.sh | &lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;bash
-
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p&gt;2.2、安装&lt;/p&gt;
-&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;apt-get &lt;span class=&quot;nb&quot;&gt;install &lt;/span&gt;gitlab-ce&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;11.7.0-ce.0
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h3 id=&quot;3配置&quot;&gt;3.配置&lt;/h3&gt;
-&lt;p&gt;打开/etc/gitlab/gitlab.rb,将external_url = ‘http://git.example.com’修改为自己的域名地址：http://example.com，默认为80端口，如要使用其他端口后面加上端口号，如：http://127.0.0.1:8080。
-更新配置&lt;/p&gt;
-&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;gitlab-ctl reconfigure
-
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h3 id=&quot;4操作&quot;&gt;4.操作&lt;/h3&gt;
-&lt;ul&gt;
-  &lt;li&gt;sudo gitlab-ctl stop&lt;/li&gt;
-  &lt;li&gt;sudo gitlab-ctl start&lt;/li&gt;
-  &lt;li&gt;sudo gitlab-ctl restart&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;参考：https://www.cnblogs.com/m2ez/p/7063606.html&lt;/p&gt;
-
-&lt;h2 id=&quot;gitlab搭建的数据迁移&quot;&gt;gitlab搭建的数据迁移&lt;/h2&gt;
-
-&lt;h3 id=&quot;1查看版本&quot;&gt;1.查看版本&lt;/h3&gt;
-&lt;p&gt;cat /opt/gitlab/embedded/service/gitlab-rails/VERSION&lt;/p&gt;
-
-&lt;h3 id=&quot;2备份旧gitlab数据&quot;&gt;2.备份旧gitlab数据&lt;/h3&gt;
-&lt;p&gt;2.1、备份原a服务器上的的数据
-gitlab-rake gitlab:backup:create RAILS_ENV=production&lt;/p&gt;
-
-&lt;p&gt;PS: 备份后的文件一般是位于/var/opt/gitlab/backups下, 自动生成文件名文件名如1481529483_gitlab_backup.tar&lt;/p&gt;
-
-&lt;h3 id=&quot;3旧gitlab数据转移到新&quot;&gt;3.旧gitlab数据转移到新&lt;/h3&gt;
-&lt;p&gt;将步骤2生成的tar文件拷贝到b服务器上相应的backups目录下
-可以利用scp或者用ftp进行直接拷贝.
-scp username@src_ip:/var/opt/gitlab/backups/1481529483_gitlab_backup.tar /var/opt/gitlab/backups
-PS: username为原服务器的用户名，src_ip原服务器IP地址&lt;/p&gt;
-
-&lt;h3 id=&quot;4-在新服务器恢复数据&quot;&gt;4. 在新服务器恢复数据&lt;/h3&gt;
-&lt;p&gt;gitlab-rake gitlab:backup:restore RAILS_ENV=production BACKUP=1481529483
-PS：BACKUP的时间点必须与原服务器备份后的文件名一致&lt;/p&gt;
-
-&lt;p&gt;参考：https://www.cnblogs.com/wenwei-blog/p/6362829.html&lt;/p&gt;
-</description>
-				<pubDate>Fri, 17 May 2019 00:00:00 +0800</pubDate>
-				<link>/mysql_union_index.html</link>
-				<guid isPermaLink="true">/mysql_union_index.html</guid>
-			</item>
-		
-			<item>
 				<title>unix bash快捷键</title>
 				<description>&lt;h2 id=&quot;linuxunix下shell快捷键操作集合&quot;&gt;Linux/Unix下Shell快捷键操作集合&lt;/h2&gt;
 
@@ -251,6 +184,8 @@ PS：BACKUP的时间点必须与原服务器备份后的文件名一致&lt;/p&gt
 			<item>
 				<title>gitlab搭建和数据迁移</title>
 				<description>&lt;h2 id=&quot;ubuntu-搭建-gitlab&quot;&gt;Ubuntu 搭建 gitlab&lt;/h2&gt;
+&lt;p&gt;官网安装介绍： https://about.gitlab.com/install/
+github： https://github.com/gitlabhq/gitlabhq&lt;/p&gt;
 
 &lt;h3 id=&quot;1首先是安装一些依赖服务&quot;&gt;1.首先是安装一些依赖服务&lt;/h3&gt;
 &lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;apt-get &lt;span class=&quot;nb&quot;&gt;install &lt;/span&gt;curl openssh-server ca-certificates postfix
@@ -313,6 +248,57 @@ PS：BACKUP的时间点必须与原服务器备份后的文件名一致&lt;/p&gt
 				<pubDate>Fri, 17 May 2019 00:00:00 +0800</pubDate>
 				<link>/gitlab-migration.html</link>
 				<guid isPermaLink="true">/gitlab-migration.html</guid>
+			</item>
+		
+			<item>
+				<title>mysql联合索引</title>
+				<description>&lt;h2 id=&quot;mysql联合索引中&quot;&gt;mysql联合索引中&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;1、select * from table where a=1, b=2&lt;/li&gt;
+  &lt;li&gt;2、select * from table where b=1, a=2&lt;/li&gt;
+  &lt;li&gt;3、select * from table where b=1
+以上哪一句不会触发索引？为什么？&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;答曰：3，因为联合索引的最左匹配原则，详细如下。&lt;/p&gt;
+
+&lt;h2 id=&quot;mysql中联合索引的最左匹配原则&quot;&gt;Mysql中联合索引的最左匹配原则&lt;/h2&gt;
+
+&lt;p&gt;在Mysql建立多列索引（联合索引）有最左前缀的原则，即最左优先。如果我们建立了一个2列的联合索引(col1,col2),实际上已经建立了两个联合索引(col1)、(col1,col2）;如果有一个3列索引(col1,col2,col3)，实际上已经建立了三个联合索引(col1)、(col1,col2)、(col1,col2,col3)。并且最左优先原则是基于BTREE算法,HASH算法不行,因为简单地说，哈希索引就是采用一定的哈希算法，把键值换算成新的哈希值，检索时不需要类似B+树那样从根节点到叶子节点逐级查找，只需一次哈希算法即可立刻定位到相应的位置，速度非常快。具体原理看这篇&lt;a href=&quot;https://www.cnblogs.com/heiming/p/5865101.html&quot;&gt;MySQL B+树索引和哈希索引的区别 - 梦中山河 - 博客园&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;为什么上面例子3不会触发索引&quot;&gt;为什么上面例子3不会触发索引&lt;/h2&gt;
+&lt;p&gt;b+树的数据项是复合的数据结构，比如(name,age,sex)的时候，b+树是按照从左到右的顺序来建立搜索树的，比如当(张三,20,F)这样的数据来检索的时候，b+树会优先比较name来确定下一步的所搜方向，如果name相同再依次比较age和sex，最后得到检索的数据；但当(20,F)这样的没有name的数据来的时候，b+树就不知道第一步该查哪个节点，因为建立搜索树的时候name就是第一个比较因子，必须要先根据name来搜索才能知道下一步去哪里查询。详情查看：&lt;a href=&quot;http://www.cnblogs.com/wangkaihua/p/10220462.html&quot;&gt;Mysql中联合索引的最左匹配原则 - 王凯华 - 博客园&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;实践验证真理&quot;&gt;实践验证真理&lt;/h2&gt;
+&lt;h3 id=&quot;建表&quot;&gt;建表&lt;/h3&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;CREATE TABLE `user` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(10) DEFAULT NULL,
+  `sex` tinyint(1) DEFAULT NULL,
+  `age` tinyint(2) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `Index_user` (`name`,`age`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4;
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;测试&quot;&gt;测试&lt;/h3&gt;
+
+&lt;p&gt;1) explain select * from user where name = ‘zzhpeng’
+&lt;img src=&quot;http://img.zzhpeng.cn/FkHS_EVmThc5fAnvhwtxR89MEKbV&quot; alt=&quot;FkHS_EVmThc5fAnvhwtxR89MEKbV&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;2) explain select * from user where name = ‘zzhpeng’ and age = 18
+&lt;img src=&quot;http://img.zzhpeng.cn/FhBY0qcm_j1pxEEqBW77-saLXQVh&quot; alt=&quot;FhBY0qcm_j1pxEEqBW77-saLXQVh&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;3) explain select * from user where age = 18
+&lt;img src=&quot;http://img.zzhpeng.cn/FqQgNo2OIMtFZ5N3er2aFYipS-7p&quot; alt=&quot;FqQgNo2OIMtFZ5N3er2aFYipS-7p&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;4) explain select * from user where age = 18 and name = ‘zzhpeng’
+&lt;img src=&quot;http://img.zzhpeng.cn/FhEoYAWN1gVc7D3Y5UBi9Hqeqg0j&quot; alt=&quot;FhEoYAWN1gVc7D3Y5UBi9Hqeqg0j&quot; /&gt;&lt;/p&gt;
+</description>
+				<pubDate>Tue, 23 Apr 2019 00:00:00 +0800</pubDate>
+				<link>/mysql_union_index.html</link>
+				<guid isPermaLink="true">/mysql_union_index.html</guid>
 			</item>
 		
 			<item>

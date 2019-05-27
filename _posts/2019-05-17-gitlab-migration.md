@@ -6,6 +6,8 @@ tags: gitlab
 ---
 
 ## Ubuntu 搭建 gitlab
+官网安装介绍： https://about.gitlab.com/install/
+github： https://github.com/gitlabhq/gitlabhq
 
 ### 1.首先是安装一些依赖服务
 ```shell

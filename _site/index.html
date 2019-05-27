@@ -127,30 +127,6 @@ github地址：https://github.com/composer/satis
 <hr>
 
 <div class="post-preview">
-    <a href="/mysql_union_index.html">
-        <h2 class="post-title">            
-            gitlab搭建和数据迁移
-        </h2>
-        
-        <div class="post-content-preview">
-            Ubuntu 搭建 gitlab
-
-1.首先是安装一些依赖服务
-sudo apt-get install curl openssh-server ca-certificates postfix
-
-
-
-2.安装gitlab
-
-  注意：如果有旧gitlab要数据迁移的话，需要和旧gitlab的版...
-        </div>
-    </a>
-    <p class="post-meta">Posted by zzhpeng on May 17, 2019</p>
-</div>
-
-<hr>
-
-<div class="post-preview">
     <a href="/linux-quick-button.html">
         <h2 class="post-title">            
             unix bash快捷键
@@ -179,18 +155,37 @@ sudo apt-get install curl openssh-server ca-certificates postfix
         
         <div class="post-content-preview">
             Ubuntu 搭建 gitlab
+官网安装介绍： https://about.gitlab.com/install/
+github： https://github.com/gitlabhq/gitlabhq
 
 1.首先是安装一些依赖服务
-sudo apt-get install curl openssh-server ca-certificates postfix
-
-
-
-2.安装gitlab
-
-  注意：如果有旧gitlab要数据迁移的话，需要和旧gitlab的版...
+sudo apt-get install curl op...
         </div>
     </a>
     <p class="post-meta">Posted by zzhpeng on May 17, 2019</p>
+</div>
+
+<hr>
+
+<div class="post-preview">
+    <a href="/mysql_union_index.html">
+        <h2 class="post-title">            
+            mysql联合索引
+        </h2>
+        
+        <div class="post-content-preview">
+            mysql联合索引中
+
+  1、select * from table where a=1, b=2
+  2、select * from table where b=1, a=2
+  3、select * from table where b=1
+以上哪一句不会触发索引？为什么？
+
+
+答曰：3...
+        </div>
+    </a>
+    <p class="post-meta">Posted by zzhpeng on April 23, 2019</p>
 </div>
 
 <hr>
