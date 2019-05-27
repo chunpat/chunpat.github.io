@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="fromChinaBoy">
 
-    <title>BLOG</title>
+    <title>Blog</title>
 
     <link rel="canonical" href="http://localhost:4000/">
 
@@ -52,7 +52,7 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="/">BLOG</a>
+            <a class="navbar-brand" href="/">Blog</a>
         </div>
 
         <!-- Collect the nav links, forms, and other content for toggling -->
@@ -89,7 +89,7 @@
         <div class="row">
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
                 <div class="site-heading">
-                    <h1>BLOG</h1>
+                    <h1>Blog</h1>
                     <hr class="small">
                     <span class="subheading">在遙遠的地方 一切虔誠終必相遇</span>
                 </div>
@@ -164,6 +164,30 @@ sudo apt-get install curl openssh-server ca-certificates postfix
 2) !!：重复执行上一条指令
 3) !a：重复执行上一条以a为首的指令
 4) !number：重复执行上...
+        </div>
+    </a>
+    <p class="post-meta">Posted by zzhpeng on May 17, 2019</p>
+</div>
+
+<hr>
+
+<div class="post-preview">
+    <a href="/gitlab-migration.html">
+        <h2 class="post-title">            
+            gitlab搭建和数据迁移
+        </h2>
+        
+        <div class="post-content-preview">
+            Ubuntu 搭建 gitlab
+
+1.首先是安装一些依赖服务
+sudo apt-get install curl openssh-server ca-certificates postfix
+
+
+
+2.安装gitlab
+
+  注意：如果有旧gitlab要数据迁移的话，需要和旧gitlab的版...
         </div>
     </a>
     <p class="post-meta">Posted by zzhpeng on May 17, 2019</p>
@@ -264,26 +288,6 @@ wget http...
 
 <hr>
 
-<div class="post-preview">
-    <a href="/php-runtime-type.html">
-        <h2 class="post-title">            
-            关于php的运行方式
-        </h2>
-        
-        <div class="post-content-preview">
-            好久好久前有个同事问我，同一台服务器怎么用两个php版本，当时解决了，只是简单的教他怎么切换。如今空闲觉得有必要整理下相关的知识。
-常见的五大运行模式
-
-
-  1）CGI（通用网关接口/ Common Gateway Interface）
-  2）FastCGI（常驻型CGI / Long-L...
-        </div>
-    </a>
-    <p class="post-meta">Posted by zzhpeng on July 15, 2018</p>
-</div>
-
-<hr>
-
 
 <!-- Pager -->
 
@@ -337,7 +341,7 @@ wget http...
 
                     
                     <li>
-                        <a href="https://twitter.com/Azeril_Lapland">
+                        <a href="https://twitter.com/zzhpeng">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
@@ -348,7 +352,7 @@ wget http...
 
                     
                     <li>
-                        <a href="https://github.com/Azeril">
+                        <a href="https://github.com/fromChinaBoy">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-github fa-stack-1x fa-inverse"></i>
@@ -360,7 +364,7 @@ wget http...
                     <!--
                     
                     <li>
-                        <a href="http://www.douban.com/people/Azeril">
+                        <a href="http://www.douban.com/people/zzhpeng">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-douban fa-stack-1x fa-inverse"></i>
@@ -373,7 +377,7 @@ wget http...
                     <!--
                     
                     <li>
-                        <a href="https://www.facebook.com/Azeril_Lapland">
+                        <a href="https://www.facebook.com/zzhpeng">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
@@ -385,7 +389,7 @@ wget http...
 
                     
                     <li>
-                        <a target="_blank" href="https://www.zhihu.com/people/Azeril">
+                        <a target="_blank" href="https://www.zhihu.com/people/zzhpeng">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa  fa-stack-1x fa-inverse">知</i>
@@ -397,7 +401,7 @@ wget http...
                     <!--
                     
                     <li>
-                        <a target="_blank" href="http://weibo.com/Azeril">
+                        <a target="_blank" href="http://weibo.com/zzhpeng">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
@@ -429,12 +433,12 @@ wget http...
 
 
 <!-- Highlight.js -->
-<script>
-    async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js",function(){
-        hljs.initHighlightingOnLoad();
-    })
-</script>
-<link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+<!--<script>-->
+    <!--async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js",function(){-->
+        <!--hljs.initHighlightingOnLoad();-->
+    <!--})-->
+<!--</script>-->
+<!--<link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">-->
 
 
 </body>

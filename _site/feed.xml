@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="https://www.w3.org/2005/Atom">
 	<channel>
-		<title>BLOG</title>
+		<title>Blog</title>
 		<description>fromChinaBoy</description>
 		<link>/</link>
 		<atom:link href="/" rel="self" type="application/rss+xml" />
@@ -246,6 +246,73 @@ PS：BACKUP的时间点必须与原服务器备份后的文件名一致&lt;/p&gt
 				<pubDate>Fri, 17 May 2019 00:00:00 +0800</pubDate>
 				<link>/linux-quick-button.html</link>
 				<guid isPermaLink="true">/linux-quick-button.html</guid>
+			</item>
+		
+			<item>
+				<title>gitlab搭建和数据迁移</title>
+				<description>&lt;h2 id=&quot;ubuntu-搭建-gitlab&quot;&gt;Ubuntu 搭建 gitlab&lt;/h2&gt;
+
+&lt;h3 id=&quot;1首先是安装一些依赖服务&quot;&gt;1.首先是安装一些依赖服务&lt;/h3&gt;
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;apt-get &lt;span class=&quot;nb&quot;&gt;install &lt;/span&gt;curl openssh-server ca-certificates postfix
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;2安装gitlab&quot;&gt;2.安装gitlab&lt;/h3&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;注意：如果有旧gitlab要数据迁移的话，需要和旧gitlab的版本一致。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;我下的是Ubuntu18
+2.1、更新源&lt;/p&gt;
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;curl &lt;span class=&quot;nt&quot;&gt;-s&lt;/span&gt; https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.deb.sh | &lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;bash
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;2.2、安装&lt;/p&gt;
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;apt-get &lt;span class=&quot;nb&quot;&gt;install &lt;/span&gt;gitlab-ce&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;11.7.0-ce.0
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;3配置&quot;&gt;3.配置&lt;/h3&gt;
+&lt;p&gt;打开/etc/gitlab/gitlab.rb,将external_url = ‘http://git.example.com’修改为自己的域名地址：http://example.com，默认为80端口，如要使用其他端口后面加上端口号，如：http://127.0.0.1:8080。
+更新配置&lt;/p&gt;
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;gitlab-ctl reconfigure
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;4操作&quot;&gt;4.操作&lt;/h3&gt;
+&lt;ul&gt;
+  &lt;li&gt;sudo gitlab-ctl stop&lt;/li&gt;
+  &lt;li&gt;sudo gitlab-ctl start&lt;/li&gt;
+  &lt;li&gt;sudo gitlab-ctl restart&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;参考：https://www.cnblogs.com/m2ez/p/7063606.html&lt;/p&gt;
+
+&lt;h2 id=&quot;gitlab搭建的数据迁移&quot;&gt;gitlab搭建的数据迁移&lt;/h2&gt;
+
+&lt;h3 id=&quot;1查看版本&quot;&gt;1.查看版本&lt;/h3&gt;
+&lt;p&gt;cat /opt/gitlab/embedded/service/gitlab-rails/VERSION&lt;/p&gt;
+
+&lt;h3 id=&quot;2备份旧gitlab数据&quot;&gt;2.备份旧gitlab数据&lt;/h3&gt;
+&lt;p&gt;2.1、备份原a服务器上的的数据
+gitlab-rake gitlab:backup:create RAILS_ENV=production&lt;/p&gt;
+
+&lt;p&gt;PS: 备份后的文件一般是位于/var/opt/gitlab/backups下, 自动生成文件名文件名如1481529483_gitlab_backup.tar&lt;/p&gt;
+
+&lt;h3 id=&quot;3旧gitlab数据转移到新&quot;&gt;3.旧gitlab数据转移到新&lt;/h3&gt;
+&lt;p&gt;将步骤2生成的tar文件拷贝到b服务器上相应的backups目录下
+可以利用scp或者用ftp进行直接拷贝.
+scp username@src_ip:/var/opt/gitlab/backups/1481529483_gitlab_backup.tar /var/opt/gitlab/backups
+PS: username为原服务器的用户名，src_ip原服务器IP地址&lt;/p&gt;
+
+&lt;h3 id=&quot;4-在新服务器恢复数据&quot;&gt;4. 在新服务器恢复数据&lt;/h3&gt;
+&lt;p&gt;gitlab-rake gitlab:backup:restore RAILS_ENV=production BACKUP=1481529483
+PS：BACKUP的时间点必须与原服务器备份后的文件名一致&lt;/p&gt;
+
+&lt;p&gt;参考：https://www.cnblogs.com/wenwei-blog/p/6362829.html&lt;/p&gt;
+</description>
+				<pubDate>Fri, 17 May 2019 00:00:00 +0800</pubDate>
+				<link>/gitlab-migration.html</link>
+				<guid isPermaLink="true">/gitlab-migration.html</guid>
 			</item>
 		
 			<item>
@@ -702,28 +769,6 @@ php-fpm 相当于一个进程池，里面维系着一定数量的php服务进程
 				<pubDate>Sun, 15 Jul 2018 00:00:00 +0800</pubDate>
 				<link>/nginx-and-php-fpm.html</link>
 				<guid isPermaLink="true">/nginx-and-php-fpm.html</guid>
-			</item>
-		
-			<item>
-				<title>sshd预防被暴力破解</title>
-				<description>&lt;p&gt;今天服务器出现了被攻击的现象，登录的时候很慢，登录成功后出现了有10w多的尝试登陆。&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://img.zzhpeng.cn/FpXkldTl5Jw2t77T_O3cKV4359kv&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;查看失败登录情况&lt;/p&gt;
-&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;lastb | less
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p&gt;&lt;img src=&quot;http://img.zzhpeng.cn/FjvMrfFakXiE2cgz0nzhvteJFqNp&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;应对办法还是有的，我暂时选择了修改默认端口22。如果还有过多的尝试登录，日后在弄其他办法。
-修改端口地方/etc/ssh/sshd_config，重启应用service sshd restart&lt;/p&gt;
-
-&lt;p&gt;参考链接 https://yq.aliyun.com/articles/195078。&lt;/p&gt;
-
-</description>
-				<pubDate>Tue, 29 May 2018 00:00:00 +0800</pubDate>
-				<link>/sshd-hacker.html</link>
-				<guid isPermaLink="true">/sshd-hacker.html</guid>
 			</item>
 		
 	</channel>
