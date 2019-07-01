@@ -7,6 +7,21 @@
 		<atom:link href="/" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>基于slim框架搭建Oauth2</title>
+				<description>&lt;h3 id=&quot;官方文档和官方源&quot;&gt;官方文档和官方源&lt;/h3&gt;
+&lt;p&gt;Oauth2源：https://github.com/thephpleague/oauth2-server&lt;/p&gt;
+
+&lt;p&gt;Slim源：https://github.com/slimphp/Slim&lt;/p&gt;
+
+&lt;h3 id=&quot;待更新&quot;&gt;待更新&lt;/h3&gt;
+
+</description>
+				<pubDate>Mon, 03 Jun 2019 00:00:00 +0800</pubDate>
+				<link>/oauth2-slim.html</link>
+				<guid isPermaLink="true">/oauth2-slim.html</guid>
+			</item>
+		
+			<item>
 				<title>搭建私有的Composer Packagist</title>
 				<description>&lt;h3 id=&quot;官方文档和官方源&quot;&gt;官方文档和官方源&lt;/h3&gt;
 &lt;p&gt;官方文档：https://getcomposer.org/doc/articles/handling-private-packages-with-satis.md&lt;/p&gt;
@@ -43,25 +58,28 @@
   &lt;li&gt;写入配置&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;div class=&quot;language-json highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;w&quot;&gt;    &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-      &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;name&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;zzhpeng/onehourx&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-      &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;homepage&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;http://packages.example.org&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; 
-      &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;repositories&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-        &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-          &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;type&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;git&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-          &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;url&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;https://gitlab.01hour.com/onehourx/backend/plugin/saas-rpc-client.git&quot;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-        &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-        &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-          &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;type&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;composer&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-          &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;url&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;https://packagist.laravel-china.org&quot;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-        &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-      &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-      &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;require&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-        &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;onehourx/saas-rpc-client&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;dev-master&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-        &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;topthink/framework&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;5.1.*&quot;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-      &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-    &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;
+{
+  &quot;name&quot;: &quot;zzhpeng packages&quot;,
+  
+  &quot;homepage&quot;: &quot;http://packages.example.org&quot;, 
+  
+  &quot;repositories&quot;: [
+    {
+      &quot;type&quot;: &quot;git&quot;,
+      &quot;url&quot;: &quot;https://github.com/FromChinaBoy/Export.git&quot;
+    },
+    {
+      &quot;type&quot;: &quot;composer&quot;,
+      &quot;url&quot;: &quot;https://packagist.laravel-china.org&quot;
+    }
+  ],
+  &quot;require&quot;: {
+    &quot;zzhpeng/export&quot;: &quot;dev-master&quot;,
+    &quot;topthink/framework&quot;: &quot;5.1.*&quot;
+  }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;h3 id=&quot;运行&quot;&gt;运行&lt;/h3&gt;
 &lt;ul&gt;
@@ -679,28 +697,6 @@ php-fpm 相当于一个进程池，里面维系着一定数量的php服务进程
 				<pubDate>Sun, 15 Jul 2018 00:00:00 +0800</pubDate>
 				<link>/nginx-and-php-fpm.html</link>
 				<guid isPermaLink="true">/nginx-and-php-fpm.html</guid>
-			</item>
-		
-			<item>
-				<title>sshd预防被暴力破解</title>
-				<description>&lt;p&gt;今天服务器出现了被攻击的现象，登录的时候很慢，登录成功后出现了有10w多的尝试登陆。&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://img.zzhpeng.cn/FpXkldTl5Jw2t77T_O3cKV4359kv&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;查看失败登录情况&lt;/p&gt;
-&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;lastb | less
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p&gt;&lt;img src=&quot;http://img.zzhpeng.cn/FjvMrfFakXiE2cgz0nzhvteJFqNp&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;应对办法还是有的，我暂时选择了修改默认端口22。如果还有过多的尝试登录，日后在弄其他办法。
-修改端口地方/etc/ssh/sshd_config，重启应用service sshd restart&lt;/p&gt;
-
-&lt;p&gt;参考链接 https://yq.aliyun.com/articles/195078。&lt;/p&gt;
-
-</description>
-				<pubDate>Tue, 29 May 2018 00:00:00 +0800</pubDate>
-				<link>/sshd-hacker.html</link>
-				<guid isPermaLink="true">/sshd-hacker.html</guid>
 			</item>
 		
 	</channel>

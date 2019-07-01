@@ -35,25 +35,28 @@ touch satis.json
 
 * 写入配置
 
-```json
+```
+
+{
+  "name": "zzhpeng packages",
+  
+  "homepage": "http://packages.example.org", 
+  
+  "repositories": [
     {
-      "name": "zzhpeng/onehourx",
-      "homepage": "http://packages.example.org", 
-      "repositories": [
-        {
-          "type": "git",
-          "url": "https://gitlab.01hour.com/onehourx/backend/plugin/saas-rpc-client.git"
-        },
-        {
-          "type": "composer",
-          "url": "https://packagist.laravel-china.org"
-        }
-      ],
-      "require": {
-        "onehourx/saas-rpc-client": "dev-master",
-        "topthink/framework": "5.1.*"
-      }
+      "type": "git",
+      "url": "https://github.com/FromChinaBoy/Export.git"
+    },
+    {
+      "type": "composer",
+      "url": "https://packagist.laravel-china.org"
     }
+  ],
+  "require": {
+    "zzhpeng/export": "dev-master",
+    "topthink/framework": "5.1.*"
+  }
+}
 ```
 
 ### 运行

@@ -151,25 +151,28 @@
   <li>写入配置</li>
 </ul>
 
-<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="w">    </span><span class="p">{</span><span class="w">
-      </span><span class="s2">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"zzhpeng/onehourx"</span><span class="p">,</span><span class="w">
-      </span><span class="s2">"homepage"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://packages.example.org"</span><span class="p">,</span><span class="w"> 
-      </span><span class="s2">"repositories"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
-        </span><span class="p">{</span><span class="w">
-          </span><span class="s2">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"git"</span><span class="p">,</span><span class="w">
-          </span><span class="s2">"url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://gitlab.01hour.com/onehourx/backend/plugin/saas-rpc-client.git"</span><span class="w">
-        </span><span class="p">},</span><span class="w">
-        </span><span class="p">{</span><span class="w">
-          </span><span class="s2">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"composer"</span><span class="p">,</span><span class="w">
-          </span><span class="s2">"url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://packagist.laravel-china.org"</span><span class="w">
-        </span><span class="p">}</span><span class="w">
-      </span><span class="p">],</span><span class="w">
-      </span><span class="s2">"require"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-        </span><span class="s2">"onehourx/saas-rpc-client"</span><span class="p">:</span><span class="w"> </span><span class="s2">"dev-master"</span><span class="p">,</span><span class="w">
-        </span><span class="s2">"topthink/framework"</span><span class="p">:</span><span class="w"> </span><span class="s2">"5.1.*"</span><span class="w">
-      </span><span class="p">}</span><span class="w">
-    </span><span class="p">}</span><span class="w">
-</span></code></pre></div></div>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+{
+  "name": "zzhpeng packages",
+  
+  "homepage": "http://packages.example.org", 
+  
+  "repositories": [
+    {
+      "type": "git",
+      "url": "https://github.com/FromChinaBoy/Export.git"
+    },
+    {
+      "type": "composer",
+      "url": "https://packagist.laravel-china.org"
+    }
+  ],
+  "require": {
+    "zzhpeng/export": "dev-master",
+    "topthink/framework": "5.1.*"
+  }
+}
+</code></pre></div></div>
 
 <h3 id="运行">运行</h3>
 <ul>
@@ -217,6 +220,10 @@
                         <a href="/linux-quick-button.html" data-toggle="tooltip" data-placement="top" title="unix bash快捷键">&larr; Previous Post</a>
                     </li>
                     
+                    
+                    <li class="next">
+                        <a href="/oauth2-slim.html" data-toggle="tooltip" data-placement="top" title="基于slim框架搭建Oauth2">Next Post &rarr;</a>
+                    </li>
                     
                 </ul>
 
