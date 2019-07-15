@@ -7,6 +7,127 @@
 		<atom:link href="/" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>基于frp,gitlab的docker镜像实现本地gitlab外网访问(一)</title>
+				<description>&lt;h3 id=&quot;基础&quot;&gt;基础&lt;/h3&gt;
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;会git的基本操作&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;会docker和docker-compose的基本操作&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;基于gitlab的docker镜像安装内网git仓库&quot;&gt;基于gitlab的docker镜像安装内网git仓库&lt;/h3&gt;
+&lt;p&gt;1、这里docker-compose管理安装
+&lt;img src=&quot;http://img.zzhpeng.cn/FgO-PtshY7SQ52npAmUL4en4WGCO&quot; alt=&quot;FgO-PtshY7SQ52npAmUL4en4WGCO&quot; /&gt;
+然后在当前目录运行docker-compose up,执行时间可能会有点久，请耐性等待。
+当执行到开始写日志的时候，就证明本地的gitlab安装成功了。如下图：
+&lt;img src=&quot;http://img.zzhpeng.cn/FrMofWRxKkWDy7Nn2Lb4JwjAesJz&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;2、访问127.0.0.1:8686测试&lt;/p&gt;
+
+&lt;h3 id=&quot;内网穿透frp&quot;&gt;内网穿透frp&lt;/h3&gt;
+&lt;p&gt;1、在frp的release找到相应系统的压缩包，里面包含服务端frps和客户端frpc
+mac系统下载frp_0.27.1_darwin_amd64.tar.gz
+linux系统下载frp_0.27.1_linux_amd64.tar.gz&lt;/p&gt;
+
+&lt;p&gt;2、下载包
+我在内网用的是mac测试，所以用了frp_0.27.1_darwin_amd64.tar.gz这个包，
+外网用linux的frp_0.27.1_linux_amd64.tar.gz。&lt;/p&gt;
+
+&lt;p&gt;3、配置
+本地客户端frpc配置&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[common]
+server_addr = *.*.*.* #填写自己的外网服务器的ip
+server_port = 7000
+
+[web] 
+type = http
+local_port = 8686
+custom_domains = gitlab.zzhpeng.cn                               
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;外网frps配置&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[common]
+bind_port = 7000
+vhost_http_port = 8080
+subdomain_host = gitlab.zzhpeng.cn                            
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;4、启动
+client端启动
+./frpc -c ./frpc.ini&lt;/p&gt;
+
+&lt;p&gt;server端启动
+./frps -c ./frps.ini&lt;/p&gt;
+
+&lt;h3 id=&quot;外网域名配置与测试&quot;&gt;外网域名配置与测试&lt;/h3&gt;
+&lt;p&gt;1、做域名解析，腾讯云云服务器如下配置
+&lt;img src=&quot;http://img.zzhpeng.cn/Fpud9LMVf-xDNvznnHnfWusl8N7W&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;2、域名http://gitlab.zzhpeng.cn:8080访问测试
+&lt;img src=&quot;http://img.zzhpeng.cn/FuPWVEIWOixgp6wM2vmBfP84_emk&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;外网域名访问优化nginx转发&quot;&gt;外网域名访问优化–nginx转发&lt;/h3&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;
+server{
+    listen 80;
+    server_name  gitlab.zzhpeng.cn;
+    root /var/www/html/goShares/public; # 该项要修改为你准备存放相关网页的路径
+
+    #access_log /dev/null;
+    #access_log  /var/log/nginx/nginx.localhost.access.log  main;
+    error_log  /var/log/nginx/wx.zzhpeng.cn.log  warn;
+
+    location / {
+        #resolver 127.0.0.1; #通过配置/etc/dnsmasq.conf，本地解析域名
+        proxy_ssl_server_name on;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Host $host;
+        proxy_pass http://gitlab.zzhpeng.cn:8080; #通过域名访问frp服务
+    }
+
+    location = /favicon.ico {
+         log_not_found off;
+         access_log off;
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;效果图如下：
+&lt;img src=&quot;http://img.zzhpeng.cn/FiasTv3nEaiDaxUK_PcotivGkE9F&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;其他优化qa&quot;&gt;其他优化Q&amp;amp;A&lt;/h3&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;Q:本地服务器是宝塔搭建的，已经有nginx环境。不用gitlab的docker镜像安装，用一键安装方法，又会帮你弄一个nginx环境，起冲突。该怎么办？&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;A:一键安装可以选择是否安装nginx，然后参考gitlab的nginx的转发。&lt;/p&gt;
+
+&lt;h3 id=&quot;资源列表&quot;&gt;资源列表&lt;/h3&gt;
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;frp的github仓库：https://github.com/fatedier/frp&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;gitlab的github仓库：https://github.com/gitlabhq/gitlabhq&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;gitlab的docker安装指导文档：https://docs.gitlab.com/omnibus/docker/&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+				<pubDate>Mon, 15 Jul 2019 00:00:00 +0800</pubDate>
+				<link>/location-gitlab-outside-visit.html</link>
+				<guid isPermaLink="true">/location-gitlab-outside-visit.html</guid>
+			</item>
+		
+			<item>
 				<title>基于slim框架搭建Oauth2</title>
 				<description>&lt;h3 id=&quot;官方文档和官方源&quot;&gt;官方文档和官方源&lt;/h3&gt;
 &lt;p&gt;Oauth2源：https://github.com/thephpleague/oauth2-server&lt;/p&gt;
@@ -659,44 +780,6 @@ nts和zts用过windows的同学都有看见过。Linux上的PHP同样有NTS和TS
 				<pubDate>Sun, 15 Jul 2018 00:00:00 +0800</pubDate>
 				<link>/php-runtime-type.html</link>
 				<guid isPermaLink="true">/php-runtime-type.html</guid>
-			</item>
-		
-			<item>
-				<title>关于nginx和php-fpm</title>
-				<description>&lt;h3 id=&quot;1网友一&quot;&gt;1、网友一&lt;/h3&gt;
-&lt;p&gt;Nginx 是非阻塞IO &amp;amp; IO复用模型，通过操作系统提供的类似 epoll 的功能，可以在一个线程里处理多个客户端的请求。
-Nginx 的进程就是线程，即每个进程里只有一个线程，但这一个线程可以服务多个客户端。&lt;/p&gt;
-
-&lt;p&gt;PHP-FPM 是阻塞的单线程模型，pm.max_children 指定的是最大的进程数量，pm.max_requests 指定的是每个进程处理多少个请求后重启(因为 PHP 偶尔会有内存泄漏，所以需要重启).
-PHP-FPM 的每个进程也只有一个线程，但是一个进程同时只能服务一个客户端。&lt;/p&gt;
-
-&lt;p&gt;大多数的 Linux 程序都倾向于使用进程而不是线程，因为 Linux 下相对来说创建进程的开销比较小，而 Linux 的线程功能又不是很强大。&lt;/p&gt;
-&lt;h3 id=&quot;2网友二&quot;&gt;2、网友二&lt;/h3&gt;
-&lt;p&gt;php-fpm 是多进程的 fast-cgi 管理服务&lt;/p&gt;
-
-&lt;p&gt;nginx 主进程是单线程的， master 进程会 fork 出多个 worker 进程，每个 worker 进程也同样是单线程模式，worker 进程采用的是 epoll 模型，异步非阻塞/事件驱动/IO多路复用，所以 nginx 比较适用于处理高并发请求的场景，就像现在的 nodejs，nodejs 是单进程且单线程模式，master 进程只有一个线程，负责请求调度和轮询回调事件的处理工作。&lt;/p&gt;
-
-&lt;p&gt;在 nginx + php-fpm 的架构模式下&lt;/p&gt;
-
-&lt;p&gt;nginx 的 worker 服务进程会把请求转发给 php-fpm 服务，它们是通过 unix socket 或 tcp socket 进行通信的，worker 把 request_1 发送给 php-fpm 后并不会同步阻塞等待 php-fpm 返回数据，而是将此次请求放入事件队列，接着去处理新的请求 request_2，同时会监测有没有回调事件触发了，这里的回调事件便是 request_1 的请求处理好了并已经返回了数据，worker 只需要把数据返回给客户端即可。
-php-fpm 相当于一个进程池，里面维系着一定数量的php服务进程，等待 nginx 的 worker 发送任务，处理完成后返回给 nginx 的 worker。&lt;/p&gt;
-&lt;h3 id=&quot;联想&quot;&gt;联想&lt;/h3&gt;
-&lt;h3 id=&quot;如何查看进程数&quot;&gt;如何查看进程数&lt;/h3&gt;
-&lt;p&gt;1、ps -ef | wc -l
-2、ps -ef | grep httpd | wc -l&lt;/p&gt;
-
-&lt;h3 id=&quot;如何查看某进程数的线程数&quot;&gt;如何查看某进程数的线程数&lt;/h3&gt;
-&lt;p&gt;1、pstree -p 4761（pid）
-2、cat /proc/4761（pid）/status
-3、top -p 4761（pid），然后按H。&lt;/p&gt;
-
-&lt;p&gt;[1] https://segmentfault.com/q/1010000000326510.
-[2] https://segmentfault.com/q/1010000004621209&lt;/p&gt;
-
-</description>
-				<pubDate>Sun, 15 Jul 2018 00:00:00 +0800</pubDate>
-				<link>/nginx-and-php-fpm.html</link>
-				<guid isPermaLink="true">/nginx-and-php-fpm.html</guid>
 			</item>
 		
 	</channel>
