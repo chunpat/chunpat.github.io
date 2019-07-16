@@ -125,25 +125,50 @@
 </ul>
 
 <h3 id="基于gitlab的docker镜像安装内网git仓库">基于gitlab的docker镜像安装内网git仓库</h3>
-<p>1、这里docker-compose管理安装
-<img src="http://img.zzhpeng.cn/FgO-PtshY7SQ52npAmUL4en4WGCO" alt="FgO-PtshY7SQ52npAmUL4en4WGCO" />
+<blockquote>
+  <p>1、这里docker-compose管理安装</p>
+</blockquote>
+
+<p><img src="http://img.zzhpeng.cn/FgO-PtshY7SQ52npAmUL4en4WGCO" alt="FgO-PtshY7SQ52npAmUL4en4WGCO" />
 然后在当前目录运行docker-compose up,执行时间可能会有点久，请耐性等待。
 当执行到开始写日志的时候，就证明本地的gitlab安装成功了。如下图：
 <img src="http://img.zzhpeng.cn/FrMofWRxKkWDy7Nn2Lb4JwjAesJz" alt="" /></p>
 
-<p>2、访问127.0.0.1:8686测试</p>
+<blockquote>
+  <p>2、访问127.0.0.1:8686测试</p>
+</blockquote>
 
 <h3 id="内网穿透frp">内网穿透frp</h3>
-<p>1、在frp的release找到相应系统的压缩包，里面包含服务端frps和客户端frpc
-mac系统下载frp_0.27.1_darwin_amd64.tar.gz
-linux系统下载frp_0.27.1_linux_amd64.tar.gz</p>
+<blockquote>
+  <p>1、在frp的release找到相应系统的压缩包，里面包含服务端frps和客户端frpc</p>
+</blockquote>
 
-<p>2、下载包
-我在内网用的是mac测试，所以用了frp_0.27.1_darwin_amd64.tar.gz这个包，
-外网用linux的frp_0.27.1_linux_amd64.tar.gz。</p>
+<ul>
+  <li>
+    <p>mac系统下载frp_0.27.1_darwin_amd64.tar.gz</p>
+  </li>
+  <li>
+    <p>linux系统下载frp_0.27.1_linux_amd64.tar.gz</p>
+  </li>
+</ul>
 
-<p>3、配置
-本地客户端frpc配置</p>
+<blockquote>
+  <p>2、下载包</p>
+</blockquote>
+
+<ul>
+  <li>我在内网用的是mac测试，所以用了frp_0.27.1_darwin_amd64.tar.gz这个包，
+外网用linux的frp_0.27.1_linux_amd64.tar.gz。</li>
+</ul>
+
+<blockquote>
+  <p>3、配置</p>
+</blockquote>
+
+<ul>
+  <li>本地客户端frpc配置</li>
+</ul>
+
 <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[common]
 server_addr = *.*.*.* #填写自己的外网服务器的ip
 server_port = 7000
@@ -155,7 +180,10 @@ custom_domains = gitlab.zzhpeng.cn
 
 </code></pre></div></div>
 
-<p>外网frps配置</p>
+<ul>
+  <li>外网frps配置</li>
+</ul>
+
 <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[common]
 bind_port = 7000
 vhost_http_port = 8080
@@ -163,19 +191,36 @@ subdomain_host = gitlab.zzhpeng.cn
 
 </code></pre></div></div>
 
-<p>4、启动
-client端启动
-./frpc -c ./frpc.ini</p>
+<blockquote>
+  <p>4、启动</p>
+</blockquote>
 
-<p>server端启动
-./frps -c ./frps.ini</p>
+<ul>
+  <li>client端启动</li>
+</ul>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>./frpc -c ./frpc.ini
+</code></pre></div></div>
+
+<ul>
+  <li>server端启动</li>
+</ul>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>./frps -c ./frps.ini
+</code></pre></div></div>
 
 <h3 id="外网域名配置与测试">外网域名配置与测试</h3>
-<p>1、做域名解析，腾讯云云服务器如下配置
-<img src="http://img.zzhpeng.cn/Fpud9LMVf-xDNvznnHnfWusl8N7W" alt="" /></p>
+<blockquote>
+  <p>1、做域名解析，腾讯云云服务器如下配置</p>
+</blockquote>
 
-<p>2、域名http://gitlab.zzhpeng.cn:8080访问测试
-<img src="http://img.zzhpeng.cn/FuPWVEIWOixgp6wM2vmBfP84_emk" alt="" /></p>
+<p><img src="http://img.zzhpeng.cn/Fpud9LMVf-xDNvznnHnfWusl8N7W" alt="" /></p>
+
+<blockquote>
+  <p>2、域名http://gitlab.zzhpeng.cn:8080访问测试</p>
+</blockquote>
+
+<p><img src="http://img.zzhpeng.cn/FuPWVEIWOixgp6wM2vmBfP84_emk" alt="" /></p>
 
 <h3 id="外网域名访问优化nginx转发">外网域名访问优化–nginx转发</h3>
 <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
@@ -213,6 +258,20 @@ server{
 </blockquote>
 
 <p>A:一键安装可以选择是否安装nginx，然后参考gitlab的nginx的转发。</p>
+
+<blockquote>
+  <p>Q:本地开发与公司内部git仓库交流不用翻到外网再到公司内网，直接与内网地址连接，怎么做？</p>
+</blockquote>
+
+<p>A:上面本地docker-compose搭建的环境，将映射出去的8686端口改为80，映射出来的config配置文件下有gitlab.rb，修改如下配置项并改公司路由器的host：</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code> # For HTTP
+ external_url "http://gitlab.example.com:8929"
+
+ or
+
+ # For HTTPS (notice the https)
+ external_url "https://gitlab.example.com:8929"
+</code></pre></div></div>
 
 <h3 id="资源列表">资源列表</h3>
 <ul>

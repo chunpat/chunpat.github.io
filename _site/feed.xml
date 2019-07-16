@@ -19,25 +19,50 @@
 &lt;/ul&gt;
 
 &lt;h3 id=&quot;基于gitlab的docker镜像安装内网git仓库&quot;&gt;基于gitlab的docker镜像安装内网git仓库&lt;/h3&gt;
-&lt;p&gt;1、这里docker-compose管理安装
-&lt;img src=&quot;http://img.zzhpeng.cn/FgO-PtshY7SQ52npAmUL4en4WGCO&quot; alt=&quot;FgO-PtshY7SQ52npAmUL4en4WGCO&quot; /&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;1、这里docker-compose管理安装&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://img.zzhpeng.cn/FgO-PtshY7SQ52npAmUL4en4WGCO&quot; alt=&quot;FgO-PtshY7SQ52npAmUL4en4WGCO&quot; /&gt;
 然后在当前目录运行docker-compose up,执行时间可能会有点久，请耐性等待。
 当执行到开始写日志的时候，就证明本地的gitlab安装成功了。如下图：
 &lt;img src=&quot;http://img.zzhpeng.cn/FrMofWRxKkWDy7Nn2Lb4JwjAesJz&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
-&lt;p&gt;2、访问127.0.0.1:8686测试&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;2、访问127.0.0.1:8686测试&lt;/p&gt;
+&lt;/blockquote&gt;
 
 &lt;h3 id=&quot;内网穿透frp&quot;&gt;内网穿透frp&lt;/h3&gt;
-&lt;p&gt;1、在frp的release找到相应系统的压缩包，里面包含服务端frps和客户端frpc
-mac系统下载frp_0.27.1_darwin_amd64.tar.gz
-linux系统下载frp_0.27.1_linux_amd64.tar.gz&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;1、在frp的release找到相应系统的压缩包，里面包含服务端frps和客户端frpc&lt;/p&gt;
+&lt;/blockquote&gt;
 
-&lt;p&gt;2、下载包
-我在内网用的是mac测试，所以用了frp_0.27.1_darwin_amd64.tar.gz这个包，
-外网用linux的frp_0.27.1_linux_amd64.tar.gz。&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;mac系统下载frp_0.27.1_darwin_amd64.tar.gz&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;linux系统下载frp_0.27.1_linux_amd64.tar.gz&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
 
-&lt;p&gt;3、配置
-本地客户端frpc配置&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;2、下载包&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;我在内网用的是mac测试，所以用了frp_0.27.1_darwin_amd64.tar.gz这个包，
+外网用linux的frp_0.27.1_linux_amd64.tar.gz。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;3、配置&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;本地客户端frpc配置&lt;/li&gt;
+&lt;/ul&gt;
+
 &lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[common]
 server_addr = *.*.*.* #填写自己的外网服务器的ip
 server_port = 7000
@@ -49,7 +74,10 @@ custom_domains = gitlab.zzhpeng.cn
 
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;外网frps配置&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;外网frps配置&lt;/li&gt;
+&lt;/ul&gt;
+
 &lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[common]
 bind_port = 7000
 vhost_http_port = 8080
@@ -57,19 +85,36 @@ subdomain_host = gitlab.zzhpeng.cn
 
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;4、启动
-client端启动
-./frpc -c ./frpc.ini&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;4、启动&lt;/p&gt;
+&lt;/blockquote&gt;
 
-&lt;p&gt;server端启动
-./frps -c ./frps.ini&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;client端启动&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;./frpc -c ./frpc.ini
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;server端启动&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;./frps -c ./frps.ini
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;h3 id=&quot;外网域名配置与测试&quot;&gt;外网域名配置与测试&lt;/h3&gt;
-&lt;p&gt;1、做域名解析，腾讯云云服务器如下配置
-&lt;img src=&quot;http://img.zzhpeng.cn/Fpud9LMVf-xDNvznnHnfWusl8N7W&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;1、做域名解析，腾讯云云服务器如下配置&lt;/p&gt;
+&lt;/blockquote&gt;
 
-&lt;p&gt;2、域名http://gitlab.zzhpeng.cn:8080访问测试
-&lt;img src=&quot;http://img.zzhpeng.cn/FuPWVEIWOixgp6wM2vmBfP84_emk&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://img.zzhpeng.cn/Fpud9LMVf-xDNvznnHnfWusl8N7W&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;2、域名http://gitlab.zzhpeng.cn:8080访问测试&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://img.zzhpeng.cn/FuPWVEIWOixgp6wM2vmBfP84_emk&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
 &lt;h3 id=&quot;外网域名访问优化nginx转发&quot;&gt;外网域名访问优化–nginx转发&lt;/h3&gt;
 &lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;
@@ -107,6 +152,20 @@ server{
 &lt;/blockquote&gt;
 
 &lt;p&gt;A:一键安装可以选择是否安装nginx，然后参考gitlab的nginx的转发。&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Q:本地开发与公司内部git仓库交流不用翻到外网再到公司内网，直接与内网地址连接，怎么做？&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;A:上面本地docker-compose搭建的环境，将映射出去的8686端口改为80，映射出来的config配置文件下有gitlab.rb，修改如下配置项并改公司路由器的host：&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; # For HTTP
+ external_url &quot;http://gitlab.example.com:8929&quot;
+
+ or
+
+ # For HTTPS (notice the https)
+ external_url &quot;https://gitlab.example.com:8929&quot;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;h3 id=&quot;资源列表&quot;&gt;资源列表&lt;/h3&gt;
 &lt;ul&gt;
