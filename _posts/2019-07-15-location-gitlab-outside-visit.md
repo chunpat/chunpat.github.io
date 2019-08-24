@@ -133,6 +133,9 @@ A:上面本地docker-compose搭建的环境，将映射出去的8686端口改为
  external_url "https://gitlab.example.com:8929"
 ```
 
+> Q:不用gitlab自带的nginx转发，用宝塔的nginx转发报502。
+
+https://stackoverflow.com/questions/35327882/what-permissions-does-nginx-need-for-the-gitlab-workhorse-socket
 
 
 
