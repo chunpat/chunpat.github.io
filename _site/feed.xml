@@ -167,6 +167,12 @@ server{
  external_url &quot;https://gitlab.example.com:8929&quot;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
+&lt;blockquote&gt;
+  &lt;p&gt;Q:不用gitlab自带的nginx转发，用宝塔的nginx转发报502。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;https://stackoverflow.com/questions/35327882/what-permissions-does-nginx-need-for-the-gitlab-workhorse-socket&lt;/p&gt;
+
 &lt;h3 id=&quot;资源列表&quot;&gt;资源列表&lt;/h3&gt;
 &lt;ul&gt;
   &lt;li&gt;
