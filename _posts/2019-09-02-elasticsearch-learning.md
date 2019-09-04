@@ -36,3 +36,5 @@ https://github.com/elastic/elasticsearch-php
 说明文档
 https://www.elastic.co/guide/en/elasticsearch/client/php-api/current/overview.html
 
+关于查询
+https://www.elastic.co/guide/cn/elasticsearch/guide/current/query-dsl-intro.html
