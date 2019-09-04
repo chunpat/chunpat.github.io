@@ -28,6 +28,14 @@
 &lt;h3 id=&quot;kibana图形管理安装&quot;&gt;Kibana图形管理安装&lt;/h3&gt;
 
 &lt;h3 id=&quot;实战&quot;&gt;实战&lt;/h3&gt;
+&lt;p&gt;官方开发的php组件&lt;/p&gt;
+
+&lt;p&gt;php客户端
+https://github.com/elastic/elasticsearch-php&lt;/p&gt;
+
+&lt;p&gt;说明文档
+https://www.elastic.co/guide/en/elasticsearch/client/php-api/current/overview.html&lt;/p&gt;
+
 </description>
 				<pubDate>Mon, 02 Sep 2019 00:00:00 +0800</pubDate>
 				<link>/elasticsearch-learning.html</link>

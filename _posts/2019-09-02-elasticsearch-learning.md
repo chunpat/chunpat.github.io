@@ -28,3 +28,11 @@ vim config/elasticsearch.yml
 
 
 ### 实战
+官方开发的php组件
+
+php客户端
+https://github.com/elastic/elasticsearch-php
+
+说明文档
+https://www.elastic.co/guide/en/elasticsearch/client/php-api/current/overview.html
+
