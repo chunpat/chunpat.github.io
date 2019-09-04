@@ -9,8 +9,21 @@
 			<item>
 				<title>elasticsearch学习</title>
 				<description>&lt;h3 id=&quot;安装&quot;&gt;安装&lt;/h3&gt;
+&lt;p&gt;下载相应版本 https://github.com/elastic/elasticsearch/releases&lt;/p&gt;
 
-&lt;h3 id=&quot;lk分词&quot;&gt;lk分词&lt;/h3&gt;
+&lt;h3 id=&quot;配置&quot;&gt;配置&lt;/h3&gt;
+&lt;p&gt;修改配置，其他主机可以访问，单节点部署&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;vim config/elasticsearch.yml
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://img.zzhpeng.cn/FqYRhHL4hv5NrrJMumI_wtDGIng1&quot; alt=&quot;FhoCc45P5ISRy7oFsr5ZQLdhK-3P&quot; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;lk分词插件&quot;&gt;lk分词插件&lt;/h3&gt;
+&lt;p&gt;中文分词器，同lucene一样，在使用中文全文检索前，需要集成IK分词器。找到相应的发行版本安装。&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;./bin/elasticsearch-plugin install https://github.com/medcl/elasticsearch-analysis-ik/releases/download/v7.3.1/elasticsearch-analysis-ik-7.3.1.zip
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;如果报错，多数是网络问题，文件没下载完整。&lt;/p&gt;
 
 &lt;h3 id=&quot;kibana图形管理安装&quot;&gt;Kibana图形管理安装&lt;/h3&gt;
 
@@ -450,9 +463,10 @@ PS：BACKUP的时间点必须与原服务器备份后的文件名一致&lt;/p&gt
 &lt;ul&gt;
   &lt;li&gt;1、select * from table where a=1, b=2&lt;/li&gt;
   &lt;li&gt;2、select * from table where b=1, a=2&lt;/li&gt;
-  &lt;li&gt;3、select * from table where b=1
-以上哪一句不会触发索引？为什么？&lt;/li&gt;
+  &lt;li&gt;3、select * from table where b=1&lt;/li&gt;
 &lt;/ul&gt;
+
+&lt;p&gt;以上哪一句不会触发索引？为什么？&lt;/p&gt;
 
 &lt;p&gt;答曰：3，因为联合索引的最左匹配原则，详细如下。&lt;/p&gt;
 

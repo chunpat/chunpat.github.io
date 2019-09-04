@@ -9,6 +9,7 @@ tags: mysql
 * 1、select * from table where a=1, b=2
 * 2、select * from table where b=1, a=2
 * 3、select * from table where b=1
+
 以上哪一句不会触发索引？为什么？
 
 答曰：3，因为联合索引的最左匹配原则，详细如下。
