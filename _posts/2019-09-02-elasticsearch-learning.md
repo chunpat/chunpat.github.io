@@ -5,10 +5,10 @@ date: 2019-09-02
 tags: elasticsearch
 ---
 
-### 安装
+## 安装
 下载相应版本 https://github.com/elastic/elasticsearch/releases
 
-### 配置
+## 配置
 修改配置，其他主机可以访问，单节点部署
 ```
 vim config/elasticsearch.yml
@@ -35,7 +35,7 @@ vim config/elasticsearch.yml
 | discovery.zen.minimum_master_nodes | 主结点数量的最少值 ,此值的公式为：(master_eligible_nodes / 2) + 1 ，比如：有3个符合要求的主结点，那么这里要设置为2 |
 
 
-### lk分词插件
+## lk分词插件
 中文分词器，同lucene一样，在使用中文全文检索前，需要集成IK分词器。找到相应的发行版本安装。
 ```
 ./bin/elasticsearch-plugin install https://github.com/medcl/elasticsearch-analysis-ik/releases/download/v7.3.1/elasticsearch-analysis-ik-7.3.1.zip
@@ -43,8 +43,10 @@ vim config/elasticsearch.yml
 ```
 如果报错，多数是网络问题，文件没下载完整。
 
-### Kibana图形管理安装
+## Kibana图形管理安装
 待。。。
+
+## php实战
 
 ### 基本概念
 
@@ -55,19 +57,13 @@ vim config/elasticsearch.yml
 | 字段（field）  | 文档中的属性 |
 | 映射配置（mappings） | 字段的数据类型、属性、是否索引、是否存储等特性 |
 
-
-### php实战
-> 资源
-
-官方开发的php客户端组件:
-https://github.com/elastic/elasticsearch-php
-
-官方说明文档：
-https://www.elastic.co/guide/en/elasticsearch/client/php-api/current/overview.html
+### 代码实现
+这里用官方组出的客户端轮子https://github.com/elastic/elasticsearch-php.git
 
 > 生成索引（index)
+
 ```
-    
+
  protected static $client = null;
 
 /**
@@ -156,6 +152,7 @@ public static function setIndex(string $index, array $param = []){
 ```
 
 > 删除索引（index)
+
 ```
 /**
  * 删除索引
@@ -175,7 +172,8 @@ public static function deleteIndex(string $index){
 
 ```
 
-> 查询索引（index)
+> 查看索引（index)
+
 ```
 /**
  * 查询索引
@@ -200,6 +198,7 @@ static function getIndex(string $index){
 ```
 
 > 创建文档（document）
+
 ```
 /**
  * 建立文档
@@ -232,6 +231,7 @@ static function setDocoments(string $index,array $documents){
 ```
 
 > 删除文档（document）
+
 ```
 
 /**
@@ -256,7 +256,29 @@ static function deleteDocuments($index,$id){
 ```
 
 > 搜索文档（document）
+
+* match是经过analyer的，也就是说，文档首先被分析器给处理了。根据不同的分析器，分析的结果也稍显不同，然后再根据分词结果进行匹配。
+
+* term则不经过分词，它是直接去倒排索引中查找了精确的值了。
+
 ```
+$body = [
+    'query' => [
+        'bool' => [
+            'must' => [
+                [ 'match' => [ 'search_name' => $key ] ],
+                [ 'bool'=>
+                    ['should' => [
+                        [ 'match' => [ 'store_id' => 681 ] ],
+                        [ 'match' => [ 'store_id' => 0 ] ],
+                    ]
+                    ]
+                ]
+            ]
+        ]
+    ]
+];
+
 
 //搜索文档
 static function searchDocuments($index,array $body){
@@ -273,8 +295,12 @@ static function searchDocuments($index,array $body){
 
 ```
 
+## 参考
 
+1、[图解Elasticsearch中的_source、_all、store和index属性 - weixin_33692284的博客 - CSDN博客](https://blog.csdn.net/weixin_33692284/article/details/92170069)
 
-### 参考
+2、[官方说明文档：](https://www.elastic.co/guide/en/elasticsearch/client/php-api/current/overview.html)
 
-[图解Elasticsearch中的_source、_all、store和index属性 - weixin_33692284的博客 - CSDN博客](https://blog.csdn.net/weixin_33692284/article/details/92170069)
+3、[官方开发的php客户端组件:](https://github.com/elastic/elasticsearch-php)
+
+4、[Elasticsearch7.*版本 1.入门 - 简书](https://www.jianshu.com/p/88f0546d5955)

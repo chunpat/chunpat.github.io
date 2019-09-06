@@ -114,34 +114,378 @@
         <div class="row">
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 post-container">
 
-                <h3 id="安装">安装</h3>
+                <h2 id="安装">安装</h2>
 <p>下载相应版本 https://github.com/elastic/elasticsearch/releases</p>
 
-<h3 id="配置">配置</h3>
+<h2 id="配置">配置</h2>
 <p>修改配置，其他主机可以访问，单节点部署</p>
 <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>vim config/elasticsearch.yml
 </code></pre></div></div>
 
 <p><img src="http://img.zzhpeng.cn/FqYRhHL4hv5NrrJMumI_wtDGIng1" alt="FhoCc45P5ISRy7oFsr5ZQLdhK-3P" /></p>
 
-<h3 id="lk分词插件">lk分词插件</h3>
+<blockquote>
+  <p>其他配置</p>
+</blockquote>
+
+<table>
+  <thead>
+    <tr>
+      <th>属性名</th>
+      <th>说明</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>cluster.name</td>
+      <td>配置elasticsearch的集群名称，默认是elasticsearch。建议修改成一个有意义的名称。</td>
+    </tr>
+    <tr>
+      <td>node.name</td>
+      <td>节点名，es会默认随机指定一个名字，建议指定一个有意义的名称，方便管理</td>
+    </tr>
+    <tr>
+      <td>path.conf</td>
+      <td>设置配置文件的存储路径，tar或zip包安装默认在es根目录下的config文件夹，rpm安装默认在/etc/ elasticsearch</td>
+    </tr>
+    <tr>
+      <td>path.data</td>
+      <td>设置索引数据的存储路径，默认是es根目录下的data文件夹，可以设置多个存储路径，用逗号隔开</td>
+    </tr>
+    <tr>
+      <td>path.logs</td>
+      <td>设置日志文件的存储路径，默认是es根目录下的logs文件夹</td>
+    </tr>
+    <tr>
+      <td>path.plugins</td>
+      <td>设置插件的存放路径，默认是es根目录下的plugins文件夹</td>
+    </tr>
+    <tr>
+      <td>bootstrap.memory_lock</td>
+      <td>设置为true可以锁住ES使用的内存，避免内存进行swap</td>
+    </tr>
+    <tr>
+      <td>network.host</td>
+      <td>设置bind_host和publish_host，设置为0.0.0.0允许外网访问</td>
+    </tr>
+    <tr>
+      <td>http.port</td>
+      <td>设置对外服务的http端口，默认为9200。</td>
+    </tr>
+    <tr>
+      <td>transport.tcp.port</td>
+      <td>集群结点之间通信端口</td>
+    </tr>
+    <tr>
+      <td>discovery.zen.ping.timeout</td>
+      <td>设置ES自动发现节点连接超时的时间，默认为3秒，如果网络延迟高可设置大些</td>
+    </tr>
+    <tr>
+      <td>discovery.zen.minimum_master_nodes</td>
+      <td>主结点数量的最少值 ,此值的公式为：(master_eligible_nodes / 2) + 1 ，比如：有3个符合要求的主结点，那么这里要设置为2</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="lk分词插件">lk分词插件</h2>
 <p>中文分词器，同lucene一样，在使用中文全文检索前，需要集成IK分词器。找到相应的发行版本安装。</p>
 <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>./bin/elasticsearch-plugin install https://github.com/medcl/elasticsearch-analysis-ik/releases/download/v7.3.1/elasticsearch-analysis-ik-7.3.1.zip
 
 </code></pre></div></div>
 <p>如果报错，多数是网络问题，文件没下载完整。</p>
 
-<h3 id="kibana图形管理安装">Kibana图形管理安装</h3>
+<h2 id="kibana图形管理安装">Kibana图形管理安装</h2>
+<p>待。。。</p>
 
-<h3 id="实战">实战</h3>
-<p>官方开发的php组件</p>
+<h2 id="php实战">php实战</h2>
 
-<p>php客户端
-https://github.com/elastic/elasticsearch-php</p>
+<h3 id="基本概念">基本概念</h3>
 
-<p>说明文档
-https://www.elastic.co/guide/en/elasticsearch/client/php-api/current/overview.html</p>
+<table>
+  <thead>
+    <tr>
+      <th>概念</th>
+      <th>说明</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>索引库（indices)</td>
+      <td>indices是index的复数，代表许多的索引，</td>
+    </tr>
+    <tr>
+      <td>文档（document）</td>
+      <td>存入索引库原始的数据。比如每一条商品信息，就是一个文档</td>
+    </tr>
+    <tr>
+      <td>字段（field）</td>
+      <td>文档中的属性</td>
+    </tr>
+    <tr>
+      <td>映射配置（mappings）</td>
+      <td>字段的数据类型、属性、是否索引、是否存储等特性</td>
+    </tr>
+  </tbody>
+</table>
 
+<h3 id="代码实现">代码实现</h3>
+<p>这里用官方组出的客户端轮子https://github.com/elastic/elasticsearch-php.git</p>
+
+<blockquote>
+  <p>生成索引（index)</p>
+</blockquote>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+ protected static $client = null;
+
+/**
+ * @return mixed
+ */
+ public static function getClient()
+ {
+    if(!isset(self::$client)){
+        $hosts = [
+            env('ELASTICSEARCH.HOST','192.168.199.254:9200'),     // IP + Port
+        ];
+        self::$client = ClientBuilder::create()           // Instantiate a new ClientBuilder
+        -&gt;setHosts($hosts)      // Set the hosts
+        -&gt;build();              // Build the client object
+    }
+    return self::$client;
+ }
+ 
+/**
+ * 加属性
+ * @author: zzhpeng
+ * Date: 2019/9/5
+ * @param array $param
+ */
+public static function addCommonParams(array &amp;$param){
+    // 统一添加404报错忽略
+    $param = array_merge($param,['client' =&gt; [ 'ignore' =&gt; 404 ]]);
+}
+
+ /**
+ * 创建索引
+ * @author: zzhpeng
+ * Date: 2019/9/5
+ * @param string $index
+ * @param array  $param
+ *
+ * @return mixed
+ */
+public static function setIndex(string $index, array $param = []){
+    $client = self::getClient();
+    if(empty($param)){
+        $params = [
+            //索引名
+            'index' =&gt; $index,
+            'body' =&gt; [
+                'settings' =&gt; [
+                //一般以（节点数*1.5或3倍）来计算，比如有4个节点，分片数量一般是6个到12个，每个分片一般分配一个副本
+                    'number_of_shards' =&gt; 1,
+                    'number_of_replicas' =&gt; 1
+                ],
+                //mappings是定义字段和类型的。
+                'mappings' =&gt; [
+                    //文档的源数据
+                    '_source' =&gt; [
+                        'enabled' =&gt; true
+                    ],
+                    //设置属性类型
+                    'properties' =&gt; [
+                        'name' =&gt; [
+                            'type' =&gt; 'text',
+                        ],
+                        'search_name' =&gt; [
+                            //type：类型，可以是text、long、short、date、integer、object等
+                            'type' =&gt; 'text',
+                            //analyzer：分词器，这里的ik_max_word即使用ik分词器
+                            'analyzer' =&gt; 'ik_max_word',
+                            'search_analyzer' =&gt; 'ik_smart',
+                        ],
+                        'goods_detail_id' =&gt; [
+                            'type' =&gt; 'integer'
+                        ],
+                        'classify_type_id' =&gt; [
+                            'type' =&gt; 'integer'
+                        ],
+                        'store_id' =&gt; [
+                            'type' =&gt; 'integer'
+                        ]
+                    ]
+                ]
+            ]
+        ];
+    }
+    $response = $client-&gt;indices()-&gt;create($params);
+    return $response;
+}
+</code></pre></div></div>
+
+<blockquote>
+  <p>删除索引（index)</p>
+</blockquote>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/**
+ * 删除索引
+ * @author: zzhpeng
+ * Date: 2019/9/5
+ * @param string $index
+ *
+ * @return mixed
+ */
+public static function deleteIndex(string $index){
+    $client = self::getClient();
+    $params = ['index' =&gt; $index];
+    self::addCommonParams($params);
+    $response = $client-&gt;indices()-&gt;delete($params);
+    return $response;
+}
+
+</code></pre></div></div>
+
+<blockquote>
+  <p>查看索引（index)</p>
+</blockquote>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/**
+ * 查询索引
+ * @author: zzhpeng
+ * Date: 2019/9/5
+ * @param string $index
+ *
+ * @return mixed
+ */
+static function getIndex(string $index){
+    // Get mappings for all indexes
+    $client = self::getClient();
+
+    $params = ['index' =&gt; $index];
+    $response = $client-&gt;indices()-&gt;getMapping($params);
+    return $response;
+// Get mappings in 'my_index'
+    $params = ['index' =&gt; 'my_index'];
+    $response = $client-&gt;indices()-&gt;getMapping($params);
+}
+
+</code></pre></div></div>
+
+<blockquote>
+  <p>创建文档（document）</p>
+</blockquote>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/**
+ * 建立文档
+ * @author: zzhpeng
+ * Date: 2019/9/5
+ * @param string $index
+ * @param array  $documents
+ *
+ * @return bool
+ */
+static function setDocoments(string $index,array $documents){
+    
+    // Get mappings for all indexes
+    $client = self::getClient();
+
+    //二位数组 $documents
+    foreach ($documents as $key =&gt; $document){
+        $params = [
+            'index' =&gt; $index,
+//                'id'    =&gt; $key,
+            'body'  =&gt; $document
+
+        ];
+        
+        $client-&gt;index($params);
+        unset($params);
+    }
+    return true;
+}
+</code></pre></div></div>
+
+<blockquote>
+  <p>删除文档（document）</p>
+</blockquote>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+/**
+ * 获取文档
+ * @author: zzhpeng
+ * Date: 2019/9/5
+ * @param $index
+ * @param $id
+ *
+ * @return mixed
+ */
+static function deleteDocuments($index,$id){
+    $client = self::getClient();
+    $params = [
+        'index' =&gt; $index,
+        'id'    =&gt; $id
+    ];
+
+// Delete doc at /my_index/_doc_/my_id
+    return $client-&gt;delete($params);
+}
+</code></pre></div></div>
+
+<blockquote>
+  <p>搜索文档（document）</p>
+</blockquote>
+
+<ul>
+  <li>
+    <p>match是经过analyer的，也就是说，文档首先被分析器给处理了。根据不同的分析器，分析的结果也稍显不同，然后再根据分词结果进行匹配。</p>
+  </li>
+  <li>
+    <p>term则不经过分词，它是直接去倒排索引中查找了精确的值了。</p>
+  </li>
+</ul>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$body = [
+    'query' =&gt; [
+        'bool' =&gt; [
+            'must' =&gt; [
+                [ 'match' =&gt; [ 'search_name' =&gt; $key ] ],
+                [ 'bool'=&gt;
+                    ['should' =&gt; [
+                        [ 'match' =&gt; [ 'store_id' =&gt; 681 ] ],
+                        [ 'match' =&gt; [ 'store_id' =&gt; 0 ] ],
+                    ]
+                    ]
+                ]
+            ]
+        ]
+    ]
+];
+
+
+//搜索文档
+static function searchDocuments($index,array $body){
+    $client = self::getClient();
+
+    $params = [
+        'index' =&gt; $index,
+        'body'  =&gt; $body
+    ];
+
+// Get doc at /my_index/_doc/my_id
+    return $response = $client-&gt;search($params);
+}
+
+</code></pre></div></div>
+
+<h2 id="参考">参考</h2>
+
+<p>1、<a href="https://blog.csdn.net/weixin_33692284/article/details/92170069">图解Elasticsearch中的_source、_all、store和index属性 - weixin_33692284的博客 - CSDN博客</a></p>
+
+<p>2、<a href="https://www.elastic.co/guide/en/elasticsearch/client/php-api/current/overview.html">官方说明文档：</a></p>
+
+<p>3、<a href="https://github.com/elastic/elasticsearch-php">官方开发的php客户端组件:</a></p>
+
+<p>4、<a href="https://www.jianshu.com/p/88f0546d5955">Elasticsearch7.*版本 1.入门 - 简书</a></p>
 
 
                 <hr>
@@ -156,6 +500,10 @@ https://www.elastic.co/guide/en/elasticsearch/client/php-api/current/overview.ht
                         <a href="/location-gitlab-outside-visit.html" data-toggle="tooltip" data-placement="top" title="基于frp,gitlab的docker镜像实现本地gitlab外网访问(一)">&larr; Previous Post</a>
                     </li>
                     
+                    
+                    <li class="next">
+                        <a href="/timed-out.html" data-toggle="tooltip" data-placement="top" title="web服务超时处理">Next Post &rarr;</a>
+                    </li>
                     
                 </ul>
 

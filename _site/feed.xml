@@ -7,35 +7,468 @@
 		<atom:link href="/" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>web服务超时处理</title>
+				<description>&lt;h2 id=&quot;事由&quot;&gt;事由&lt;/h2&gt;
+&lt;p&gt;执行285675条mysql数据操作的时候，页面出现nginx异常An error occurred.报错。查看日志，详情如下：&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;2019/09/06 14:32:46 [error] 9#9: *7 upstream timed out (110: Connection timed out) while 
+
+reading response header from upstream, client: 172.26.0.1, server: localhost, request: 
+
+&quot;GET /index/elasticsearch/setDocument HTTP/1.1&quot;, upstream: &quot;fastcgi://172.26.0.3:9000&quot;, 
+
+host: &quot;192.168.199.182:8002&quot;
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;解决&quot;&gt;解决&lt;/h2&gt;
+&lt;p&gt;本地开发环境，由于要执行这些数据的处理，加长超时时间处理，所以:&lt;/p&gt;
+
+&lt;p&gt;nginx.conf&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;
+http {
+    keepalive_timeout  600; //10分钟
+    client_header_timeout 600;
+    client_body_timeout 600;
+ 
+    server{
+         proxy_read_timeout 600;
+ 
+         location ~ \.php$ {
+                  fastcgi_connect_timeout 600s;
+                  fastcgi_send_timeout 600s;
+                  fastcgi_read_timeout 600s;
+                  ...
+         }
+    }
+ 
+}
+
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;php对应的方法下加上 set_time_limit(0);&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;
+/**
+ * 数据写入
+ * @author: zzhpeng
+ * Date: 2019/9/5
+ * @return \think\Response
+ */
+public function setDocument(){
+    set_time_limit(0);
+    $count = DepotGoodsDetail::count();
+
+    $pageSize = 500;
+    for ($i = 0;$i&amp;lt; ceil($count / $pageSize); $i++){
+        $offset = $pageSize * $i;
+        $data = DepotGoodsDetail::limit($offset,$pageSize)-&amp;gt;column('id,goods_sn,goods_name,skus_json,classify_type_id,store_id');
+        $documents = [];
+        foreach ($data as $id =&amp;gt; $vo) {
+            $sku = implode(&quot; &quot;, json_decode($vo['skus_json'], true));
+            $documents[] = [
+                'goods_detail_id' =&amp;gt; $vo['id'],
+                'name' =&amp;gt; $vo['goods_sn'] . ' ' . $vo['goods_name'] . ' ' . $sku,
+                'search_name' =&amp;gt; $vo['goods_sn'] . ' ' . trim($vo['goods_name'] . $sku),
+                'classify_type_id' =&amp;gt; $vo['classify_type_id'],
+                'store_id' =&amp;gt; $vo['store_id'],
+            ];
+        }
+        ElasticsearchLogic::setDocoments('oh_depot_goods_name_list',$documents);
+        unset($documents);
+        sleep(2);
+    }
+
+    return $this-&amp;gt;successResponse();
+}
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;参考&quot;&gt;参考&lt;/h2&gt;
+
+&lt;p&gt;1、&lt;a href=&quot;https://blog.csdn.net/daily886/article/details/92558512&quot;&gt;nginx 配置接口超时时间 10分钟 - daily886的博客 - CSDN博客&lt;/a&gt;&lt;/p&gt;
+
+</description>
+				<pubDate>Fri, 06 Sep 2019 00:00:00 +0800</pubDate>
+				<link>/timed-out.html</link>
+				<guid isPermaLink="true">/timed-out.html</guid>
+			</item>
+		
+			<item>
 				<title>elasticsearch学习</title>
-				<description>&lt;h3 id=&quot;安装&quot;&gt;安装&lt;/h3&gt;
+				<description>&lt;h2 id=&quot;安装&quot;&gt;安装&lt;/h2&gt;
 &lt;p&gt;下载相应版本 https://github.com/elastic/elasticsearch/releases&lt;/p&gt;
 
-&lt;h3 id=&quot;配置&quot;&gt;配置&lt;/h3&gt;
+&lt;h2 id=&quot;配置&quot;&gt;配置&lt;/h2&gt;
 &lt;p&gt;修改配置，其他主机可以访问，单节点部署&lt;/p&gt;
 &lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;vim config/elasticsearch.yml
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;&lt;img src=&quot;http://img.zzhpeng.cn/FqYRhHL4hv5NrrJMumI_wtDGIng1&quot; alt=&quot;FhoCc45P5ISRy7oFsr5ZQLdhK-3P&quot; /&gt;&lt;/p&gt;
 
-&lt;h3 id=&quot;lk分词插件&quot;&gt;lk分词插件&lt;/h3&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;其他配置&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;属性名&lt;/th&gt;
+      &lt;th&gt;说明&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;cluster.name&lt;/td&gt;
+      &lt;td&gt;配置elasticsearch的集群名称，默认是elasticsearch。建议修改成一个有意义的名称。&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;node.name&lt;/td&gt;
+      &lt;td&gt;节点名，es会默认随机指定一个名字，建议指定一个有意义的名称，方便管理&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;path.conf&lt;/td&gt;
+      &lt;td&gt;设置配置文件的存储路径，tar或zip包安装默认在es根目录下的config文件夹，rpm安装默认在/etc/ elasticsearch&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;path.data&lt;/td&gt;
+      &lt;td&gt;设置索引数据的存储路径，默认是es根目录下的data文件夹，可以设置多个存储路径，用逗号隔开&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;path.logs&lt;/td&gt;
+      &lt;td&gt;设置日志文件的存储路径，默认是es根目录下的logs文件夹&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;path.plugins&lt;/td&gt;
+      &lt;td&gt;设置插件的存放路径，默认是es根目录下的plugins文件夹&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;bootstrap.memory_lock&lt;/td&gt;
+      &lt;td&gt;设置为true可以锁住ES使用的内存，避免内存进行swap&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;network.host&lt;/td&gt;
+      &lt;td&gt;设置bind_host和publish_host，设置为0.0.0.0允许外网访问&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;http.port&lt;/td&gt;
+      &lt;td&gt;设置对外服务的http端口，默认为9200。&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;transport.tcp.port&lt;/td&gt;
+      &lt;td&gt;集群结点之间通信端口&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;discovery.zen.ping.timeout&lt;/td&gt;
+      &lt;td&gt;设置ES自动发现节点连接超时的时间，默认为3秒，如果网络延迟高可设置大些&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;discovery.zen.minimum_master_nodes&lt;/td&gt;
+      &lt;td&gt;主结点数量的最少值 ,此值的公式为：(master_eligible_nodes / 2) + 1 ，比如：有3个符合要求的主结点，那么这里要设置为2&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;h2 id=&quot;lk分词插件&quot;&gt;lk分词插件&lt;/h2&gt;
 &lt;p&gt;中文分词器，同lucene一样，在使用中文全文检索前，需要集成IK分词器。找到相应的发行版本安装。&lt;/p&gt;
 &lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;./bin/elasticsearch-plugin install https://github.com/medcl/elasticsearch-analysis-ik/releases/download/v7.3.1/elasticsearch-analysis-ik-7.3.1.zip
 
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;p&gt;如果报错，多数是网络问题，文件没下载完整。&lt;/p&gt;
 
-&lt;h3 id=&quot;kibana图形管理安装&quot;&gt;Kibana图形管理安装&lt;/h3&gt;
+&lt;h2 id=&quot;kibana图形管理安装&quot;&gt;Kibana图形管理安装&lt;/h2&gt;
+&lt;p&gt;待。。。&lt;/p&gt;
 
-&lt;h3 id=&quot;实战&quot;&gt;实战&lt;/h3&gt;
-&lt;p&gt;官方开发的php组件&lt;/p&gt;
+&lt;h2 id=&quot;php实战&quot;&gt;php实战&lt;/h2&gt;
 
-&lt;p&gt;php客户端
-https://github.com/elastic/elasticsearch-php&lt;/p&gt;
+&lt;h3 id=&quot;基本概念&quot;&gt;基本概念&lt;/h3&gt;
 
-&lt;p&gt;说明文档
-https://www.elastic.co/guide/en/elasticsearch/client/php-api/current/overview.html&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;概念&lt;/th&gt;
+      &lt;th&gt;说明&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;索引库（indices)&lt;/td&gt;
+      &lt;td&gt;indices是index的复数，代表许多的索引，&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;文档（document）&lt;/td&gt;
+      &lt;td&gt;存入索引库原始的数据。比如每一条商品信息，就是一个文档&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;字段（field）&lt;/td&gt;
+      &lt;td&gt;文档中的属性&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;映射配置（mappings）&lt;/td&gt;
+      &lt;td&gt;字段的数据类型、属性、是否索引、是否存储等特性&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
 
+&lt;h3 id=&quot;代码实现&quot;&gt;代码实现&lt;/h3&gt;
+&lt;p&gt;这里用官方组出的客户端轮子https://github.com/elastic/elasticsearch-php.git&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;生成索引（index)&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;
+ protected static $client = null;
+
+/**
+ * @return mixed
+ */
+ public static function getClient()
+ {
+    if(!isset(self::$client)){
+        $hosts = [
+            env('ELASTICSEARCH.HOST','192.168.199.254:9200'),     // IP + Port
+        ];
+        self::$client = ClientBuilder::create()           // Instantiate a new ClientBuilder
+        -&amp;gt;setHosts($hosts)      // Set the hosts
+        -&amp;gt;build();              // Build the client object
+    }
+    return self::$client;
+ }
+ 
+/**
+ * 加属性
+ * @author: zzhpeng
+ * Date: 2019/9/5
+ * @param array $param
+ */
+public static function addCommonParams(array &amp;amp;$param){
+    // 统一添加404报错忽略
+    $param = array_merge($param,['client' =&amp;gt; [ 'ignore' =&amp;gt; 404 ]]);
+}
+
+ /**
+ * 创建索引
+ * @author: zzhpeng
+ * Date: 2019/9/5
+ * @param string $index
+ * @param array  $param
+ *
+ * @return mixed
+ */
+public static function setIndex(string $index, array $param = []){
+    $client = self::getClient();
+    if(empty($param)){
+        $params = [
+            //索引名
+            'index' =&amp;gt; $index,
+            'body' =&amp;gt; [
+                'settings' =&amp;gt; [
+                //一般以（节点数*1.5或3倍）来计算，比如有4个节点，分片数量一般是6个到12个，每个分片一般分配一个副本
+                    'number_of_shards' =&amp;gt; 1,
+                    'number_of_replicas' =&amp;gt; 1
+                ],
+                //mappings是定义字段和类型的。
+                'mappings' =&amp;gt; [
+                    //文档的源数据
+                    '_source' =&amp;gt; [
+                        'enabled' =&amp;gt; true
+                    ],
+                    //设置属性类型
+                    'properties' =&amp;gt; [
+                        'name' =&amp;gt; [
+                            'type' =&amp;gt; 'text',
+                        ],
+                        'search_name' =&amp;gt; [
+                            //type：类型，可以是text、long、short、date、integer、object等
+                            'type' =&amp;gt; 'text',
+                            //analyzer：分词器，这里的ik_max_word即使用ik分词器
+                            'analyzer' =&amp;gt; 'ik_max_word',
+                            'search_analyzer' =&amp;gt; 'ik_smart',
+                        ],
+                        'goods_detail_id' =&amp;gt; [
+                            'type' =&amp;gt; 'integer'
+                        ],
+                        'classify_type_id' =&amp;gt; [
+                            'type' =&amp;gt; 'integer'
+                        ],
+                        'store_id' =&amp;gt; [
+                            'type' =&amp;gt; 'integer'
+                        ]
+                    ]
+                ]
+            ]
+        ];
+    }
+    $response = $client-&amp;gt;indices()-&amp;gt;create($params);
+    return $response;
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;删除索引（index)&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;/**
+ * 删除索引
+ * @author: zzhpeng
+ * Date: 2019/9/5
+ * @param string $index
+ *
+ * @return mixed
+ */
+public static function deleteIndex(string $index){
+    $client = self::getClient();
+    $params = ['index' =&amp;gt; $index];
+    self::addCommonParams($params);
+    $response = $client-&amp;gt;indices()-&amp;gt;delete($params);
+    return $response;
+}
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;查看索引（index)&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;/**
+ * 查询索引
+ * @author: zzhpeng
+ * Date: 2019/9/5
+ * @param string $index
+ *
+ * @return mixed
+ */
+static function getIndex(string $index){
+    // Get mappings for all indexes
+    $client = self::getClient();
+
+    $params = ['index' =&amp;gt; $index];
+    $response = $client-&amp;gt;indices()-&amp;gt;getMapping($params);
+    return $response;
+// Get mappings in 'my_index'
+    $params = ['index' =&amp;gt; 'my_index'];
+    $response = $client-&amp;gt;indices()-&amp;gt;getMapping($params);
+}
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;创建文档（document）&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;/**
+ * 建立文档
+ * @author: zzhpeng
+ * Date: 2019/9/5
+ * @param string $index
+ * @param array  $documents
+ *
+ * @return bool
+ */
+static function setDocoments(string $index,array $documents){
+    
+    // Get mappings for all indexes
+    $client = self::getClient();
+
+    //二位数组 $documents
+    foreach ($documents as $key =&amp;gt; $document){
+        $params = [
+            'index' =&amp;gt; $index,
+//                'id'    =&amp;gt; $key,
+            'body'  =&amp;gt; $document
+
+        ];
+        
+        $client-&amp;gt;index($params);
+        unset($params);
+    }
+    return true;
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;删除文档（document）&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;
+/**
+ * 获取文档
+ * @author: zzhpeng
+ * Date: 2019/9/5
+ * @param $index
+ * @param $id
+ *
+ * @return mixed
+ */
+static function deleteDocuments($index,$id){
+    $client = self::getClient();
+    $params = [
+        'index' =&amp;gt; $index,
+        'id'    =&amp;gt; $id
+    ];
+
+// Delete doc at /my_index/_doc_/my_id
+    return $client-&amp;gt;delete($params);
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;搜索文档（document）&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;match是经过analyer的，也就是说，文档首先被分析器给处理了。根据不同的分析器，分析的结果也稍显不同，然后再根据分词结果进行匹配。&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;term则不经过分词，它是直接去倒排索引中查找了精确的值了。&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$body = [
+    'query' =&amp;gt; [
+        'bool' =&amp;gt; [
+            'must' =&amp;gt; [
+                [ 'match' =&amp;gt; [ 'search_name' =&amp;gt; $key ] ],
+                [ 'bool'=&amp;gt;
+                    ['should' =&amp;gt; [
+                        [ 'match' =&amp;gt; [ 'store_id' =&amp;gt; 681 ] ],
+                        [ 'match' =&amp;gt; [ 'store_id' =&amp;gt; 0 ] ],
+                    ]
+                    ]
+                ]
+            ]
+        ]
+    ]
+];
+
+
+//搜索文档
+static function searchDocuments($index,array $body){
+    $client = self::getClient();
+
+    $params = [
+        'index' =&amp;gt; $index,
+        'body'  =&amp;gt; $body
+    ];
+
+// Get doc at /my_index/_doc/my_id
+    return $response = $client-&amp;gt;search($params);
+}
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;参考&quot;&gt;参考&lt;/h2&gt;
+
+&lt;p&gt;1、&lt;a href=&quot;https://blog.csdn.net/weixin_33692284/article/details/92170069&quot;&gt;图解Elasticsearch中的_source、_all、store和index属性 - weixin_33692284的博客 - CSDN博客&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;2、&lt;a href=&quot;https://www.elastic.co/guide/en/elasticsearch/client/php-api/current/overview.html&quot;&gt;官方说明文档：&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;3、&lt;a href=&quot;https://github.com/elastic/elasticsearch-php&quot;&gt;官方开发的php客户端组件:&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;4、&lt;a href=&quot;https://www.jianshu.com/p/88f0546d5955&quot;&gt;Elasticsearch7.*版本 1.入门 - 简书&lt;/a&gt;&lt;/p&gt;
 </description>
 				<pubDate>Mon, 02 Sep 2019 00:00:00 +0800</pubDate>
 				<link>/elasticsearch-learning.html</link>
@@ -646,130 +1079,6 @@ docker network create –subnet=172.18.0.0/16 net1&lt;/p&gt;
 				<pubDate>Thu, 30 Aug 2018 00:00:00 +0800</pubDate>
 				<link>/mysql_create_user.html</link>
 				<guid isPermaLink="true">/mysql_create_user.html</guid>
-			</item>
-		
-			<item>
-				<title>面试！面试！</title>
-				<description>&lt;blockquote&gt;
-  &lt;p&gt;介绍&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;Daemontools是管理Unix服务的工具，它提供一组工具来管理一系列用户进程，当进程由于某些原因down掉之后，daemontools会自动重启进程。主要的功能是Supervisor。&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;安装&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;mkdir&lt;/span&gt;  ~/tools
-&lt;span class=&quot;nb&quot;&gt;cd&lt;/span&gt; /tools
-wget http://cr.yp.to/daemontools/daemontools-0.76.tar.gz
-&lt;span class=&quot;nb&quot;&gt;tar &lt;/span&gt;xvzf daemontools-0.76.tar.gz
-&lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;admin/daemontools-0.76
-package/install
-
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h3 id=&quot;如果安装出现错误&quot;&gt;如果安装出现错误&lt;/h3&gt;
-
-&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;/usr/bin/ld: errno: TLS defini  tion &lt;span class=&quot;k&quot;&gt;in&lt;/span&gt; /lib/libc.so.6 section .tbss mismatches non-TLS 
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h3 id=&quot;how-to-fix-it&quot;&gt;How to fix it&lt;/h3&gt;
-
-&lt;p&gt;将admin/daemontools-0.76/src/error.h中的extern int errno;替换为#include &lt;errno.h&gt;&lt;/errno.h&gt;&lt;/p&gt;
-
-&lt;p&gt;安装完成之后，会创建 /service 和/command两个目录。&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;使用daemontools&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;daemontools是一组service管理工具，其中svscanboot工具用来启动svscan工具。可以通过以下命令启动svscanboot。&lt;/p&gt;
-
-&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;nohup&lt;/span&gt; /command/svscanboot &amp;amp;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;ul&gt;
-  &lt;li&gt;nohup为终端断开还在后台运行&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;启动之后，查看进程，可以发现svscan做为svscanboot的子进程在运行。&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://www.zzhpeng.cn/wp-content/uploads/2018/05/ps_svs.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;实战&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;启动svscanboot之后，相应的svscan进程也启动起来，其中参数/service 就是管理配置文件的目录。&lt;/p&gt;
-
-&lt;h3 id=&quot;1创建脚本目录&quot;&gt;1、创建脚本目录&lt;/h3&gt;
-&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;mkdir&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-p&lt;/span&gt; /opt/svc/nginx
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h3 id=&quot;2在目录创建run脚本名字必须是run而且权限是755&quot;&gt;2、在目录创建run脚本(名字必须是run而且权限是755)&lt;/h3&gt;
-
-&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;touch&lt;/span&gt; /opt/svc/nginx/run  &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;chmod &lt;/span&gt;755 /opt/svc/nginx/run
-&lt;span class=&quot;nb&quot;&gt;cat&lt;/span&gt; /opt/svc/nginx/run
-&lt;span class=&quot;c&quot;&gt;#!/bin/sh&lt;/span&gt;
-&lt;span class=&quot;nb&quot;&gt;exec&lt;/span&gt; /usr/local/nginx/sbin/nginx   &lt;span class=&quot;c&quot;&gt;#启动进程命令&lt;/span&gt;
-
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h3 id=&quot;3创建symbol-link映射到service下&quot;&gt;3、创建symbol link，映射到/service下&lt;/h3&gt;
-
-&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;ln&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-s&lt;/span&gt; /opt/svc/nginx/  /service/
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;之后svscan会自动检测，并添加任务，每隔几秒执行一次该文件。
-查看进程树形图
-&lt;img src=&quot;http://www.zzhpeng.cn/wp-content/uploads/2018/05/pstree.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;从中可以看出来，svscanboot负责启动svscan服务，svscan管理supervise进程。而具体的客户进程，是通过supervise进程来统一管理的。&lt;/p&gt;
-
-&lt;p&gt;现在nginx被daemontool管理起来了，试试看杀掉nginx应用进程看看。&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;扩展&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;1、启动被管理的进程 (配置完后无需执行svc命令)
-svc -u /service/nginx/  (启动之后，如果nginx挂掉，daemontools会自动重启nginx)&lt;/p&gt;
-
-&lt;p&gt;2、关闭被管理的进程（不会关闭daemontools supervise进程）
-svc -d /service/nginx/&lt;/p&gt;
-
-&lt;p&gt;3、查看service状态
-svstat /service/nginx/&lt;/p&gt;
-
-&lt;p&gt;4、移除service
-rm  /service/nginx   #移除软连接&lt;br /&gt;
-svc -dx /opt/svc/nginx/&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;实战2 与tp5的think-queue结合&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;run如下：&lt;/p&gt;
-&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;#!/bin/sh&lt;/span&gt;
-&lt;span class=&quot;nb&quot;&gt;exec&lt;/span&gt; /usr/local/php/bin/php /home/wwwroot/thinkphp/think queue:listen &lt;span class=&quot;nt&quot;&gt;--queue&lt;/span&gt; helloJobQueue   &lt;span class=&quot;c&quot;&gt;#启动进程命令&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;注意&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;1、被管理的进程不能以daemon形式运行，例如nginx.conf 必须关闭daemon， daemon off。&lt;/li&gt;
-  &lt;li&gt;2、不要在/service/建任何目录， /service/只存放一些symbol link。&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;参考文献
-http://kavy.iteye.com/blog/2119978&lt;/p&gt;
-
-</description>
-				<pubDate>Sat, 21 Jul 2018 00:00:00 +0800</pubDate>
-				<link>/interview.html</link>
-				<guid isPermaLink="true">/interview.html</guid>
 			</item>
 		
 	</channel>

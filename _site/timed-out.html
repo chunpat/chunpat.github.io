@@ -8,9 +8,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="fromChinaBoy">
 
-    <title>Blog</title>
+    <title>web服务超时处理 - Blog</title>
 
-    <link rel="canonical" href="http://localhost:4000/">
+    <link rel="canonical" href="http://localhost:4000/timed-out.html">
 
     <!-- Icons -->
   <link rel="shortcut icon" href="img/favicon.ico">
@@ -83,251 +83,187 @@
 </nav>
 
 
-    <!-- Page Header -->
-<header class="intro-header" style="background-image: url('/img/autumn2.jpg')">
+    <!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/fantasy.jpg')
+    }
+</style>
+<header class="intro-header" >
     <div class="container">
         <div class="row">
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-                <div class="site-heading">
-                    <h1>Blog</h1>
-                    <hr class="small">
-                    <span class="subheading">在遙遠的地方 一切虔誠終必相遇</span>
+                <div class="post-heading">
+                    <div class="Tags">
+                        
+                        <a class="tag" href="/Tags/#nginx,php" title="nginx,php">nginx,php</a>
+                        
+                    </div>
+                    <h1>web服务超时处理</h1>
+                    
+                    <span class="meta">Posted by zzhpeng on September 6, 2019</span>
                 </div>
             </div>
         </div>
     </div>
 </header>
 
-<!-- Main Content -->
-<div class="container">
-	<div class="row">
-		<div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-			
-<div class="post-preview">
-    <a href="/timed-out.html">
-        <h2 class="post-title">            
-            web服务超时处理
-        </h2>
-        
-        <div class="post-content-preview">
-            事由
-执行285675条mysql数据操作的时候，页面出现nginx异常An error occurred.报错。查看日志，详情如下：
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 post-container">
 
-2019/09/06 14:32:46 [error] 9#9: *7 upstream timed out (110: Connection timed ...
+                <h2 id="事由">事由</h2>
+<p>执行285675条mysql数据操作的时候，页面出现nginx异常An error occurred.报错。查看日志，详情如下：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>2019/09/06 14:32:46 [error] 9#9: *7 upstream timed out (110: Connection timed out) while 
+
+reading response header from upstream, client: 172.26.0.1, server: localhost, request: 
+
+"GET /index/elasticsearch/setDocument HTTP/1.1", upstream: "fastcgi://172.26.0.3:9000", 
+
+host: "192.168.199.182:8002"
+
+</code></pre></div></div>
+
+<h2 id="解决">解决</h2>
+<p>本地开发环境，由于要执行这些数据的处理，加长超时时间处理，所以:</p>
+
+<p>nginx.conf</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+http {
+    keepalive_timeout  600; //10分钟
+    client_header_timeout 600;
+    client_body_timeout 600;
+ 
+    server{
+         proxy_read_timeout 600;
+ 
+         location ~ \.php$ {
+                  fastcgi_connect_timeout 600s;
+                  fastcgi_send_timeout 600s;
+                  fastcgi_read_timeout 600s;
+                  ...
+         }
+    }
+ 
+}
+
+
+</code></pre></div></div>
+
+<p>php对应的方法下加上 set_time_limit(0);</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+/**
+ * 数据写入
+ * @author: zzhpeng
+ * Date: 2019/9/5
+ * @return \think\Response
+ */
+public function setDocument(){
+    set_time_limit(0);
+    $count = DepotGoodsDetail::count();
+
+    $pageSize = 500;
+    for ($i = 0;$i&lt; ceil($count / $pageSize); $i++){
+        $offset = $pageSize * $i;
+        $data = DepotGoodsDetail::limit($offset,$pageSize)-&gt;column('id,goods_sn,goods_name,skus_json,classify_type_id,store_id');
+        $documents = [];
+        foreach ($data as $id =&gt; $vo) {
+            $sku = implode(" ", json_decode($vo['skus_json'], true));
+            $documents[] = [
+                'goods_detail_id' =&gt; $vo['id'],
+                'name' =&gt; $vo['goods_sn'] . ' ' . $vo['goods_name'] . ' ' . $sku,
+                'search_name' =&gt; $vo['goods_sn'] . ' ' . trim($vo['goods_name'] . $sku),
+                'classify_type_id' =&gt; $vo['classify_type_id'],
+                'store_id' =&gt; $vo['store_id'],
+            ];
+        }
+        ElasticsearchLogic::setDocoments('oh_depot_goods_name_list',$documents);
+        unset($documents);
+        sleep(2);
+    }
+
+    return $this-&gt;successResponse();
+}
+
+</code></pre></div></div>
+
+<h2 id="参考">参考</h2>
+
+<p>1、<a href="https://blog.csdn.net/daily886/article/details/92558512">nginx 配置接口超时时间 10分钟 - daily886的博客 - CSDN博客</a></p>
+
+
+
+                <hr>
+
+                <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/4.0/80x15.png" /></a><br />本作品采用<a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/">CC BY-NC-ND 4.0</a>进行许可。转载，请注明原作者 Zzhpeng 及本文源链接。
+
+                <hr>
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/elasticsearch-learning.html" data-toggle="tooltip" data-placement="top" title="elasticsearch学习">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                </ul>
+
+                <!-- Utteranc -->
+
+                <script src="https://utteranc.es/client.js"
+                        repo="fromChinaBoy/fromChinaBoy.github.io"
+                        issue-term="pathname"
+                        theme="github-light"
+                        crossorigin="anonymous"
+                        async>
+                </script>
+                <!-- Share botton -->
+                <!-- Go to www.addthis.com/dashboard to customize your tools --> <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-5caaedc5f9567124"></script>
+
+            </div>
         </div>
-    </a>
-    <p class="post-meta">Posted by zzhpeng on September 6, 2019</p>
-</div>
-
-<hr>
-
-<div class="post-preview">
-    <a href="/elasticsearch-learning.html">
-        <h2 class="post-title">            
-            elasticsearch学习
-        </h2>
-        
-        <div class="post-content-preview">
-            安装
-下载相应版本 https://github.com/elastic/elasticsearch/releases
-
-配置
-修改配置，其他主机可以访问，单节点部署
-vim config/elasticsearch.yml
-
-
-
-
-
-  其他配置
-
-
-
-  
-    
-      属性名
- ...
-        </div>
-    </a>
-    <p class="post-meta">Posted by zzhpeng on September 2, 2019</p>
-</div>
-
-<hr>
-
-<div class="post-preview">
-    <a href="/location-gitlab-outside-visit.html">
-        <h2 class="post-title">            
-            基于frp,gitlab的docker镜像实现本地gitlab外网访问(一)
-        </h2>
-        
-        <div class="post-content-preview">
-            基础
-
-  
-    会git的基本操作
-  
-  
-    会docker和docker-compose的基本操作
-  
-
-
-基于gitlab的docker镜像安装内网git仓库
-
-  1、这里docker-compose管理安装
-
-
-
-然后在当前目录运行docker-compose up,...
-        </div>
-    </a>
-    <p class="post-meta">Posted by zzhpeng on July 15, 2019</p>
-</div>
-
-<hr>
-
-<div class="post-preview">
-    <a href="/oauth2-slim.html">
-        <h2 class="post-title">            
-            基于slim框架搭建Oauth2
-        </h2>
-        
-        <div class="post-content-preview">
-            官方文档和官方源
-Oauth2源：https://github.com/thephpleague/oauth2-server
-
-Slim源：https://github.com/slimphp/Slim
-
-待更新
-
-
-        </div>
-    </a>
-    <p class="post-meta">Posted by zzhpeng on June 3, 2019</p>
-</div>
-
-<hr>
-
-<div class="post-preview">
-    <a href="/private-composer-packagist.html">
-        <h2 class="post-title">            
-            搭建私有的Composer Packagist
-        </h2>
-        
-        <div class="post-content-preview">
-            官方文档和官方源
-官方文档：https://getcomposer.org/doc/articles/handling-private-packages-with-satis.md
-
-github地址：https://github.com/composer/satis
-
-下载源
-
-
-  方法一...
-        </div>
-    </a>
-    <p class="post-meta">Posted by zzhpeng on May 24, 2019</p>
-</div>
-
-<hr>
-
-<div class="post-preview">
-    <a href="/linux-quick-button.html">
-        <h2 class="post-title">            
-            unix bash快捷键
-        </h2>
-        
-        <div class="post-content-preview">
-            Linux/Unix下Shell快捷键操作集合
-
-快速搜索
-
-  1) ctrl + r 组合键来进入历史搜索模式在history表中查询某条过往指令，找到需要重复执行的命令后，按回车键即可。
-  2) !!：重复执行上一条指令
-  3) !a：重复执行上一条以a为首的指令
-  4) !num...
-        </div>
-    </a>
-    <p class="post-meta">Posted by zzhpeng on May 17, 2019</p>
-</div>
-
-<hr>
-
-<div class="post-preview">
-    <a href="/gitlab-migration.html">
-        <h2 class="post-title">            
-            gitlab搭建和数据迁移
-        </h2>
-        
-        <div class="post-content-preview">
-            Ubuntu 搭建 gitlab
-官网安装介绍： https://about.gitlab.com/install/
-github： https://github.com/gitlabhq/gitlabhq
-
-1.首先是安装一些依赖服务
-sudo apt-get install curl op...
-        </div>
-    </a>
-    <p class="post-meta">Posted by zzhpeng on May 17, 2019</p>
-</div>
-
-<hr>
-
-<div class="post-preview">
-    <a href="/mysql_union_index.html">
-        <h2 class="post-title">            
-            mysql联合索引
-        </h2>
-        
-        <div class="post-content-preview">
-            mysql联合索引中
-
-  1、select * from table where a=1, b=2
-  2、select * from table where b=1, a=2
-  3、select * from table where b=1
-
-
-以上哪一句不会触发索引？为什么？
-
-答曰：...
-        </div>
-    </a>
-    <p class="post-meta">Posted by zzhpeng on April 23, 2019</p>
-</div>
-
-<hr>
-
-
-<!-- Pager -->
-
-<ul class="pager">
-    
-    
-    <li class="next">
-        <a href="/page2">Older Posts &rarr;</a>
-    </li>
-    
-</ul>
-
-
-<script>
-  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
-  ga('create', 'UA-66863061-1', 'auto');
-  ga('send', 'pageview');
-
+     </div>
+  </article>
 </script>
 
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
 
-
-
-		</div>
-	</div>
-</div>
-
-<hr>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
 
   
     <!-- Footer -->
