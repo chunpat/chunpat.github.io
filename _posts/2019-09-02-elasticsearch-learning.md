@@ -295,6 +295,15 @@ static function searchDocuments($index,array $body){
 
 ```
 
+## 问题
+
+### 查看 elasticsearch 使用情况
+curl -X GET "http://192.168.199.254:9200/_cat/indices?v"
+![](http://img.zzhpeng.cn/Fo3ZNz38wF3ij-z9_kAZ0RAAwCzJ)
+
+### 高频写入down机
+待。。。
+
 ## 参考
 
 1、[图解Elasticsearch中的_source、_all、store和index属性 - weixin_33692284的博客 - CSDN博客](https://blog.csdn.net/weixin_33692284/article/details/92170069)

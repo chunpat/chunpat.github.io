@@ -460,6 +460,15 @@ static function searchDocuments($index,array $body){
 
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
+&lt;h2 id=&quot;问题&quot;&gt;问题&lt;/h2&gt;
+
+&lt;h3 id=&quot;查看-elasticsearch-使用情况&quot;&gt;查看 elasticsearch 使用情况&lt;/h3&gt;
+&lt;p&gt;curl -X GET “http://192.168.199.254:9200/_cat/indices?v”
+&lt;img src=&quot;http://img.zzhpeng.cn/Fo3ZNz38wF3ij-z9_kAZ0RAAwCzJ&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;高频写入down机&quot;&gt;高频写入down机&lt;/h3&gt;
+&lt;p&gt;待。。。&lt;/p&gt;
+
 &lt;h2 id=&quot;参考&quot;&gt;参考&lt;/h2&gt;
 
 &lt;p&gt;1、&lt;a href=&quot;https://blog.csdn.net/weixin_33692284/article/details/92170069&quot;&gt;图解Elasticsearch中的_source、_all、store和index属性 - weixin_33692284的博客 - CSDN博客&lt;/a&gt;&lt;/p&gt;
