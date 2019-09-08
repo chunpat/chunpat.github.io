@@ -6,15 +6,48 @@ tags: elasticsearch
 ---
 
 ## 安装
-下载相应版本 https://github.com/elastic/elasticsearch/releases
+下载相应版本 https://www.elastic.co/cn/downloads/elasticsearch
 
 ## 配置
-修改配置，其他主机可以访问，单节点部署
+1、修改配置，其他主机可以访问，单节点部署
 ```
 vim config/elasticsearch.yml
 ```
 
 ![FhoCc45P5ISRy7oFsr5ZQLdhK-3P](http://img.zzhpeng.cn/FqYRhHL4hv5NrrJMumI_wtDGIng1)
+
+其他配置：https://www.cnblogs.com/zlslch/p/6419948.html
+
+2、修改占用内存大小
+```
+vim /config/jvm.options
+```
+个人开发小项目，可以把参数改小些
+
+```
+-Xms512m
+-Xmx512m
+```
+
+3、启动报错
+
+执行启动命令
+```
+.bin/elasticsearch
+```
+然后报错
+```
+[1]: max virtual memory areas vm.max_map_count [65530] is too low, increase to at least [262144]
+```
+
+提示需要修改虚拟内存，切换到root用户，执行命令：
+```
+sysctl -w vm.max_map_count=262144
+```
+
+上述方法修改之后，如果重启虚拟机将失效，所以：解决办法：在 /etc/sysctl.conf文件最后添加一行
+vm.max_map_count=262144
+即可永久修改
 
 
 > 其他配置
@@ -313,3 +346,5 @@ curl -X GET "http://192.168.199.254:9200/_cat/indices?v"
 3、[官方开发的php客户端组件:](https://github.com/elastic/elasticsearch-php)
 
 4、[Elasticsearch7.*版本 1.入门 - 简书](https://www.jianshu.com/p/88f0546d5955)
+
+5、[elasticsearch-.yml（中文配置详解） - 大数据和AI躺过的坑 - 博客园](https://www.cnblogs.com/zlslch/p/6419948.html)
