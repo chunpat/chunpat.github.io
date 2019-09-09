@@ -104,6 +104,52 @@
 		<div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
 			
 <div class="post-preview">
+    <a href="/elasticsearch-production.html">
+        <h2 class="post-title">            
+            elasticsearch部署
+        </h2>
+        
+        <div class="post-content-preview">
+            1、安装OpenSdk
+sudo apt-get install openjdk-8-jdk
+
+配置Java环境变量
+sudo vim /etc/profile
+在profile末尾添加以下内容:
+export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd...
+        </div>
+    </a>
+    <p class="post-meta">Posted by zzhpeng on September 9, 2019</p>
+</div>
+
+<hr>
+
+<div class="post-preview">
+    <a href="/php-ob-flush.html">
+        <h2 class="post-title">            
+            PHP缓冲区
+        </h2>
+        
+        <div class="post-content-preview">
+            事由
+上一篇文章中，写了关于nginx和php-fpm组合 请求超时的解决方案。
+但是，又遇到个问题就是缓冲区，需要边保持请求连接边打印东西
+到浏览器。
+
+解决
+
+参考
+
+1、关于PHP 刷新缓冲区操作(边执行边输出)简单分析
+2、深入理解php的输出缓冲区(output buffer) - ...
+        </div>
+    </a>
+    <p class="post-meta">Posted by zzhpeng on September 7, 2019</p>
+</div>
+
+<hr>
+
+<div class="post-preview">
     <a href="/timed-out.html">
         <h2 class="post-title">            
             web服务超时处理
@@ -129,24 +175,16 @@
         
         <div class="post-content-preview">
             安装
-下载相应版本 https://github.com/elastic/elasticsearch/releases
+下载相应版本 https://www.elastic.co/cn/downloads/elasticsearch
 
 配置
-修改配置，其他主机可以访问，单节点部署
+1、修改配置，其他主机可以访问，单节点部署
 vim config/elasticsearch.yml
 
 
 
 
-
-  其他配置
-
-
-
-  
-    
-      属性名
- ...
+其他配置：https://www.cnblogs.com...
         </div>
     </a>
     <p class="post-meta">Posted by zzhpeng on September 2, 2019</p>
@@ -248,50 +286,6 @@ github地址：https://github.com/composer/satis
         </div>
     </a>
     <p class="post-meta">Posted by zzhpeng on May 17, 2019</p>
-</div>
-
-<hr>
-
-<div class="post-preview">
-    <a href="/gitlab-migration.html">
-        <h2 class="post-title">            
-            gitlab搭建和数据迁移
-        </h2>
-        
-        <div class="post-content-preview">
-            Ubuntu 搭建 gitlab
-官网安装介绍： https://about.gitlab.com/install/
-github： https://github.com/gitlabhq/gitlabhq
-
-1.首先是安装一些依赖服务
-sudo apt-get install curl op...
-        </div>
-    </a>
-    <p class="post-meta">Posted by zzhpeng on May 17, 2019</p>
-</div>
-
-<hr>
-
-<div class="post-preview">
-    <a href="/mysql_union_index.html">
-        <h2 class="post-title">            
-            mysql联合索引
-        </h2>
-        
-        <div class="post-content-preview">
-            mysql联合索引中
-
-  1、select * from table where a=1, b=2
-  2、select * from table where b=1, a=2
-  3、select * from table where b=1
-
-
-以上哪一句不会触发索引？为什么？
-
-答曰：...
-        </div>
-    </a>
-    <p class="post-meta">Posted by zzhpeng on April 23, 2019</p>
 </div>
 
 <hr>

@@ -7,6 +7,90 @@
 		<atom:link href="/" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>elasticsearch部署</title>
+				<description>&lt;h2 id=&quot;1安装opensdk&quot;&gt;1、安装OpenSdk&lt;/h2&gt;
+&lt;p&gt;sudo apt-get install openjdk-8-jdk&lt;/p&gt;
+
+&lt;p&gt;配置Java环境变量
+sudo vim /etc/profile
+在profile末尾添加以下内容:&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+export JRE_HOME=$JAVA_HOME/jre
+export CLASSPATH=$JAVA_HOME/lib:$JRE_HOME/lib:$CLASSPATH
+export PATH=$JAVA_HOME/bin:$JRE_HOME/bin:$PATH
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;添加后保存并退出，用java -version查看是否配置成功&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;openjdk version &quot;1.8.0_191&quot;
+OpenJDK Runtime Environment (build 1.8.0_191-8u191-b12-2ubuntu0.18.04.1-b12)
+OpenJDK 64-Bit Server VM (build 25.191-b12, mixed mode)
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;2安装elasticsearch&quot;&gt;2、安装Elasticsearch&lt;/h2&gt;
+
+&lt;p&gt;选择相应版本，大小200多M，有点大&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.3.1-linux-x86_64.tar.gz
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;解压&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;tar -zxvf elasticsearch-7.3.1
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;3安装elasticsearch-ik分词&quot;&gt;3、安装elasticsearch-ik分词&lt;/h2&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo ./bin/elasticsearch-plugin install https://github.com/medcl/elasticsearch-analysis-ik/releases/download/v7.3.1/elasticsearch-analysis-ik-7.3.1.zip
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;4改配置-elasticsearchbinelasticsearchyml&quot;&gt;4、改配置 /elasticsearch/bin/elasticsearch.yml&lt;/h2&gt;
+
+&lt;h2 id=&quot;参考&quot;&gt;参考&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;1、&lt;a href=&quot;https://cnblogs.com/xiaojianfeng/p/9435507.html&quot;&gt;Elasticsearch和Head插件安装 - v-imok - 博客园&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;2、&lt;a href=&quot;https://elasticsearch.cn/question/4136&quot;&gt;请教elasticsearch出现unassigned shards根本原因 - Elastic 中文社区&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;3、[官方index检测](https://www.elastic.co/guide/en/elasticsearch/reference/6.2/cluster-allocation-explain.html&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;3、yellow问题
+https://discuss.elastic.co/t/cluster-yellow-reason-shards-started-kibana-0/93034&lt;/p&gt;
+
+&lt;p&gt;4、kibana
+https://www.elastic.co/guide/en/kibana/current/targz.html&lt;/p&gt;
+</description>
+				<pubDate>Mon, 09 Sep 2019 00:00:00 +0800</pubDate>
+				<link>/elasticsearch-production.html</link>
+				<guid isPermaLink="true">/elasticsearch-production.html</guid>
+			</item>
+		
+			<item>
+				<title>PHP缓冲区</title>
+				<description>&lt;h2 id=&quot;事由&quot;&gt;事由&lt;/h2&gt;
+&lt;p&gt;上一篇文章中，写了关于nginx和php-fpm组合 请求超时的解决方案。
+但是，又遇到个问题就是缓冲区，需要边保持请求连接边打印东西
+到浏览器。&lt;/p&gt;
+
+&lt;h2 id=&quot;解决&quot;&gt;解决&lt;/h2&gt;
+
+&lt;h2 id=&quot;参考&quot;&gt;参考&lt;/h2&gt;
+
+&lt;p&gt;1、&lt;a href=&quot;https://www.cnblogs.com/devcjq/articles/6072945.html&quot;&gt;关于PHP 刷新缓冲区操作(边执行边输出)简单分析&lt;/a&gt;
+2、&lt;a href=&quot;https://www.cnblogs.com/raobenjun/p/8086051.html&quot;&gt;深入理解php的输出缓冲区(output buffer) - EzrealR - 博客园&lt;/a&gt;
+3、&lt;a href=&quot;https://www.cnblogs.com/raobenjun/p/8085957.html&quot;&gt;php缓冲区 - EzrealR - 博客园&lt;/a&gt;&lt;/p&gt;
+
+</description>
+				<pubDate>Sat, 07 Sep 2019 00:00:00 +0800</pubDate>
+				<link>/php-ob-flush.html</link>
+				<guid isPermaLink="true">/php-ob-flush.html</guid>
+			</item>
+		
+			<item>
 				<title>web服务超时处理</title>
 				<description>&lt;h2 id=&quot;事由&quot;&gt;事由&lt;/h2&gt;
 &lt;p&gt;执行285675条mysql数据操作的时候，页面出现nginx异常An error occurred.报错。查看日志，详情如下：&lt;/p&gt;
@@ -98,14 +182,42 @@ public function setDocument(){
 			<item>
 				<title>elasticsearch学习</title>
 				<description>&lt;h2 id=&quot;安装&quot;&gt;安装&lt;/h2&gt;
-&lt;p&gt;下载相应版本 https://github.com/elastic/elasticsearch/releases&lt;/p&gt;
+&lt;p&gt;下载相应版本 https://www.elastic.co/cn/downloads/elasticsearch&lt;/p&gt;
 
 &lt;h2 id=&quot;配置&quot;&gt;配置&lt;/h2&gt;
-&lt;p&gt;修改配置，其他主机可以访问，单节点部署&lt;/p&gt;
+&lt;p&gt;1、修改配置，其他主机可以访问，单节点部署&lt;/p&gt;
 &lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;vim config/elasticsearch.yml
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;&lt;img src=&quot;http://img.zzhpeng.cn/FqYRhHL4hv5NrrJMumI_wtDGIng1&quot; alt=&quot;FhoCc45P5ISRy7oFsr5ZQLdhK-3P&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;其他配置：https://www.cnblogs.com/zlslch/p/6419948.html&lt;/p&gt;
+
+&lt;p&gt;2、修改占用内存大小&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;vim /config/jvm.options
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;个人开发小项目，可以把参数改小些&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;-Xms512m
+-Xmx512m
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;3、启动报错&lt;/p&gt;
+
+&lt;p&gt;执行启动命令&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;.bin/elasticsearch
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;然后报错&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[1]: max virtual memory areas vm.max_map_count [65530] is too low, increase to at least [262144]
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;提示需要修改虚拟内存，切换到root用户，执行命令：&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sysctl -w vm.max_map_count=262144
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;上述方法修改之后，如果重启虚拟机将失效，所以：解决办法：在 /etc/sysctl.conf文件最后添加一行
+vm.max_map_count=262144
+即可永久修改&lt;/p&gt;
 
 &lt;blockquote&gt;
   &lt;p&gt;其他配置&lt;/p&gt;
@@ -478,6 +590,8 @@ static function searchDocuments($index,array $body){
 &lt;p&gt;3、&lt;a href=&quot;https://github.com/elastic/elasticsearch-php&quot;&gt;官方开发的php客户端组件:&lt;/a&gt;&lt;/p&gt;
 
 &lt;p&gt;4、&lt;a href=&quot;https://www.jianshu.com/p/88f0546d5955&quot;&gt;Elasticsearch7.*版本 1.入门 - 简书&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;5、&lt;a href=&quot;https://www.cnblogs.com/zlslch/p/6419948.html&quot;&gt;elasticsearch-.yml（中文配置详解） - 大数据和AI躺过的坑 - 博客园&lt;/a&gt;&lt;/p&gt;
 </description>
 				<pubDate>Mon, 02 Sep 2019 00:00:00 +0800</pubDate>
 				<link>/elasticsearch-learning.html</link>
@@ -957,137 +1071,6 @@ PS：BACKUP的时间点必须与原服务器备份后的文件名一致&lt;/p&gt
 				<pubDate>Tue, 23 Apr 2019 00:00:00 +0800</pubDate>
 				<link>/mysql_union_index.html</link>
 				<guid isPermaLink="true">/mysql_union_index.html</guid>
-			</item>
-		
-			<item>
-				<title>docker 入门</title>
-				<description>&lt;h1 id=&quot;简介&quot;&gt;简介&lt;/h1&gt;
-&lt;p&gt;官网 &lt;a href=&quot;https://www.docker.com/&quot;&gt;Enterprise Container Platform | Docker&lt;/a&gt;
-手册 &lt;a href=&quot;https://docs.docker.com/&quot;&gt;Docker Documentation | Docker Documentation&lt;/a&gt;&lt;/p&gt;
-
-&lt;h1 id=&quot;虚拟机与docker对比&quot;&gt;虚拟机与docker对比&lt;/h1&gt;
-&lt;p&gt;&lt;a href=&quot;https://www.docker.com/resources/what-container&quot;&gt;What is a Container | Docker&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://img.zzhpeng.cn/FlUbUkJUdU9WSBqD9IBYzHZ3gkSp&quot; alt=&quot;FlUbUkJUdU9WSBqD9IBYzHZ3gkSp&quot; /&gt;&lt;/p&gt;
-&lt;h1 id=&quot;docker-ce-和-docker-ee&quot;&gt;docker-ce 和 docker-ee&lt;/h1&gt;
-&lt;h3 id=&quot;about-docker-cecommunity-edition&quot;&gt;About Docker CE（Community Edition）&lt;/h3&gt;
-&lt;p&gt;Docker Community Edition (CE) is ideal for developers and small teams looking to get started with Docker and experimenting with container-based apps. Docker CE has three types of update channels, stable, test, and nightly:&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;Stable gives you latest releases for general availability.&lt;/li&gt;
-  &lt;li&gt;Test gives pre-releases that are ready for testing before general availability.&lt;/li&gt;
-  &lt;li&gt;Nightly gives you latest builds of work in progress for the next major release.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;For more information about Docker CE, see Docker &lt;a href=&quot;https://www.docker.com/community-edition/&quot;&gt;click me&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;Releases： 每六个月发布一个大版本&lt;/p&gt;
-
-&lt;h3 id=&quot;about-docker-eeenterprise-edition&quot;&gt;About Docker EE（Enterprise Edition）&lt;/h3&gt;
-&lt;p&gt;Docker Enterprise is designed for enterprise development as well as IT teams who build, ship, and run business-critical applications in production and at scale. Docker Enterprise is integrated, certified, and supported to provide enterprises with the most secure container platform in the industry. For more info about Docker Enterprise, including purchasing options, see&lt;a href=&quot;https://www.docker.com/enterprise-edition/&quot;&gt; Docker Enterprise&lt;/a&gt;.&lt;/p&gt;
-
-&lt;h3 id=&quot;docker-ce-和-docker-ee-对比&quot;&gt;Docker CE 和 Docker EE 对比&lt;/h3&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://img.zzhpeng.cn/FrnYjbS3hXBqxik_zQFpF-SiH-c5&quot; alt=&quot;FrnYjbS3hXBqxik_zQFpF-SiH-c5&quot; /&gt;&lt;/p&gt;
-
-&lt;h1 id=&quot;docker安装&quot;&gt;docker安装&lt;/h1&gt;
-&lt;p&gt;原始镜像地址会慢，可以用阿里、163等等提供的，不过要注册阿里等账号。&lt;/p&gt;
-&lt;h3 id=&quot;1docker--get-docker-ce-for-ubuntu--docker-documentation&quot;&gt;1、docker : &lt;a href=&quot;https://docs.docker.com/install/linux/docker-ce/ubuntu/&quot;&gt;Get Docker CE for Ubuntu | Docker Documentation&lt;/a&gt;&lt;/h3&gt;
-&lt;p&gt;有很多安装途径，实在找不到对应的系统可以用 Binaries 包安装&lt;/p&gt;
-
-&lt;h3 id=&quot;2docker-compose--install-docker-compose--docker-documentation&quot;&gt;2、docker-compose : &lt;a href=&quot;https://docs.docker.com/compose/install/&quot;&gt;Install Docker Compose | Docker Documentation&lt;/a&gt;&lt;/h3&gt;
-&lt;p&gt;docker-compose 镜像组合技术 组合成服务service&lt;/p&gt;
-
-&lt;h1 id=&quot;dockerfile-镜像构建&quot;&gt;dockerfile 镜像构建&lt;/h1&gt;
-&lt;p&gt;&lt;a href=&quot;https://docs.docker.com/engine/reference/builder/&quot;&gt;| Docker Documentation&lt;/a&gt;&lt;/p&gt;
-&lt;h3 id=&quot;案例1构建一小时nodejs镜像&quot;&gt;案例1，构建一小时nodejs镜像&lt;/h3&gt;
-&lt;ul&gt;
-  &lt;li&gt;1、docker build –rm –tag nodejs_test .  （基于官网node:11-alpine镜像，构建镜像）&lt;/li&gt;
-  &lt;li&gt;2、docker run -it –rm –name node_test -v “$PWD/store_system/”:/usr/src/app -w /usr/src/app nodejs_test npm run dev&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://img.zzhpeng.cn/Frlszrq6fwzOO7WJjCdeIaEB80rG&quot; alt=&quot;Frlszrq6fwzOO7WJjCdeIaEB80rG&quot; /&gt;&lt;/p&gt;
-
-&lt;h3 id=&quot;案例2构建一小时后端phpnginx开发环境&quot;&gt;案例2，构建一小时后端php&amp;amp;nginx开发环境&lt;/h3&gt;
-&lt;p&gt;php 相关资料 如何加扩展 &lt;a href=&quot;https://hub.docker.com/_/php&quot;&gt;Docker Hub&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;#创建镜像
-#docker build –rm -t myphp:7.2-fpm .&lt;/p&gt;
-
-&lt;p&gt;#建立网络
-#docker network create –subnet=172.23.0.0/16 net1&lt;/p&gt;
-
-&lt;p&gt;#启动容器
-#docker run –rm -p 9000:9000 –name myphp -v $PWD/www/:/var/www/html/ -v $PWD/conf/php-fpm.conf:/usr/local/etc/php/php-fpm.d/php-fpm.conf -v $PWD/conf/php.ini:/usr/local/etc/php/php.ini –net=net1 –ip 172.23.0.2 -d myphp:7.2-fpm
-#docker run –rm -p 8088:80 –name mynginx -v $PWD/www:/www -v $PWD/conf/nginx.conf:/etc/nginx/nginx.conf -v $PWD/conf/conf.d:/etc/nginx/conf.d/ -v $PWD/logs/:/var/log/nginx/ –net=net1 –ip 172.23.0.3 –link myphp:7.2-fpm -d nginx&lt;/p&gt;
-
-&lt;h3 id=&quot;案例3构建python开发环境&quot;&gt;案例3，构建python开发环境&lt;/h3&gt;
-&lt;p&gt;scrapy爬虫项目 &lt;a href=&quot;https://github.com/LittleLory/codePool/tree/master/python/autohome_spider&quot;&gt;codePool/python/autohome_spider at master · LittleLory/codePool · GitHub&lt;/a&gt;
-&lt;img src=&quot;http://img.zzhpeng.cn/Fg7kWIhRoHX5GSrOs_Jl1VDXWla8&quot; alt=&quot;Fg7kWIhRoHX5GSrOs_Jl1VDXWla8&quot; /&gt;&lt;/p&gt;
-
-&lt;h1 id=&quot;docker-compose-镜像组建管理工具&quot;&gt;docker-compose 镜像组建管理工具&lt;/h1&gt;
-&lt;p&gt;Compose is a tool for defining and running complex applications with Docker. With Compose, you define a multi-container application in a single file, then spin your application up in a single command which does everything that needs to be done to get it running.
-手册：&lt;a href=&quot;https://docs.docker.com/compose/compose-file/&quot;&gt;Compose file version 3 reference | Docker Documentation&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;项目地址：&lt;a href=&quot;https://github.com/FromChinaBoy/dnmp&quot;&gt;GitHub - FromChinaBoy/dnmp: Docker LNMP (Nginx, PHP7/PHP5, MySQL, Redis)&lt;/a&gt;&lt;/p&gt;
-&lt;blockquote&gt;
-  &lt;p&gt;有关php72配置参数的解释
-cap_add:
-      - SYS_PTRACE&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;因为有用到xdebug打断点，需要获取sys的拦截系统能力。&lt;/p&gt;
-
-&lt;p&gt;参考：&lt;a href=&quot;https://www.cnblogs.com/catch/p/3476280.html&quot;&gt;[译] 玩转ptrace (一) - twoon - 博客园&lt;/a&gt;&lt;/p&gt;
-
-&lt;h1 id=&quot;docker-网络&quot;&gt;docker 网络&lt;/h1&gt;
-&lt;p&gt;创建网段&lt;br /&gt;
-docker network create –subnet=172.18.0.0/16 net1&lt;/p&gt;
-
-&lt;h3 id=&quot;docker的bridge网桥和虚拟机的网桥是不同的&quot;&gt;docker的bridge网桥和虚拟机的网桥是不同的&lt;/h3&gt;
-&lt;p&gt;&lt;a href=&quot;https://docs.docker.com/network/bridge/&quot;&gt;Use bridge networks | Docker Documentation&lt;/a&gt;&lt;/p&gt;
-
-&lt;h3 id=&quot;docker-compose下的设置&quot;&gt;docker-compose下的设置&lt;/h3&gt;
-&lt;p&gt;&lt;img src=&quot;http://img.zzhpeng.cn/FgW7P1v9FCatiIQMo-4xmqOx26Gm&quot; alt=&quot;FgW7P1v9FCatiIQMo-4xmqOx26Gm&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;参考文献
-&lt;a href=&quot;https://github.com/buxiaomo/MarkdownBooks/blob/master/Docker%E5%85%A5%E9%97%A8%E7%BA%A7%E7%AE%80%E6%98%93%E6%89%8B%E5%86%8C.md&quot;&gt;https://github.com/buxiaomo/MarkdownBooks/blob/master/Docker%E5%85%A5%E9%97%A8%E7%BA%A7%E7%AE%80%E6%98%93%E6%89%8B%E5%86%8C.md&lt;/a&gt;&lt;/p&gt;
-
-</description>
-				<pubDate>Wed, 06 Mar 2019 00:00:00 +0800</pubDate>
-				<link>/docker_introduction.html</link>
-				<guid isPermaLink="true">/docker_introduction.html</guid>
-			</item>
-		
-			<item>
-				<title>mysql5.7创建用户</title>
-				<description>&lt;p&gt;今天把自己服务器的mysql5.7用户误删除了root,所以整理了,如何添加用户。&lt;/p&gt;
-&lt;h3 id=&quot;1mysql57加用户或者误删root&quot;&gt;1、mysql5.7加用户或者误删root&lt;/h3&gt;
-&lt;ul&gt;
-  &lt;li&gt;创建一个新账号
-    &lt;div class=&quot;language-sql highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;use&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mysql&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;insert&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;into&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;user&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;set&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;user&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'root'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ssl_cipher&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;''&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x509_issuer&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;''&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x509_subject&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;''&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
-  &lt;/li&gt;
-  &lt;li&gt;设置默认参数
-    &lt;div class=&quot;language-sql highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;update&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;user&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;set&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;Host&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'localhost'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;select_priv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'y'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;insert_priv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'y'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;update_priv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'y'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Alter_priv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'y'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;delete_priv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'y'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;create_priv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'y'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;drop_priv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'y'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;reload_priv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'y'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;shutdown_priv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'y'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Process_priv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'y'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;file_priv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'y'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;grant_priv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'y'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;References_priv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'y'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;index_priv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'y'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;create_user_priv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'y'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;show_db_priv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'y'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;super_priv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'y'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;create_tmp_table_priv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'y'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Lock_tables_priv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'y'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;execute_priv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'y'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;repl_slave_priv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'y'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;repl_client_priv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'y'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;create_view_priv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'y'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;show_view_priv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'y'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;create_routine_priv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'y'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;alter_routine_priv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'y'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;create_user_priv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'y'&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;where&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;user&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'root'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
-  &lt;/li&gt;
-  &lt;li&gt;设置密码
-    &lt;div class=&quot;language-sql highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;update&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;user&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;set&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;authentication_string&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;password&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'root'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;where&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;user&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'root'&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;flush&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;privileges&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
-  &lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;参考：&lt;a href=&quot;https://blog.csdn.net/cywosp/article/details/42145779&quot;&gt;点滴记录——Linux Mysql数据库误删root用户 - CSDN博客&lt;/a&gt;&lt;/p&gt;
-&lt;h3 id=&quot;2扩展&quot;&gt;2、扩展&lt;/h3&gt;
-&lt;p&gt;mysql -uroot -p 默认是验证mysql.user的host 等于 localhost的而不是127.0.0.1
-&lt;a href=&quot;https://blog.csdn.net/love2377/article/details/78249233?locationNum=10&amp;amp;fps=1&quot;&gt;不是你想像的简单！配置mysql连接方式的时候，localhost和127.0.0.1的区别。 - CSDN博客&lt;/a&gt;&lt;/p&gt;
-
-</description>
-				<pubDate>Thu, 30 Aug 2018 00:00:00 +0800</pubDate>
-				<link>/mysql_create_user.html</link>
-				<guid isPermaLink="true">/mysql_create_user.html</guid>
 			</item>
 		
 	</channel>
