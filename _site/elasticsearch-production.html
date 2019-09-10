@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="fromChinaBoy">
 
-    <title>elasticsearch部署 - Blog</title>
+    <title>elasticsearch生产部署 - Blog</title>
 
     <link rel="canonical" href="http://localhost:4000/elasticsearch-production.html">
 
@@ -99,7 +99,7 @@
                         <a class="tag" href="/Tags/#elasticsearch" title="elasticsearch">elasticsearch</a>
                         
                     </div>
-                    <h1>elasticsearch部署</h1>
+                    <h1>elasticsearch生产部署</h1>
                     
                     <span class="meta">Posted by zzhpeng on September 9, 2019</span>
                 </div>
@@ -114,7 +114,8 @@
         <div class="row">
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 post-container">
 
-                <h2 id="1安装opensdk">1、安装OpenSdk</h2>
+                <h1 id="ubuntu-系统下直接安装">Ubuntu 系统下直接安装</h1>
+<h2 id="1安装opensdk">1、安装OpenSdk</h2>
 <p>sudo apt-get install openjdk-8-jdk</p>
 
 <p>配置Java环境变量
@@ -136,20 +137,67 @@ OpenJDK 64-Bit Server VM (build 25.191-b12, mixed mode)
 
 <h2 id="2安装elasticsearch">2、安装Elasticsearch</h2>
 
-<p>选择相应版本，大小200多M，有点大</p>
+<p>选择相应版本，大小200多M，有点大，源不好，下载会有点慢，请耐性等待！！</p>
 <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.3.1-linux-x86_64.tar.gz
 </code></pre></div></div>
 
 <p>解压</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>tar -zxvf elasticsearch-7.3.1
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>tar -zxvf elasticsearch-7.3.1-linux-x86_64.tar.gz
+cd elasticsearch-7.3.1
 </code></pre></div></div>
 
 <h2 id="3安装elasticsearch-ik分词">3、安装elasticsearch-ik分词</h2>
 
+<p>源不好，下载会有点慢，请耐性等待！！</p>
 <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo ./bin/elasticsearch-plugin install https://github.com/medcl/elasticsearch-analysis-ik/releases/download/v7.3.1/elasticsearch-analysis-ik-7.3.1.zip
 </code></pre></div></div>
 
+<p>下载完成后，记得选择Y,不然不会安装</p>
+
 <h2 id="4改配置-elasticsearchbinelasticsearchyml">4、改配置 /elasticsearch/bin/elasticsearch.yml</h2>
+
+<h3 id="41切换root账户改vmmax_map_count">4.1、切换root账户改vm.max_map_count</h3>
+
+<blockquote>
+  <p>报错信息</p>
+</blockquote>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code> ERROR: bootstrap checks failed max virtual memory areas vm.max_map_count [65530] is
+</code></pre></div></div>
+
+<blockquote>
+  <p>解决，切换到root用户修改配置sysctl.conf</p>
+</blockquote>
+
+<p>vi /etc/sysctl.conf</p>
+
+<p>加参数</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>vm.max_map_count=655360
+</code></pre></div></div>
+
+<p>使生效</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sysctl -p
+</code></pre></div></div>
+
+<h3 id="42更改内存占用">4.2、更改内存占用</h3>
+
+<p>默认1G，修改为实际占用。
+vim ./config/jvm.options</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>-Xms512m
+-Xmx512m
+</code></pre></div></div>
+
+<h3 id="43内存不锁">4.3、内存不锁</h3>
+
+<p>vim ./config/elasticsearch.yml</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bootstrap.memory_lock: false //原来是true
+</code></pre></div></div>
+
+<h1 id="docker-安装">Docker 安装</h1>
+
+<p>待~</p>
 
 <h2 id="参考">参考</h2>
 <ul>
@@ -160,15 +208,15 @@ OpenJDK 64-Bit Server VM (build 25.191-b12, mixed mode)
     <p>2、<a href="https://elasticsearch.cn/question/4136">请教elasticsearch出现unassigned shards根本原因 - Elastic 中文社区</a></p>
   </li>
   <li>
-    <p>3、[官方index检测](https://www.elastic.co/guide/en/elasticsearch/reference/6.2/cluster-allocation-explain.html</p>
+    <p>3、<a href="https://www.elastic.co/guide/en/elasticsearch/reference/6.2/cluster-allocation-explain.html">官方index检测</a></p>
+  </li>
+  <li>
+    <p>4、<a href="https://discuss.elastic.co/t/cluster-yellow-reason-shards-started-kibana-0/93034">状态为yellow的原因</a></p>
+  </li>
+  <li>
+    <p>5、<a href="https://www.elastic.co/guide/en/kibana/current/targz.html">kibana</a></p>
   </li>
 </ul>
-
-<p>3、yellow问题
-https://discuss.elastic.co/t/cluster-yellow-reason-shards-started-kibana-0/93034</p>
-
-<p>4、kibana
-https://www.elastic.co/guide/en/kibana/current/targz.html</p>
 
 
                 <hr>

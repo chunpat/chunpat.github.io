@@ -7,8 +7,9 @@
 		<atom:link href="/" rel="self" type="application/rss+xml" />
 		
 			<item>
-				<title>elasticsearch部署</title>
-				<description>&lt;h2 id=&quot;1安装opensdk&quot;&gt;1、安装OpenSdk&lt;/h2&gt;
+				<title>elasticsearch生产部署</title>
+				<description>&lt;h1 id=&quot;ubuntu-系统下直接安装&quot;&gt;Ubuntu 系统下直接安装&lt;/h1&gt;
+&lt;h2 id=&quot;1安装opensdk&quot;&gt;1、安装OpenSdk&lt;/h2&gt;
 &lt;p&gt;sudo apt-get install openjdk-8-jdk&lt;/p&gt;
 
 &lt;p&gt;配置Java环境变量
@@ -30,20 +31,67 @@ OpenJDK 64-Bit Server VM (build 25.191-b12, mixed mode)
 
 &lt;h2 id=&quot;2安装elasticsearch&quot;&gt;2、安装Elasticsearch&lt;/h2&gt;
 
-&lt;p&gt;选择相应版本，大小200多M，有点大&lt;/p&gt;
+&lt;p&gt;选择相应版本，大小200多M，有点大，源不好，下载会有点慢，请耐性等待！！&lt;/p&gt;
 &lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.3.1-linux-x86_64.tar.gz
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;解压&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;tar -zxvf elasticsearch-7.3.1
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;tar -zxvf elasticsearch-7.3.1-linux-x86_64.tar.gz
+cd elasticsearch-7.3.1
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;h2 id=&quot;3安装elasticsearch-ik分词&quot;&gt;3、安装elasticsearch-ik分词&lt;/h2&gt;
 
+&lt;p&gt;源不好，下载会有点慢，请耐性等待！！&lt;/p&gt;
 &lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo ./bin/elasticsearch-plugin install https://github.com/medcl/elasticsearch-analysis-ik/releases/download/v7.3.1/elasticsearch-analysis-ik-7.3.1.zip
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
+&lt;p&gt;下载完成后，记得选择Y,不然不会安装&lt;/p&gt;
+
 &lt;h2 id=&quot;4改配置-elasticsearchbinelasticsearchyml&quot;&gt;4、改配置 /elasticsearch/bin/elasticsearch.yml&lt;/h2&gt;
+
+&lt;h3 id=&quot;41切换root账户改vmmax_map_count&quot;&gt;4.1、切换root账户改vm.max_map_count&lt;/h3&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;报错信息&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; ERROR: bootstrap checks failed max virtual memory areas vm.max_map_count [65530] is
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;解决，切换到root用户修改配置sysctl.conf&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;vi /etc/sysctl.conf&lt;/p&gt;
+
+&lt;p&gt;加参数&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;vm.max_map_count=655360
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;使生效&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sysctl -p
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;42更改内存占用&quot;&gt;4.2、更改内存占用&lt;/h3&gt;
+
+&lt;p&gt;默认1G，修改为实际占用。
+vim ./config/jvm.options&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;-Xms512m
+-Xmx512m
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;43内存不锁&quot;&gt;4.3、内存不锁&lt;/h3&gt;
+
+&lt;p&gt;vim ./config/elasticsearch.yml&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;bootstrap.memory_lock: false //原来是true
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h1 id=&quot;docker-安装&quot;&gt;Docker 安装&lt;/h1&gt;
+
+&lt;p&gt;待~&lt;/p&gt;
 
 &lt;h2 id=&quot;参考&quot;&gt;参考&lt;/h2&gt;
 &lt;ul&gt;
@@ -54,15 +102,15 @@ OpenJDK 64-Bit Server VM (build 25.191-b12, mixed mode)
     &lt;p&gt;2、&lt;a href=&quot;https://elasticsearch.cn/question/4136&quot;&gt;请教elasticsearch出现unassigned shards根本原因 - Elastic 中文社区&lt;/a&gt;&lt;/p&gt;
   &lt;/li&gt;
   &lt;li&gt;
-    &lt;p&gt;3、[官方index检测](https://www.elastic.co/guide/en/elasticsearch/reference/6.2/cluster-allocation-explain.html&lt;/p&gt;
+    &lt;p&gt;3、&lt;a href=&quot;https://www.elastic.co/guide/en/elasticsearch/reference/6.2/cluster-allocation-explain.html&quot;&gt;官方index检测&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;4、&lt;a href=&quot;https://discuss.elastic.co/t/cluster-yellow-reason-shards-started-kibana-0/93034&quot;&gt;状态为yellow的原因&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;5、&lt;a href=&quot;https://www.elastic.co/guide/en/kibana/current/targz.html&quot;&gt;kibana&lt;/a&gt;&lt;/p&gt;
   &lt;/li&gt;
 &lt;/ul&gt;
-
-&lt;p&gt;3、yellow问题
-https://discuss.elastic.co/t/cluster-yellow-reason-shards-started-kibana-0/93034&lt;/p&gt;
-
-&lt;p&gt;4、kibana
-https://www.elastic.co/guide/en/kibana/current/targz.html&lt;/p&gt;
 </description>
 				<pubDate>Mon, 09 Sep 2019 00:00:00 +0800</pubDate>
 				<link>/elasticsearch-production.html</link>
