@@ -92,6 +92,13 @@ vim ./config/elasticsearch.yml
 bootstrap.memory_lock: false //原来是true
 ```
 
+## 5、启动
+启动命令
+```$xslt
+./bin/elasticsearchg
+```
+
+
 # Docker 安装
 
 待~

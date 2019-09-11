@@ -104,6 +104,43 @@
 		<div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
 			
 <div class="post-preview">
+    <a href="/disk-extend.html">
+        <h2 class="post-title">            
+            云服务器磁盘扩容
+        </h2>
+        
+        <div class="post-content-preview">
+            操作前记得保存数据，镜像
+数据丢失，概不负责！！
+
+数据盘扩容
+查看磁盘情况
+
+  查看已分区磁盘情况
+  df -h
+  
+
+
+
+  查看磁盘情况
+  sudo fdisk -lu
+  
+
+
+格式化
+sudo mkfs.ext3 /dev/vdb5  //扩展分区，然后分逻辑分区
+
+
+挂载
+...
+        </div>
+    </a>
+    <p class="post-meta">Posted by zzhpeng on September 10, 2019</p>
+</div>
+
+<hr>
+
+<div class="post-preview">
     <a href="/elasticsearch-production.html">
         <h2 class="post-title">            
             elasticsearch生产部署
@@ -265,28 +302,6 @@ github地址：https://github.com/composer/satis
         </div>
     </a>
     <p class="post-meta">Posted by zzhpeng on May 24, 2019</p>
-</div>
-
-<hr>
-
-<div class="post-preview">
-    <a href="/linux-quick-button.html">
-        <h2 class="post-title">            
-            unix bash快捷键
-        </h2>
-        
-        <div class="post-content-preview">
-            Linux/Unix下Shell快捷键操作集合
-
-快速搜索
-
-  1) ctrl + r 组合键来进入历史搜索模式在history表中查询某条过往指令，找到需要重复执行的命令后，按回车键即可。
-  2) !!：重复执行上一条指令
-  3) !a：重复执行上一条以a为首的指令
-  4) !num...
-        </div>
-    </a>
-    <p class="post-meta">Posted by zzhpeng on May 17, 2019</p>
 </div>
 
 <hr>
