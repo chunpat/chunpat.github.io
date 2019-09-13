@@ -66,5 +66,5 @@ fdisk [选项] –l <disk>  列出所有分区表
 
 
 # 参考
-1、[Linux命令之fdisk - 苦逼运维 - 博客园](https://www.cnblogs.com/diantong/p/8820779.html)
+* 1、[Linux命令之fdisk - 苦逼运维 - 博客园](https://www.cnblogs.com/diantong/p/8820779.html)
 

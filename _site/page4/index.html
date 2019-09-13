@@ -10,7 +10,7 @@
 
     <title>Blog</title>
 
-    <link rel="canonical" href="http://localhost:4000/page3/">
+    <link rel="canonical" href="http://localhost:4000/page4/">
 
     <!-- Icons -->
   <link rel="shortcut icon" href="img/favicon.ico">
@@ -104,179 +104,23 @@
 		<div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
 			
 <div class="post-preview">
-    <a href="/nginx-and-php-fpm.html">
+    <a href="/blog/Mac-OS-Apps.html">
         <h2 class="post-title">            
-            关于nginx和php-fpm
+            Mac OS：搭建一个简约好用的个人系统
         </h2>
         
         <div class="post-content-preview">
-            1、网友一
-Nginx 是非阻塞IO &amp; IO复用模型，通过操作系统提供的类似 epoll 的功能，可以在一个线程里处理多个客户端的请求。
-Nginx 的进程就是线程，即每个进程里只有一个线程，但这一个线程可以服务多个客户端。
+            From App Store
 
-PHP-FPM 是阻塞的单线程模型，pm.max_chi...
-        </div>
-    </a>
-    <p class="post-meta">Posted by zzhpeng on July 15, 2018</p>
-</div>
+The Unarchiver  压缩解压软件。
 
-<hr>
+PopClip $4.99 Mac 下的文本选定增强工具 通过诸多插件让复制、剪切、搜索各项操作更为容易。
 
-<div class="post-preview">
-    <a href="/sshd-hacker.html">
-        <h2 class="post-title">            
-            sshd预防被暴力破解
-        </h2>
-        
-        <div class="post-content-preview">
-            今天服务器出现了被攻击的现象，登录的时候很慢，登录成功后出现了有10w多的尝试登陆。
-
-
-
-查看失败登录情况
-lastb | less
-
-
-
-应对办法还是有的，我暂时选择了修改默认端口22。如果还有过多的尝试登录，日后在弄其他办法。
-修改端口地方/etc/ssh/sshd_config，重启应...
-        </div>
-    </a>
-    <p class="post-meta">Posted by zzhpeng on May 29, 2018</p>
-</div>
-
-<hr>
-
-<div class="post-preview">
-    <a href="/linux-daemontools.html">
-        <h2 class="post-title">            
-            linux的进程守护daemontools
-        </h2>
-        
-        <div class="post-content-preview">
-            
-  介绍
-
-
-Daemontools是管理Unix服务的工具，它提供一组工具来管理一系列用户进程，当进程由于某些原因down掉之后，daemontools会自动重启进程。主要的功能是Supervisor。
-
-
-  安装
-
-
-mkdir  ~/tools
-cd /tools
-wget http...
-        </div>
-    </a>
-    <p class="post-meta">Posted by zzhpeng on May 16, 2018</p>
-</div>
-
-<hr>
-
-<div class="post-preview">
-    <a href="/mysql_group_by_and_having.html">
-        <h2 class="post-title">            
-            sql语句中的GROUP BY 和 HAVING的使用count()
-        </h2>
-        
-        <div class="post-content-preview">
-            这个sql语句是我分析tpshop2.0.4的登录流程的时候，会检测购物车重复数据问题！
-
-
-这条语句有点不懂，所以查了下某度。http://blog.163.com/hks_blog/blog/static/214926090201382225845920/
-
-这条链接写的挺详细的，并且还有...
-        </div>
-    </a>
-    <p class="post-meta">Posted by zzhpeng on June 8, 2017</p>
-</div>
-
-<hr>
-
-<div class="post-preview">
-    <a href="/mysql_log_error_debug.html">
-        <h2 class="post-title">            
-            开启mysql日志排查错误
-        </h2>
-        
-        <div class="post-content-preview">
-            系统的大半的错误是由于sql语句的错误，所以快速找到那条sql报错至关重要，这里可以通过查看sql来排错！我用的是mysql数据库，其
-
-mysql的配置文件是my.ini。
-
-添加这些代码。
-
-[mysqld]
-
-general_log=ON
-
-general_log_file=D:/tes...
-        </div>
-    </a>
-    <p class="post-meta">Posted by zzhpeng on June 7, 2017</p>
-</div>
-
-<hr>
-
-<div class="post-preview">
-    <a href="/blog/Video-Post-Processing-Guide.html">
-        <h2 class="post-title">            
-            视频后期制作指南
-        </h2>
-        
-        <div class="post-content-preview">
-            工具
-
-
-  Final Cut Pro X —— 视频后期处理工具，苹果出品，简称 FCPX。
-  Adobe Audition —— 音频处理（降噪）工具，简称 AA。
-  Movavi Video Converter —— 视频格式转换工具，用于初期的视频格式处理及后期视频文件的导出后的...
-        </div>
-    </a>
-    <p class="post-meta">Posted by zzhpeng on October 20, 2016</p>
-</div>
-
-<hr>
-
-<div class="post-preview">
-    <a href="/jekyll_tutorials1.html">
-        <h2 class="post-title">            
-            Jekyll搭建个人博客
-        </h2>
-        
-        <div class="post-content-preview">
-            　之前写了一篇HEXO搭建个人博客的教程获得了很好评，尤其是在简书上目前已经累积了10W+的阅读量了，也有好心的读者主动给我打赏，在此感谢。
-
-　如果你看过我的文章会发现我现在的博客样式跟之前是有很大的区别的，之前我也是使用 HEXO 搭建的博客，后来发现使用 HEXO 在多台电脑上发布博客，...
-        </div>
-    </a>
-    <p class="post-meta">Posted by zzhpeng on October 14, 2016</p>
-</div>
-
-<hr>
-
-<div class="post-preview">
-    <a href="/blog/Vim.html">
-        <h2 class="post-title">            
-            VIM 基础命令
-        </h2>
-        
-        <div class="post-content-preview">
-            VIM
-
-以前玩 Python 及之前用 Git 因为不熟悉 Vim 遇到了很多坑，进而导致屡次学习各项语言的放弃…惨痛教训就源于这莫名其妙的 Vim…
-
-整理一下思路，重新出发。
-
-Vi/Vim 常用的有三种模式：
-
-
-  普通 模式 默认进入界面时的模式，此时只支持 Vi/Vim 的指令
+Evernote  / Alternote $4.99 印象笔记及轻量级的印象笔记（第三方笔记工具）
 ...
         </div>
     </a>
-    <p class="post-meta">Posted by zzhpeng on October 23, 2015</p>
+    <p class="post-meta">Posted by zzhpeng on May 31, 2015</p>
 </div>
 
 <hr>
@@ -287,13 +131,9 @@ Vi/Vim 常用的有三种模式：
 <ul class="pager">
     
     <li class="previous">
-        <a href="/page2">&larr; Newer Posts</a>
+        <a href="/page3">&larr; Newer Posts</a>
     </li>
     
-    
-    <li class="next">
-        <a href="/page4">Older Posts &rarr;</a>
-    </li>
     
 </ul>
 

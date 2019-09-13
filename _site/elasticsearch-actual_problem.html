@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="fromChinaBoy">
+
+    <title>elasticsearch业务问题 - Blog</title>
+
+    <link rel="canonical" href="http://localhost:4000/elasticsearch-actual_problem.html">
+
+    <!-- Icons -->
+  <link rel="shortcut icon" href="img/favicon.ico">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/clean-blog.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    <!-- Custom Fonts -->
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href='//fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+
+
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a href="/">Home</a>
+                </li>
+                
+                <li>
+                    <a href="/About.html">About</a>
+                </li>
+                
+                <li>
+                    <a href="/Tools.html">Tools</a>
+                </li>
+                
+                <li>
+                    <a href="/tags.html">Tags</a>
+                </li>
+                
+
+            </ul>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+
+
+    <!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/fantasy.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="Tags">
+                        
+                        <a class="tag" href="/Tags/#elasticsearch" title="elasticsearch">elasticsearch</a>
+                        
+                    </div>
+                    <h1>elasticsearch业务问题</h1>
+                    
+                    <span class="meta">Posted by zzhpeng on September 12, 2019</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 post-container">
+
+                <h2 id="场景">场景</h2>
+<blockquote>
+  <p>要搜索的内容</p>
+</blockquote>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>P92325 iphone 7s plus 4G 黑色 美版 无锁
+P92324 iphone 7 128g 金色 有锁 通用版
+</code></pre></div></div>
+
+<blockquote>
+  <p>以为客户那边要求是，想的很简单</p>
+</blockquote>
+
+<ul>
+  <li>1、iphone7splus  搜索-&gt;P92325 iphone 7s plus 4G 黑色 美版 无锁</li>
+  <li>2、iphone 7s plus  搜索-&gt;P92325 iphone 7s plus 4G 黑色 美版 无锁</li>
+</ul>
+
+<blockquote>
+  <p>实际输入情况,五花八门，还有这些情况</p>
+</blockquote>
+
+<ul>
+  <li>1、iphone7splus  搜索-&gt;P92325 iphone 7s plus 4G 黑色 美版 无锁</li>
+  <li>2、iphone 7s plus   搜索-&gt;P92325 iphone 7s plus 4G 黑色 美版 无锁</li>
+  <li>3、iphone7sp 美版   搜索-&gt;P92325 iphone 7s plus 4G 黑色 美版 无锁</li>
+  <li>4、iphone7 128g 美版   搜索-&gt;P92324 iphone 7 128g 金色 有锁 通用版</li>
+  <li>5、iphone7s plus 美版   搜索-&gt;iphone 7s plus 4G 黑色 美版 无锁</li>
+  <li>。。。</li>
+</ul>
+
+<h2 id="解决路程">解决路程</h2>
+<blockquote>
+  <p>错误解决方案，将搜索内容去掉空格，然后DOC的文章分析用IK分词器ik_max_word，
+搜索用ik_smart,然后将搜索的词也去掉空格。</p>
+</blockquote>
+
+<h3 id="1创建索引">1、创建索引</h3>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl -XPUT http://localhost:9200/model
+</code></pre></div></div>
+
+<h3 id="2设置索引属性map">2、设置索引属性map</h3>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl -XPOST http://localhost:9200/model/_mapping -H 'Content-Type:application/json' -d'
+{
+        "properties": {
+            "name": {
+                "type": "text",
+                "analyzer": "ik_max_word",
+                "search_analyzer": "ik_smart"
+            }
+        }
+
+}'
+</code></pre></div></div>
+
+<h3 id="3写入doc数据">3、写入doc数据</h3>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl -XPOST http://localhost:9200/model/_create/1 -H 'Content-Type:application/json' -d'
+{"content":"P92325 iphone7splus4G黑色美版无锁"}
+'
+curl -XPOST http://localhost:9200/model/_create/2 -H 'Content-Type:application/json' -d'
+{"content":"P92324 iphone7128g金色有锁通用版"}
+'
+
+</code></pre></div></div>
+<h3 id="4查看doc状态">4、查看doc状态</h3>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl -X GET "http://localhost:9200/_cat/indices?v"
+</code></pre></div></div>
+
+<h3 id="5搜索数据">5、搜索数据</h3>
+
+<p>iphone7splus 或 iphone 7s plus 查找搜索出 P92325 iphone 7s plus 4G 黑色 美版 无锁</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl -XPOST http://localhost:9200/model/_search  -H 'Content-Type:application/json' -d'
+{
+    "size" : 100,
+    "query" : { "match" : { "content" : "iphone7splus" }}
+  
+}
+'
+</code></pre></div></div>
+<p>结果，啥都没：</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{
+	"took": 249,
+	"timed_out": false,
+	"_shards": {
+		"total": 1,
+		"successful": 1,
+		"skipped": 0,
+		"failed": 0
+	},
+	"hits": {
+		"total": {
+			"value": 0,
+			"relation": "eq"
+		},
+		"max_score": null,
+		"hits": []
+	}
+}
+</code></pre></div></div>
+
+<blockquote>
+  <p>为什么搜不出（一），因为P92325 iphone7splus4G黑色美版无锁 的文章分析不会出现iphone7splus。</p>
+</blockquote>
+
+<p>搜索词ik_smart分析</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl -XGET "http://localhost:9200/model/_analyze" -H 'Content-Type: application/json' -d'
+{
+   "text":"iphone7splus","tokenizer": "ik_smart"
+}'
+
+</code></pre></div></div>
+
+<p>结果出现</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{
+	"tokens": [{
+		"token": "iphone7splus",
+		"start_offset": 0,
+		"end_offset": 12,
+		"type": "LETTER",
+		"position": 0
+	}]
+}
+</code></pre></div></div>
+
+<p>查找文ik_max_word分析</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl -XGET "http://localhost:9200/model/_analyze" -H 'Content-Type: application/json' -d'
+{
+   "text":"iphone7splus4G黑色美版无锁","tokenizer": "ik_max_word"
+}'
+</code></pre></div></div>
+
+<p>结果，不会出现iphone7splus</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+{
+    "tokens": [
+        {
+            "token": "iphone7splus4g",
+            "start_offset": 0,
+            "end_offset": 14,
+            "type": "LETTER",
+            "position": 0
+        },
+        {
+            "token": "iphone",
+            "start_offset": 0,
+            "end_offset": 6,
+            "type": "ENGLISH",
+            "position": 1
+        },
+        {
+            "token": "7",
+            "start_offset": 6,
+            "end_offset": 7,
+            "type": "ARABIC",
+            "position": 2
+        },
+        {
+            "token": "splus",
+            "start_offset": 7,
+            "end_offset": 12,
+            "type": "ENGLISH",
+            "position": 3
+        },
+        {
+            "token": "4",
+            "start_offset": 12,
+            "end_offset": 13,
+            "type": "ARABIC",
+            "position": 4
+        },
+        {
+            "token": "g",
+            "start_offset": 13,
+            "end_offset": 14,
+            "type": "ENGLISH",
+            "position": 5
+        },
+        {
+            "token": "黑色",
+            "start_offset": 14,
+            "end_offset": 16,
+            "type": "CN_WORD",
+            "position": 6
+        },
+        {
+            "token": "美版",
+            "start_offset": 16,
+            "end_offset": 18,
+            "type": "CN_WORD",
+            "position": 7
+        },
+        {
+            "token": "无",
+            "start_offset": 18,
+            "end_offset": 19,
+            "type": "CN_CHAR",
+            "position": 8
+        },
+        {
+            "token": "锁",
+            "start_offset": 19,
+            "end_offset": 20,
+            "type": "CN_CHAR",
+            "position": 9
+        }
+    ]
+}
+</code></pre></div></div>
+
+<p>所以说，去掉空格方案是不行的，那就不去掉咯</p>
+
+<p>分析语句</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl -XGET "http://localhost:9200/model/_analyze" -H 'Content-Type: application/json' -d'
+{
+   "text":"iphone 7s plus 4G 黑色 美版 无锁","tokenizer": "ik_max_word"
+}'
+</code></pre></div></div>
+
+<p>结果，还是没有iphone7splus组合，那么搜索哪里也不去掉空格吧。这样就可以搜索到了。</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{
+    "tokens": [
+        {
+            "token": "iphone",
+            "start_offset": 0,
+            "end_offset": 6,
+            "type": "ENGLISH",
+            "position": 0
+        },
+        {
+            "token": "7s",
+            "start_offset": 7,
+            "end_offset": 9,
+            "type": "LETTER",
+            "position": 1
+        },
+        {
+            "token": "7",
+            "start_offset": 7,
+            "end_offset": 8,
+            "type": "ARABIC",
+            "position": 2
+        },
+        {
+            "token": "s",
+            "start_offset": 8,
+            "end_offset": 9,
+            "type": "ENGLISH",
+            "position": 3
+        },
+        {
+            "token": "plus",
+            "start_offset": 10,
+            "end_offset": 14,
+            "type": "ENGLISH",
+            "position": 4
+        },
+        {
+            "token": "4g",
+            "start_offset": 15,
+            "end_offset": 17,
+            "type": "LETTER",
+            "position": 5
+        },
+        {
+            "token": "4",
+            "start_offset": 15,
+            "end_offset": 16,
+            "type": "ARABIC",
+            "position": 6
+        },
+        {
+            "token": "g",
+            "start_offset": 16,
+            "end_offset": 17,
+            "type": "ENGLISH",
+            "position": 7
+        },
+        {
+            "token": "黑色",
+            "start_offset": 18,
+            "end_offset": 20,
+            "type": "CN_WORD",
+            "position": 8
+        },
+        {
+            "token": "美版",
+            "start_offset": 21,
+            "end_offset": 23,
+            "type": "CN_WORD",
+            "position": 9
+        },
+        {
+            "token": "无",
+            "start_offset": 24,
+            "end_offset": 25,
+            "type": "CN_CHAR",
+            "position": 10
+        },
+        {
+            "token": "锁",
+            "start_offset": 25,
+            "end_offset": 26,
+            "type": "CN_CHAR",
+            "position": 11
+        }
+    ]
+}
+
+</code></pre></div></div>
+
+<blockquote>
+  <p>但是问题是，这只是解决了我的简单设想客户是这么简单的输入搜索。但是实际却不是，复杂的多。</p>
+</blockquote>
+
+<p>解决方案是将搜索分析都改为ik_max_word，这样搜索词和文章的颗粒度都分的很细。</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl -XPOST http://localhost:9200/model/_mapping -H 'Content-Type:application/json' -d'
+{
+        "properties": {
+            "name": {
+                "type": "text",
+                "analyzer": "ik_max_word",
+                "search_analyzer": "ik_max_word"
+            }
+        }
+
+}'
+</code></pre></div></div>
+
+<ul>
+  <li>注意的是，已经写入doc数据是不能修改的哦！</li>
+</ul>
+
+<h2 id="后记">后记</h2>
+<p>1、去掉空格这种方案是听老大说的，太过信任和自己的懒惰，没实际去测试，导致进坑多时。</p>
+
+<p>2、探究技术要优先多看官方手册，其他来源资料只会让自己乱上加乱。</p>
+
+<p>3、功能流程要测一遍，很重要，处处都可能留下bug。错了之后数据乱，就更难调了。</p>
+
+<h2 id="参考">参考</h2>
+<ul>
+  <li>1、<a href="https://github.com/medcl/elasticsearch-analysis-ik">GitHub - medcl/elasticsearch-analysis-ik: The IK Analysis plugin integrates Lucene IK analyzer into elasticsearch, support customized dictionary.</a></li>
+</ul>
+
+
+                <hr>
+
+                <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/4.0/80x15.png" /></a><br />本作品采用<a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/">CC BY-NC-ND 4.0</a>进行许可。转载，请注明原作者 Zzhpeng 及本文源链接。
+
+                <hr>
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/disk-extend.html" data-toggle="tooltip" data-placement="top" title="云服务器磁盘扩容">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                </ul>
+
+                <!-- Utteranc -->
+
+                <script src="https://utteranc.es/client.js"
+                        repo="fromChinaBoy/fromChinaBoy.github.io"
+                        issue-term="pathname"
+                        theme="github-light"
+                        crossorigin="anonymous"
+                        async>
+                </script>
+                <!-- Share botton -->
+                <!-- Go to www.addthis.com/dashboard to customize your tools --> <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-5caaedc5f9567124"></script>
+
+            </div>
+        </div>
+     </div>
+  </article>
+</script>
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+  
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    <!-- kill the Facebook and Weibo -->
+                    <li>
+                        <a href="/feed.xml">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+
+                    
+                    <li>
+                        <a href="https://twitter.com/zzhpeng">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+
+                    
+                    <li>
+                        <a href="https://github.com/fromChinaBoy">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <!--
+                    
+                    <li>
+                        <a href="http://www.douban.com/people/zzhpeng">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-douban fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    -->
+
+                    <!--
+                    
+                    <li>
+                        <a href="https://www.facebook.com/zzhpeng">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    -->
+
+                    
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/zzhpeng">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                    
+
+                    <!--
+                    
+                    <li>
+                        <a target="_blank" href="http://weibo.com/zzhpeng">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    -->
+
+                </ul>
+                <p class="copyright text-muted">
+                &copy; 2011~2019 zzhpeng ♪ Powered by Jekyll.
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js "></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js "></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/clean-blog.min.js "></script>
+
+
+
+
+<!-- Highlight.js -->
+<!--<script>-->
+    <!--async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js",function(){-->
+        <!--hljs.initHighlightingOnLoad();-->
+    <!--})-->
+<!--</script>-->
+<!--<link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">-->
+
+
+</body>
+
+</html>

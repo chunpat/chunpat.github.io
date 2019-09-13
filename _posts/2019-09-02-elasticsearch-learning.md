@@ -334,6 +334,12 @@ static function searchDocuments($index,array $body){
 curl -X GET "http://192.168.199.254:9200/_cat/indices?v"
 ![](http://img.zzhpeng.cn/Fo3ZNz38wF3ij-z9_kAZ0RAAwCzJ)
 
+### 磁盘容量超过90%会不给链接操作
+报错信息
+```
+low disk watermark [85%] exceeded on …，replicas will not be assigned to this node
+```
+
 ### 高频写入down机
 待。。。
 

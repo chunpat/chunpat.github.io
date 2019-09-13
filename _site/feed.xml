@@ -7,6 +7,357 @@
 		<atom:link href="/" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>elasticsearch业务问题</title>
+				<description>&lt;h2 id=&quot;场景&quot;&gt;场景&lt;/h2&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;要搜索的内容&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;P92325 iphone 7s plus 4G 黑色 美版 无锁
+P92324 iphone 7 128g 金色 有锁 通用版
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;以为客户那边要求是，想的很简单&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;1、iphone7splus  搜索-&amp;gt;P92325 iphone 7s plus 4G 黑色 美版 无锁&lt;/li&gt;
+  &lt;li&gt;2、iphone 7s plus  搜索-&amp;gt;P92325 iphone 7s plus 4G 黑色 美版 无锁&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;实际输入情况,五花八门，还有这些情况&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;1、iphone7splus  搜索-&amp;gt;P92325 iphone 7s plus 4G 黑色 美版 无锁&lt;/li&gt;
+  &lt;li&gt;2、iphone 7s plus   搜索-&amp;gt;P92325 iphone 7s plus 4G 黑色 美版 无锁&lt;/li&gt;
+  &lt;li&gt;3、iphone7sp 美版   搜索-&amp;gt;P92325 iphone 7s plus 4G 黑色 美版 无锁&lt;/li&gt;
+  &lt;li&gt;4、iphone7 128g 美版   搜索-&amp;gt;P92324 iphone 7 128g 金色 有锁 通用版&lt;/li&gt;
+  &lt;li&gt;5、iphone7s plus 美版   搜索-&amp;gt;iphone 7s plus 4G 黑色 美版 无锁&lt;/li&gt;
+  &lt;li&gt;。。。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;解决路程&quot;&gt;解决路程&lt;/h2&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;错误解决方案，将搜索内容去掉空格，然后DOC的文章分析用IK分词器ik_max_word，
+搜索用ik_smart,然后将搜索的词也去掉空格。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h3 id=&quot;1创建索引&quot;&gt;1、创建索引&lt;/h3&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;curl -XPUT http://localhost:9200/model
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;2设置索引属性map&quot;&gt;2、设置索引属性map&lt;/h3&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;curl -XPOST http://localhost:9200/model/_mapping -H 'Content-Type:application/json' -d'
+{
+        &quot;properties&quot;: {
+            &quot;name&quot;: {
+                &quot;type&quot;: &quot;text&quot;,
+                &quot;analyzer&quot;: &quot;ik_max_word&quot;,
+                &quot;search_analyzer&quot;: &quot;ik_smart&quot;
+            }
+        }
+
+}'
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;3写入doc数据&quot;&gt;3、写入doc数据&lt;/h3&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;curl -XPOST http://localhost:9200/model/_create/1 -H 'Content-Type:application/json' -d'
+{&quot;content&quot;:&quot;P92325 iphone7splus4G黑色美版无锁&quot;}
+'
+curl -XPOST http://localhost:9200/model/_create/2 -H 'Content-Type:application/json' -d'
+{&quot;content&quot;:&quot;P92324 iphone7128g金色有锁通用版&quot;}
+'
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;h3 id=&quot;4查看doc状态&quot;&gt;4、查看doc状态&lt;/h3&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;curl -X GET &quot;http://localhost:9200/_cat/indices?v&quot;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;5搜索数据&quot;&gt;5、搜索数据&lt;/h3&gt;
+
+&lt;p&gt;iphone7splus 或 iphone 7s plus 查找搜索出 P92325 iphone 7s plus 4G 黑色 美版 无锁&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;curl -XPOST http://localhost:9200/model/_search  -H 'Content-Type:application/json' -d'
+{
+    &quot;size&quot; : 100,
+    &quot;query&quot; : { &quot;match&quot; : { &quot;content&quot; : &quot;iphone7splus&quot; }}
+  
+}
+'
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;结果，啥都没：&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;{
+	&quot;took&quot;: 249,
+	&quot;timed_out&quot;: false,
+	&quot;_shards&quot;: {
+		&quot;total&quot;: 1,
+		&quot;successful&quot;: 1,
+		&quot;skipped&quot;: 0,
+		&quot;failed&quot;: 0
+	},
+	&quot;hits&quot;: {
+		&quot;total&quot;: {
+			&quot;value&quot;: 0,
+			&quot;relation&quot;: &quot;eq&quot;
+		},
+		&quot;max_score&quot;: null,
+		&quot;hits&quot;: []
+	}
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;为什么搜不出（一），因为P92325 iphone7splus4G黑色美版无锁 的文章分析不会出现iphone7splus。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;搜索词ik_smart分析&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;curl -XGET &quot;http://localhost:9200/model/_analyze&quot; -H 'Content-Type: application/json' -d'
+{
+   &quot;text&quot;:&quot;iphone7splus&quot;,&quot;tokenizer&quot;: &quot;ik_smart&quot;
+}'
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;结果出现&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;{
+	&quot;tokens&quot;: [{
+		&quot;token&quot;: &quot;iphone7splus&quot;,
+		&quot;start_offset&quot;: 0,
+		&quot;end_offset&quot;: 12,
+		&quot;type&quot;: &quot;LETTER&quot;,
+		&quot;position&quot;: 0
+	}]
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;查找文ik_max_word分析&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;curl -XGET &quot;http://localhost:9200/model/_analyze&quot; -H 'Content-Type: application/json' -d'
+{
+   &quot;text&quot;:&quot;iphone7splus4G黑色美版无锁&quot;,&quot;tokenizer&quot;: &quot;ik_max_word&quot;
+}'
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;结果，不会出现iphone7splus&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;
+{
+    &quot;tokens&quot;: [
+        {
+            &quot;token&quot;: &quot;iphone7splus4g&quot;,
+            &quot;start_offset&quot;: 0,
+            &quot;end_offset&quot;: 14,
+            &quot;type&quot;: &quot;LETTER&quot;,
+            &quot;position&quot;: 0
+        },
+        {
+            &quot;token&quot;: &quot;iphone&quot;,
+            &quot;start_offset&quot;: 0,
+            &quot;end_offset&quot;: 6,
+            &quot;type&quot;: &quot;ENGLISH&quot;,
+            &quot;position&quot;: 1
+        },
+        {
+            &quot;token&quot;: &quot;7&quot;,
+            &quot;start_offset&quot;: 6,
+            &quot;end_offset&quot;: 7,
+            &quot;type&quot;: &quot;ARABIC&quot;,
+            &quot;position&quot;: 2
+        },
+        {
+            &quot;token&quot;: &quot;splus&quot;,
+            &quot;start_offset&quot;: 7,
+            &quot;end_offset&quot;: 12,
+            &quot;type&quot;: &quot;ENGLISH&quot;,
+            &quot;position&quot;: 3
+        },
+        {
+            &quot;token&quot;: &quot;4&quot;,
+            &quot;start_offset&quot;: 12,
+            &quot;end_offset&quot;: 13,
+            &quot;type&quot;: &quot;ARABIC&quot;,
+            &quot;position&quot;: 4
+        },
+        {
+            &quot;token&quot;: &quot;g&quot;,
+            &quot;start_offset&quot;: 13,
+            &quot;end_offset&quot;: 14,
+            &quot;type&quot;: &quot;ENGLISH&quot;,
+            &quot;position&quot;: 5
+        },
+        {
+            &quot;token&quot;: &quot;黑色&quot;,
+            &quot;start_offset&quot;: 14,
+            &quot;end_offset&quot;: 16,
+            &quot;type&quot;: &quot;CN_WORD&quot;,
+            &quot;position&quot;: 6
+        },
+        {
+            &quot;token&quot;: &quot;美版&quot;,
+            &quot;start_offset&quot;: 16,
+            &quot;end_offset&quot;: 18,
+            &quot;type&quot;: &quot;CN_WORD&quot;,
+            &quot;position&quot;: 7
+        },
+        {
+            &quot;token&quot;: &quot;无&quot;,
+            &quot;start_offset&quot;: 18,
+            &quot;end_offset&quot;: 19,
+            &quot;type&quot;: &quot;CN_CHAR&quot;,
+            &quot;position&quot;: 8
+        },
+        {
+            &quot;token&quot;: &quot;锁&quot;,
+            &quot;start_offset&quot;: 19,
+            &quot;end_offset&quot;: 20,
+            &quot;type&quot;: &quot;CN_CHAR&quot;,
+            &quot;position&quot;: 9
+        }
+    ]
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;所以说，去掉空格方案是不行的，那就不去掉咯&lt;/p&gt;
+
+&lt;p&gt;分析语句&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;curl -XGET &quot;http://localhost:9200/model/_analyze&quot; -H 'Content-Type: application/json' -d'
+{
+   &quot;text&quot;:&quot;iphone 7s plus 4G 黑色 美版 无锁&quot;,&quot;tokenizer&quot;: &quot;ik_max_word&quot;
+}'
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;结果，还是没有iphone7splus组合，那么搜索哪里也不去掉空格吧。这样就可以搜索到了。&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;{
+    &quot;tokens&quot;: [
+        {
+            &quot;token&quot;: &quot;iphone&quot;,
+            &quot;start_offset&quot;: 0,
+            &quot;end_offset&quot;: 6,
+            &quot;type&quot;: &quot;ENGLISH&quot;,
+            &quot;position&quot;: 0
+        },
+        {
+            &quot;token&quot;: &quot;7s&quot;,
+            &quot;start_offset&quot;: 7,
+            &quot;end_offset&quot;: 9,
+            &quot;type&quot;: &quot;LETTER&quot;,
+            &quot;position&quot;: 1
+        },
+        {
+            &quot;token&quot;: &quot;7&quot;,
+            &quot;start_offset&quot;: 7,
+            &quot;end_offset&quot;: 8,
+            &quot;type&quot;: &quot;ARABIC&quot;,
+            &quot;position&quot;: 2
+        },
+        {
+            &quot;token&quot;: &quot;s&quot;,
+            &quot;start_offset&quot;: 8,
+            &quot;end_offset&quot;: 9,
+            &quot;type&quot;: &quot;ENGLISH&quot;,
+            &quot;position&quot;: 3
+        },
+        {
+            &quot;token&quot;: &quot;plus&quot;,
+            &quot;start_offset&quot;: 10,
+            &quot;end_offset&quot;: 14,
+            &quot;type&quot;: &quot;ENGLISH&quot;,
+            &quot;position&quot;: 4
+        },
+        {
+            &quot;token&quot;: &quot;4g&quot;,
+            &quot;start_offset&quot;: 15,
+            &quot;end_offset&quot;: 17,
+            &quot;type&quot;: &quot;LETTER&quot;,
+            &quot;position&quot;: 5
+        },
+        {
+            &quot;token&quot;: &quot;4&quot;,
+            &quot;start_offset&quot;: 15,
+            &quot;end_offset&quot;: 16,
+            &quot;type&quot;: &quot;ARABIC&quot;,
+            &quot;position&quot;: 6
+        },
+        {
+            &quot;token&quot;: &quot;g&quot;,
+            &quot;start_offset&quot;: 16,
+            &quot;end_offset&quot;: 17,
+            &quot;type&quot;: &quot;ENGLISH&quot;,
+            &quot;position&quot;: 7
+        },
+        {
+            &quot;token&quot;: &quot;黑色&quot;,
+            &quot;start_offset&quot;: 18,
+            &quot;end_offset&quot;: 20,
+            &quot;type&quot;: &quot;CN_WORD&quot;,
+            &quot;position&quot;: 8
+        },
+        {
+            &quot;token&quot;: &quot;美版&quot;,
+            &quot;start_offset&quot;: 21,
+            &quot;end_offset&quot;: 23,
+            &quot;type&quot;: &quot;CN_WORD&quot;,
+            &quot;position&quot;: 9
+        },
+        {
+            &quot;token&quot;: &quot;无&quot;,
+            &quot;start_offset&quot;: 24,
+            &quot;end_offset&quot;: 25,
+            &quot;type&quot;: &quot;CN_CHAR&quot;,
+            &quot;position&quot;: 10
+        },
+        {
+            &quot;token&quot;: &quot;锁&quot;,
+            &quot;start_offset&quot;: 25,
+            &quot;end_offset&quot;: 26,
+            &quot;type&quot;: &quot;CN_CHAR&quot;,
+            &quot;position&quot;: 11
+        }
+    ]
+}
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;但是问题是，这只是解决了我的简单设想客户是这么简单的输入搜索。但是实际却不是，复杂的多。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;解决方案是将搜索分析都改为ik_max_word，这样搜索词和文章的颗粒度都分的很细。&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;curl -XPOST http://localhost:9200/model/_mapping -H 'Content-Type:application/json' -d'
+{
+        &quot;properties&quot;: {
+            &quot;name&quot;: {
+                &quot;type&quot;: &quot;text&quot;,
+                &quot;analyzer&quot;: &quot;ik_max_word&quot;,
+                &quot;search_analyzer&quot;: &quot;ik_max_word&quot;
+            }
+        }
+
+}'
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;注意的是，已经写入doc数据是不能修改的哦！&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;后记&quot;&gt;后记&lt;/h2&gt;
+&lt;p&gt;1、去掉空格这种方案是听老大说的，太过信任和自己的懒惰，没实际去测试，导致进坑多时。&lt;/p&gt;
+
+&lt;p&gt;2、探究技术要优先多看官方手册，其他来源资料只会让自己乱上加乱。&lt;/p&gt;
+
+&lt;p&gt;3、功能流程要测一遍，很重要，处处都可能留下bug。错了之后数据乱，就更难调了。&lt;/p&gt;
+
+&lt;h2 id=&quot;参考&quot;&gt;参考&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;1、&lt;a href=&quot;https://github.com/medcl/elasticsearch-analysis-ik&quot;&gt;GitHub - medcl/elasticsearch-analysis-ik: The IK Analysis plugin integrates Lucene IK analyzer into elasticsearch, support customized dictionary.&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+				<pubDate>Thu, 12 Sep 2019 00:00:00 +0800</pubDate>
+				<link>/elasticsearch-actual_problem.html</link>
+				<guid isPermaLink="true">/elasticsearch-actual_problem.html</guid>
+			</item>
+		
+			<item>
 				<title>云服务器磁盘扩容</title>
 				<description>&lt;h1 id=&quot;操作前记得保存数据镜像&quot;&gt;操作前记得保存数据，镜像&lt;/h1&gt;
 &lt;p&gt;数据丢失，概不负责！！&lt;/p&gt;
@@ -63,7 +414,9 @@ https://help.aliyun.com/document_detail/111738.html?spm=a2c4g.11186623.4.1.74dc7
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;h1 id=&quot;参考&quot;&gt;参考&lt;/h1&gt;
-&lt;p&gt;1、&lt;a href=&quot;https://www.cnblogs.com/diantong/p/8820779.html&quot;&gt;Linux命令之fdisk - 苦逼运维 - 博客园&lt;/a&gt;&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;1、&lt;a href=&quot;https://www.cnblogs.com/diantong/p/8820779.html&quot;&gt;Linux命令之fdisk - 苦逼运维 - 博客园&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
 
 </description>
 				<pubDate>Tue, 10 Sep 2019 00:00:00 +0800</pubDate>
@@ -696,6 +1049,11 @@ static function searchDocuments($index,array $body){
 &lt;p&gt;curl -X GET “http://192.168.199.254:9200/_cat/indices?v”
 &lt;img src=&quot;http://img.zzhpeng.cn/Fo3ZNz38wF3ij-z9_kAZ0RAAwCzJ&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
+&lt;h3 id=&quot;磁盘容量超过90会不给链接操作&quot;&gt;磁盘容量超过90%会不给链接操作&lt;/h3&gt;
+&lt;p&gt;报错信息&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;low disk watermark [85%] exceeded on …，replicas will not be assigned to this node
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
 &lt;h3 id=&quot;高频写入down机&quot;&gt;高频写入down机&lt;/h3&gt;
 &lt;p&gt;待。。。&lt;/p&gt;
 
@@ -1068,75 +1426,6 @@ ps aux | &lt;span class=&quot;nb&quot;&gt;tee&lt;/span&gt; &lt;span class=&quot;
 				<pubDate>Fri, 17 May 2019 00:00:00 +0800</pubDate>
 				<link>/linux-quick-button.html</link>
 				<guid isPermaLink="true">/linux-quick-button.html</guid>
-			</item>
-		
-			<item>
-				<title>gitlab搭建和数据迁移</title>
-				<description>&lt;h2 id=&quot;ubuntu-搭建-gitlab&quot;&gt;Ubuntu 搭建 gitlab&lt;/h2&gt;
-&lt;p&gt;官网安装介绍： https://about.gitlab.com/install/
-github： https://github.com/gitlabhq/gitlabhq&lt;/p&gt;
-
-&lt;h3 id=&quot;1首先是安装一些依赖服务&quot;&gt;1.首先是安装一些依赖服务&lt;/h3&gt;
-&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;apt-get &lt;span class=&quot;nb&quot;&gt;install &lt;/span&gt;curl openssh-server ca-certificates postfix
-
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h3 id=&quot;2安装gitlab&quot;&gt;2.安装gitlab&lt;/h3&gt;
-&lt;blockquote&gt;
-  &lt;p&gt;注意：如果有旧gitlab要数据迁移的话，需要和旧gitlab的版本一致。&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;我下的是Ubuntu18
-2.1、更新源&lt;/p&gt;
-&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;curl &lt;span class=&quot;nt&quot;&gt;-s&lt;/span&gt; https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.deb.sh | &lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;bash
-
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p&gt;2.2、安装&lt;/p&gt;
-&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;apt-get &lt;span class=&quot;nb&quot;&gt;install &lt;/span&gt;gitlab-ce&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;11.7.0-ce.0
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h3 id=&quot;3配置&quot;&gt;3.配置&lt;/h3&gt;
-&lt;p&gt;打开/etc/gitlab/gitlab.rb,将external_url = ‘http://git.example.com’修改为自己的域名地址：http://example.com，默认为80端口，如要使用其他端口后面加上端口号，如：http://127.0.0.1:8080。
-更新配置&lt;/p&gt;
-&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;gitlab-ctl reconfigure
-
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h3 id=&quot;4操作&quot;&gt;4.操作&lt;/h3&gt;
-&lt;ul&gt;
-  &lt;li&gt;sudo gitlab-ctl stop&lt;/li&gt;
-  &lt;li&gt;sudo gitlab-ctl start&lt;/li&gt;
-  &lt;li&gt;sudo gitlab-ctl restart&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;参考：https://www.cnblogs.com/m2ez/p/7063606.html&lt;/p&gt;
-
-&lt;h2 id=&quot;gitlab搭建的数据迁移&quot;&gt;gitlab搭建的数据迁移&lt;/h2&gt;
-
-&lt;h3 id=&quot;1查看版本&quot;&gt;1.查看版本&lt;/h3&gt;
-&lt;p&gt;cat /opt/gitlab/embedded/service/gitlab-rails/VERSION&lt;/p&gt;
-
-&lt;h3 id=&quot;2备份旧gitlab数据&quot;&gt;2.备份旧gitlab数据&lt;/h3&gt;
-&lt;p&gt;2.1、备份原a服务器上的的数据
-gitlab-rake gitlab:backup:create RAILS_ENV=production&lt;/p&gt;
-
-&lt;p&gt;PS: 备份后的文件一般是位于/var/opt/gitlab/backups下, 自动生成文件名文件名如1481529483_gitlab_backup.tar&lt;/p&gt;
-
-&lt;h3 id=&quot;3旧gitlab数据转移到新&quot;&gt;3.旧gitlab数据转移到新&lt;/h3&gt;
-&lt;p&gt;将步骤2生成的tar文件拷贝到b服务器上相应的backups目录下
-可以利用scp或者用ftp进行直接拷贝.
-scp username@src_ip:/var/opt/gitlab/backups/1481529483_gitlab_backup.tar /var/opt/gitlab/backups
-PS: username为原服务器的用户名，src_ip原服务器IP地址&lt;/p&gt;
-
-&lt;h3 id=&quot;4-在新服务器恢复数据&quot;&gt;4. 在新服务器恢复数据&lt;/h3&gt;
-&lt;p&gt;gitlab-rake gitlab:backup:restore RAILS_ENV=production BACKUP=1481529483
-PS：BACKUP的时间点必须与原服务器备份后的文件名一致&lt;/p&gt;
-
-&lt;p&gt;参考：https://www.cnblogs.com/wenwei-blog/p/6362829.html&lt;/p&gt;
-</description>
-				<pubDate>Fri, 17 May 2019 00:00:00 +0800</pubDate>
-				<link>/gitlab-migration.html</link>
-				<guid isPermaLink="true">/gitlab-migration.html</guid>
 			</item>
 		
 	</channel>
