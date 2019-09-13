@@ -342,6 +342,7 @@ curl -XPOST http://localhost:9200/model/_mapping -H 'Content-Type:application/js
 
 3、功能流程要测一遍，很重要，处处都可能留下bug。错了之后数据乱，就更难调了。
 
+4、实际业务场景要多了解，多询问一线人员。
 
 ## 参考
 * 1、[GitHub - medcl/elasticsearch-analysis-ik: The IK Analysis plugin integrates Lucene IK analyzer into elasticsearch, support customized dictionary.](https://github.com/medcl/elasticsearch-analysis-ik)
