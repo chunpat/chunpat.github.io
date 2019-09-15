@@ -347,6 +347,8 @@ curl -XPOST http://localhost:9200/model/_create/2 -H 'Content-Type:application/j
 
 &lt;p&gt;3、功能流程要测一遍，很重要，处处都可能留下bug。错了之后数据乱，就更难调了。&lt;/p&gt;
 
+&lt;p&gt;4、实际业务场景要多了解，多询问一线人员。&lt;/p&gt;
+
 &lt;h2 id=&quot;参考&quot;&gt;参考&lt;/h2&gt;
 &lt;ul&gt;
   &lt;li&gt;1、&lt;a href=&quot;https://github.com/medcl/elasticsearch-analysis-ik&quot;&gt;GitHub - medcl/elasticsearch-analysis-ik: The IK Analysis plugin integrates Lucene IK analyzer into elasticsearch, support customized dictionary.&lt;/a&gt;&lt;/li&gt;
@@ -543,11 +545,34 @@ vim ./config/jvm.options&lt;/p&gt;
 			<item>
 				<title>PHP缓冲区</title>
 				<description>&lt;h2 id=&quot;事由&quot;&gt;事由&lt;/h2&gt;
-&lt;p&gt;上一篇文章中，写了关于nginx和php-fpm组合 请求超时的解决方案。
-但是，又遇到个问题就是缓冲区，需要边保持请求连接边打印东西
+&lt;p&gt;上一篇文章中，写了关于nginx和php-fpm组合 请求超时的解决方案,
+设置了保持长时间请求不断。但是，又遇到个问题就是缓冲区，需要边保持请求连接边打印东西
 到浏览器。&lt;/p&gt;
 
 &lt;h2 id=&quot;解决&quot;&gt;解决&lt;/h2&gt;
+&lt;p&gt;涉及php.ini属性概念与修改
+output_buffering
+implicit_flush
+output_handler&lt;/p&gt;
+
+&lt;h3 id=&quot;cli模式的缓冲区强制不开启&quot;&gt;cli模式的缓冲区强制不开启&lt;/h3&gt;
+&lt;p&gt;output_buffering 为off
+implicit_flush 为on&lt;/p&gt;
+
+&lt;h3 id=&quot;php-fpm-才可以用phpini的设置&quot;&gt;php-fpm 才可以用php.ini的设置&lt;/h3&gt;
+
+&lt;p&gt;默认设置是 output_buffering=4096，implicit_flush 为off,所以要缓冲区输出的话就要手动填充或者改配置，然后flush出来。&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;    for ($i = 0; $i&amp;lt; 10;$i++){
+        ob_start();
+        //查看执行情况
+        echo '完成:' .$i . '/100' . PHP_EOL;
+        echo str_repeat(&quot; &quot;, 1024 * 2);//人为将缓冲数据扩充到2k
+
+        ob_end_clean();
+        sleep(1);
+    }
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;h2 id=&quot;参考&quot;&gt;参考&lt;/h2&gt;
 

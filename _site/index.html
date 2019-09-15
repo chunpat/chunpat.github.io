@@ -199,16 +199,15 @@ export JAVA_HOME=/usr/lib/jvm/jav...
         
         <div class="post-content-preview">
             事由
-上一篇文章中，写了关于nginx和php-fpm组合 请求超时的解决方案。
-但是，又遇到个问题就是缓冲区，需要边保持请求连接边打印东西
+上一篇文章中，写了关于nginx和php-fpm组合 请求超时的解决方案,
+设置了保持长时间请求不断。但是，又遇到个问题就是缓冲区，需要边保持请求连接边打印东西
 到浏览器。
 
 解决
-
-参考
-
-1、关于PHP 刷新缓冲区操作(边执行边输出)简单分析
-2、深入理解php的输出缓冲区(output buffer) - ...
+涉及php.ini属性概念与修改
+output_buffering
+implicit_flush
+outp...
         </div>
     </a>
     <p class="post-meta">Posted by zzhpeng on September 7, 2019</p>

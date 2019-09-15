@@ -115,11 +115,34 @@
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 post-container">
 
                 <h2 id="事由">事由</h2>
-<p>上一篇文章中，写了关于nginx和php-fpm组合 请求超时的解决方案。
-但是，又遇到个问题就是缓冲区，需要边保持请求连接边打印东西
+<p>上一篇文章中，写了关于nginx和php-fpm组合 请求超时的解决方案,
+设置了保持长时间请求不断。但是，又遇到个问题就是缓冲区，需要边保持请求连接边打印东西
 到浏览器。</p>
 
 <h2 id="解决">解决</h2>
+<p>涉及php.ini属性概念与修改
+output_buffering
+implicit_flush
+output_handler</p>
+
+<h3 id="cli模式的缓冲区强制不开启">cli模式的缓冲区强制不开启</h3>
+<p>output_buffering 为off
+implicit_flush 为on</p>
+
+<h3 id="php-fpm-才可以用phpini的设置">php-fpm 才可以用php.ini的设置</h3>
+
+<p>默认设置是 output_buffering=4096，implicit_flush 为off,所以要缓冲区输出的话就要手动填充或者改配置，然后flush出来。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    for ($i = 0; $i&lt; 10;$i++){
+        ob_start();
+        //查看执行情况
+        echo '完成:' .$i . '/100' . PHP_EOL;
+        echo str_repeat(" ", 1024 * 2);//人为将缓冲数据扩充到2k
+
+        ob_end_clean();
+        sleep(1);
+    }
+</code></pre></div></div>
 
 <h2 id="参考">参考</h2>
 
