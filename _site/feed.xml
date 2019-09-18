@@ -7,6 +7,50 @@
 		<atom:link href="/" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>jenkins启动一段时间后掉线</title>
+				<description>&lt;h2 id=&quot;问题&quot;&gt;问题&lt;/h2&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;和gitlab使用的端口8080冲突，修改为了8088。然后每次jenkins启动过一段时间后会自动的down服务，
+启动命令是service jenkins start。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;使用lsof -i:8080查看端口使用情况：
+&lt;img src=&quot;http://img.zzhpeng.cn/FhgyPfOl3dr5UBcyGy0iMjavJ_3c&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;解决路程&quot;&gt;解决路程&lt;/h2&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;尝试用另外一种方法启动,但还是使用旧的端口问题。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://img.zzhpeng.cn/Fiy7cWxbK29pDZZdUnqaosW5BDfC&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;搜索了下，找到了可以直接在启动后面加参数，改使用端口。&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;java -jar jenkins.war --ajp13Port=-1 --httpPort=8088
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;挂在后台&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;nohup java -jar jenkins.war --ajp13Port=-1 --httpPort=8088 &amp;amp;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;再次出现问题&quot;&gt;再次出现问题&lt;/h2&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;两种启动的数据文件不是用同一个的，用挂在后台的是新的数据库，需要重新注册admin，重新配置。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;解决~~待。。。。&lt;/p&gt;
+
+&lt;h2 id=&quot;参考&quot;&gt;参考&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;1、&lt;a href=&quot;https://blog.csdn.net/panruifang/article/details/14223323&quot;&gt;Jenkins 安装Address already in use问题&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+				<pubDate>Wed, 18 Sep 2019 00:00:00 +0800</pubDate>
+				<link>/jenkins-auto-down.html</link>
+				<guid isPermaLink="true">/jenkins-auto-down.html</guid>
+			</item>
+		
+			<item>
 				<title>elasticsearch业务问题</title>
 				<description>&lt;h2 id=&quot;场景&quot;&gt;场景&lt;/h2&gt;
 &lt;blockquote&gt;
@@ -1396,61 +1440,6 @@ server{
 				<pubDate>Fri, 24 May 2019 00:00:00 +0800</pubDate>
 				<link>/private-composer-packagist.html</link>
 				<guid isPermaLink="true">/private-composer-packagist.html</guid>
-			</item>
-		
-			<item>
-				<title>unix bash快捷键</title>
-				<description>&lt;h2 id=&quot;linuxunix下shell快捷键操作集合&quot;&gt;Linux/Unix下Shell快捷键操作集合&lt;/h2&gt;
-
-&lt;h3 id=&quot;快速搜索&quot;&gt;快速搜索&lt;/h3&gt;
-&lt;ul&gt;
-  &lt;li&gt;1) ctrl + r 组合键来进入历史搜索模式在history表中查询某条过往指令，找到需要重复执行的命令后，按回车键即可。&lt;/li&gt;
-  &lt;li&gt;2) !!：重复执行上一条指令&lt;/li&gt;
-  &lt;li&gt;3) !a：重复执行上一条以a为首的指令&lt;/li&gt;
-  &lt;li&gt;4) !number：重复执行上一条在history表中记录号码为number的指令&lt;/li&gt;
-  &lt;li&gt;5) !-number：重复执行前第number条指令&lt;/li&gt;
-  &lt;li&gt;6) !$：表示获得上一条命令中的最后一项内容。e.g 先来看一个例子： mkdir /exampledir  &amp;amp;&amp;amp; cd !$&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&quot;编辑的快捷键&quot;&gt;编辑的快捷键&lt;/h3&gt;
-&lt;ul&gt;
-  &lt;li&gt;1) Ctrl + a：将光标定位到命令的开头&lt;/li&gt;
-  &lt;li&gt;2) Ctrl + e：将光标定位到命令的结尾，与上一个快捷键相反&lt;/li&gt;
-  &lt;li&gt;3) Ctrl + u：剪切光标之前的内容&lt;/li&gt;
-  &lt;li&gt;4) Ctrl + k：剪切光标之后的内容，与上一个快捷键相反&lt;/li&gt;
-  &lt;li&gt;5) Ctrl + y：粘贴Ctrl + u和Ctrl + k所剪切的内容&lt;/li&gt;
-  &lt;li&gt;6) Ctrl + t：交换光标之前两个字符的顺序&lt;/li&gt;
-  &lt;li&gt;7) Ctrl + w：删除光标左边的参数（选项）或内容&lt;/li&gt;
-  &lt;li&gt;8) Ctrl + l：清屏&lt;/li&gt;
-  &lt;li&gt;9) Ctrl + d：输入已结束。在shell下相当于一个exit&lt;/li&gt;
-  &lt;li&gt;10) Ctrl + c：键盘中断请求。&lt;/li&gt;
-  &lt;li&gt;11) Ctrl + s &amp;amp; Ctrl + q：暂停/恢复屏幕输出&lt;/li&gt;
-  &lt;li&gt;12) Ctrl + n(↓)：显示下一条命令&lt;/li&gt;
-  &lt;li&gt;13) Ctrl + p(↑)：显示上一条命令&lt;/li&gt;
-  &lt;li&gt;14) Ctrl + b：向回移动&lt;/li&gt;
-  &lt;li&gt;15) Ctrl + f： 向前移动&lt;/li&gt;
-  &lt;li&gt;16) Ctrl + shift +↓：终端向下滚动&lt;/li&gt;
-  &lt;li&gt;17) Ctrl + shift +↑：终端向上滚动&lt;/li&gt;
-  &lt;li&gt;18) Shift+pgup/pgdown：终端上下翻页滚动&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&quot;处理作业&quot;&gt;处理作业&lt;/h3&gt;
-&lt;p&gt;首先，使用 Ctrl + z 快捷键可以让正在执行的命令挂起。如果要让该进程在后台执行，那么可以执行 bg 命令。而 fg 命令则可以让该进程重新回到前台来。使用 jobs 命令能够查看到哪些进程在后台执行。 你也可以在 fg 或 bg 命令中使用作业 id，如： fg %3 又如： bg %7&lt;/p&gt;
-
-&lt;h3 id=&quot;使用管道grep&quot;&gt;使用管道grep&lt;/h3&gt;
-&lt;p&gt;例子：&lt;/p&gt;
-&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;ps aux | &lt;span class=&quot;nb&quot;&gt;grep &lt;/span&gt;init
-ps aux | &lt;span class=&quot;nb&quot;&gt;tee &lt;/span&gt;filename | &lt;span class=&quot;nb&quot;&gt;grep &lt;/span&gt;init
-ps aux | &lt;span class=&quot;nb&quot;&gt;tee&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-a&lt;/span&gt; filename | &lt;span class=&quot;nb&quot;&gt;grep &lt;/span&gt;init
-
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h3 id=&quot;将标准输出保存为文件&quot;&gt;将标准输出保存为文件&lt;/h3&gt;
-&lt;p&gt;你可以将命令的标准输出内容保存到一个文件中，举例如下： ps aux &amp;gt; filename 注意其中的“&amp;gt;”符号。 你也可以将这些输出内容追加到一个已存在的文件中： ps aux » filename&lt;/p&gt;
-</description>
-				<pubDate>Fri, 17 May 2019 00:00:00 +0800</pubDate>
-				<link>/linux-quick-button.html</link>
-				<guid isPermaLink="true">/linux-quick-button.html</guid>
 			</item>
 		
 	</channel>
