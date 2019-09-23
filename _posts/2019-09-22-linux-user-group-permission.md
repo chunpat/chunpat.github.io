@@ -117,3 +117,7 @@ upstream gitlab-workhorse {
 ```
 cat /etc/group
 ```
+
+查看socket文件权限
+
+![](http://img.zzhpeng.cn/FgyLa8Dd6ArOr3F--bvO2qDsoInw)

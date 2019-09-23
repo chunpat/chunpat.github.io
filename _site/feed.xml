@@ -115,6 +115,10 @@ sudo gitlab-ctl restart
 &lt;p&gt;如何查看系统组情况和修改&lt;/p&gt;
 &lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;cat /etc/group
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;查看socket文件权限&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://img.zzhpeng.cn/FgyLa8Dd6ArOr3F--bvO2qDsoInw&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 </description>
 				<pubDate>Sun, 22 Sep 2019 00:00:00 +0800</pubDate>
 				<link>/linux-user-group-permission.html</link>
