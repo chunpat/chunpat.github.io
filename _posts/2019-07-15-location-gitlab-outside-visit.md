@@ -140,10 +140,10 @@ https://stackoverflow.com/questions/35327882/what-permissions-does-nginx-need-fo
 
 
 
-### 资源列表
-* frp的github仓库：https://github.com/fatedier/frp
+### 参考
+* 1、[frp的github仓库](https://github.com/fatedier/frp)
 
-* gitlab的github仓库：https://github.com/gitlabhq/gitlabhq
+* 2、[gitlab的github仓库](https://github.com/gitlabhq/gitlabhq)
 
-* gitlab的docker安装指导文档：https://docs.gitlab.com/omnibus/docker/
+* 3、[gitlab的docker安装指导文档](https://docs.gitlab.com/omnibus/docker/)
 

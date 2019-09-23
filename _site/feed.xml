@@ -7,6 +7,121 @@
 		<atom:link href="/" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>gitlab出现502问题</title>
+				<description>&lt;h3 id=&quot;问题概述&quot;&gt;问题概述&lt;/h3&gt;
+&lt;p&gt;上周，公司内部服务器重启，自搭建的gitlab仓库返回502。在这里先说明gitlab的搭建情况，用了宝塔管理，已经有了
+nginx，所以不用gitlab自带的nginx服务，修改过程如下。&lt;/p&gt;
+
+&lt;p&gt;1、修改配置文件，禁用内嵌 nginx&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo vim /etc/gitlab/gitlab.rb
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;修改一下配置&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# 关闭nginx服务
+nginx['enable'] = false
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;应用修改的配置&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# 重新加载配置
+sudo gitlab-ctl reconfigure
+# 重新启动
+sudo gitlab-ctl restart
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;2、设置宝塔的nginx代理转发,如下&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# 添加upstream指向gitlab
+upstream gitlab-workhorse {
+  server unix:/var/opt/gitlab/gitlab-workhorse/socket  fail_timeout=0;
+}
+
+
+# 在server中添加
+server
+{
+
+    ......
+
+    location / {
+            # serve static files from defined root folder;.
+            # @gitlab-workhorse is a named location for the upstream fallback, see below
+            try_files $uri $uri/index.html $uri.html @gitlab-workhorse;
+    }
+
+    location @gitlab-workhorse {
+            # If you use https make sure you disable gzip compression 
+            # to be safe against BREACH attack
+
+            proxy_read_timeout 300; # Some requests take more than 30 seconds.
+            proxy_connect_timeout 300; # Some requests take more than 30 seconds.
+            proxy_redirect     off;
+
+            proxy_set_header   X-Forwarded-Proto $scheme;
+            proxy_set_header   Host              $http_host;
+            proxy_set_header   X-Real-IP         $remote_addr;
+            proxy_set_header   X-Forwarded-For   $proxy_add_x_forwarded_for;
+            proxy_set_header   X-Frame-Options   SAMEORIGIN;
+
+            proxy_pass http://gitlab-workhorse;
+    }
+
+    location ~ ^/(assets)/  {
+            root /opt/gitlab/embedded/service/gitlab-rails/public;
+            # gzip_static on; # to serve pre-gzipped version
+            expires max;
+            add_header Cache-Control public;
+    }
+
+    .....
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;然后报出了502，查看nginx的error日志，提示权限问题。
+&lt;img src=&quot;http://img.zzhpeng.cn/Fkn0XGjtnpSN-0bTrMNeFeWo3wxr&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;解决过程&quot;&gt;解决过程&lt;/h3&gt;
+&lt;p&gt;看到/etc/gitlab/gitlab.rb文件有个说明，当不开启内部的nginx的时候，需要加一个外部的用户。这里的外部用户
+即是指宝塔的nginx开启的用户www。&lt;/p&gt;
+
+&lt;p&gt;1、查看nginx的开启用户
+&lt;img src=&quot;http://img.zzhpeng.cn/FiqxjiPd1NGzUVLRyb9XmszwI9TE&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;2、修改/etc/gitlab/gitlab.rb
+&lt;img src=&quot;http://img.zzhpeng.cn/Fp5IQkW4PcGC4O_-kF_oelDWhQJF&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;应用修改的配置&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# 重新加载配置
+sudo gitlab-ctl reconfigure
+# 重新启动
+sudo gitlab-ctl restart
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;strong&gt;！！！但是，还是不行，还是502问题。你看，理论上没问题啊！&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;这里涉及到了socket文件通讯的问题，一旦建立连接就会一直连接，原权限之类的还是原来的。&lt;/p&gt;
+
+&lt;p&gt;nginx代理流，文件socket服务转发&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;upstream gitlab-workhorse {
+  server unix:/var/opt/gitlab/gitlab-workhorse/socket  fail_timeout=0;
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;所以，需要重启nginx,让它重新加载conf配置文件，重新建立连接&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;额外&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;如何查看系统组情况和修改&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;cat /etc/group
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+</description>
+				<pubDate>Sun, 22 Sep 2019 00:00:00 +0800</pubDate>
+				<link>/linux-user-group-permission.html</link>
+				<guid isPermaLink="true">/linux-user-group-permission.html</guid>
+			</item>
+		
+			<item>
 				<title>jenkins启动一段时间后掉线</title>
 				<description>&lt;h2 id=&quot;问题&quot;&gt;问题&lt;/h2&gt;
 &lt;blockquote&gt;
@@ -1310,16 +1425,16 @@ server{
 
 &lt;p&gt;https://stackoverflow.com/questions/35327882/what-permissions-does-nginx-need-for-the-gitlab-workhorse-socket&lt;/p&gt;
 
-&lt;h3 id=&quot;资源列表&quot;&gt;资源列表&lt;/h3&gt;
+&lt;h3 id=&quot;参考&quot;&gt;参考&lt;/h3&gt;
 &lt;ul&gt;
   &lt;li&gt;
-    &lt;p&gt;frp的github仓库：https://github.com/fatedier/frp&lt;/p&gt;
+    &lt;p&gt;1、&lt;a href=&quot;https://github.com/fatedier/frp&quot;&gt;frp的github仓库&lt;/a&gt;&lt;/p&gt;
   &lt;/li&gt;
   &lt;li&gt;
-    &lt;p&gt;gitlab的github仓库：https://github.com/gitlabhq/gitlabhq&lt;/p&gt;
+    &lt;p&gt;2、&lt;a href=&quot;https://github.com/gitlabhq/gitlabhq&quot;&gt;gitlab的github仓库&lt;/a&gt;&lt;/p&gt;
   &lt;/li&gt;
   &lt;li&gt;
-    &lt;p&gt;gitlab的docker安装指导文档：https://docs.gitlab.com/omnibus/docker/&lt;/p&gt;
+    &lt;p&gt;3、&lt;a href=&quot;https://docs.gitlab.com/omnibus/docker/&quot;&gt;gitlab的docker安装指导文档&lt;/a&gt;&lt;/p&gt;
   &lt;/li&gt;
 &lt;/ul&gt;
 
@@ -1342,104 +1457,6 @@ server{
 				<pubDate>Mon, 03 Jun 2019 00:00:00 +0800</pubDate>
 				<link>/oauth2-slim.html</link>
 				<guid isPermaLink="true">/oauth2-slim.html</guid>
-			</item>
-		
-			<item>
-				<title>搭建私有的Composer Packagist</title>
-				<description>&lt;h3 id=&quot;官方文档和官方源&quot;&gt;官方文档和官方源&lt;/h3&gt;
-&lt;p&gt;官方文档：https://getcomposer.org/doc/articles/handling-private-packages-with-satis.md&lt;/p&gt;
-
-&lt;p&gt;github地址：https://github.com/composer/satis&lt;/p&gt;
-
-&lt;h3 id=&quot;下载源&quot;&gt;下载源&lt;/h3&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;方法一&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;git clone https://github.com/composer/satis.git
-
-&lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;satis &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; composer update
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;方法二&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;composer create-project composer/satis:dev-master
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h3 id=&quot;写satisjson配置&quot;&gt;写satis.json配置&lt;/h3&gt;
-&lt;ul&gt;
-  &lt;li&gt;生成satis.json文件&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;touch &lt;/span&gt;satis.json
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;写入配置&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;
-{
-  &quot;name&quot;: &quot;zzhpeng packages&quot;,
-  
-  &quot;homepage&quot;: &quot;http://packages.example.org&quot;, 
-  
-  &quot;repositories&quot;: [
-    {
-      &quot;type&quot;: &quot;git&quot;,
-      &quot;url&quot;: &quot;https://github.com/FromChinaBoy/Export.git&quot;
-    },
-    {
-      &quot;type&quot;: &quot;composer&quot;,
-      &quot;url&quot;: &quot;https://packagist.laravel-china.org&quot;
-    }
-  ],
-  &quot;require&quot;: {
-    &quot;zzhpeng/export&quot;: &quot;dev-master&quot;,
-    &quot;topthink/framework&quot;: &quot;5.1.*&quot;
-  }
-}
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h3 id=&quot;运行&quot;&gt;运行&lt;/h3&gt;
-&lt;ul&gt;
-  &lt;li&gt;生成静态页面和更新源&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;php bin/satis build satis.json ./public
-
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;执行命令后会生成public文件夹，下面有静态文件&lt;/p&gt;
-
-&lt;h3 id=&quot;部署站点&quot;&gt;部署站点&lt;/h3&gt;
-&lt;ul&gt;
-  &lt;li&gt;php cli部署&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;php &lt;span class=&quot;nt&quot;&gt;-S&lt;/span&gt; localhost:8866 &lt;span class=&quot;nt&quot;&gt;-t&lt;/span&gt; ./public
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;nginx 部署&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;略&lt;/p&gt;
-
-&lt;h3 id=&quot;额外&quot;&gt;额外&lt;/h3&gt;
-&lt;ul&gt;
-  &lt;li&gt;linux crontab定时器实时更新&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;略&lt;/p&gt;
-
-</description>
-				<pubDate>Fri, 24 May 2019 00:00:00 +0800</pubDate>
-				<link>/private-composer-packagist.html</link>
-				<guid isPermaLink="true">/private-composer-packagist.html</guid>
 			</item>
 		
 	</channel>
