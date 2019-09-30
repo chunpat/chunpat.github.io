@@ -7,6 +7,75 @@
 		<atom:link href="/" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>更换mac默认bash shell为zsh</title>
+				<description>&lt;h3 id=&quot;问题概述&quot;&gt;问题概述&lt;/h3&gt;
+&lt;p&gt;原本的bash shell用起来也挺快捷，但是在git操作切换分支之类的没有提醒用起来没那么爽。很久前老大推荐我用，
+之前回复是勤奋点，多打几个字母也有好处。今天再次看到相关的blog，决定换起来，结果就是，真香！&lt;/p&gt;
+
+&lt;h3 id=&quot;更换brew源&quot;&gt;更换brew源&lt;/h3&gt;
+&lt;p&gt;原本的源是github的，由于墙的问题可能会有点慢，所以换成国内的源。&lt;/p&gt;
+
+&lt;p&gt;替换brew.git&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;cd &quot;$(brew --repo)&quot;
+git remote set-url origin https://mirrors.ustc.edu.cn/brew.git
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;替换homebrew-core.git:&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;cd &quot;$(brew --repo)/Library/Taps/homebrew/homebrew-core&quot;
+git remote set-url origin https://mirrors.ustc.edu.cn/homebrew-core.git
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;更新Homebrew&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;brew update
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;安装&quot;&gt;安装&lt;/h3&gt;
+
+&lt;p&gt;安装zsh&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;brew install zsh
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;安装oh-my-zsh&lt;/p&gt;
+
+&lt;p&gt;到home目录。&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;cd ~
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;从github下载oh-my-zsh。&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;git clone git://github.com/robbyrussell/oh-my-zsh.git ~/.oh-my-zsh
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;生成zsh配置文件zshrc。&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;cp ~/.oh-my-zsh/templates/zshrc.zsh-template ~/.zshrc
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;兼容bash设置的参数，将原来设置在bash的参数copy到zsh的~/.zshrc文件下。&lt;/p&gt;
+
+&lt;p&gt;修改默认shell为zsh&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;chsh -s /bin/zsh
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;问题&quot;&gt;问题&lt;/h3&gt;
+
+&lt;p&gt;chsh -s /bin/zsh 后出现 chsh: no changes made&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;dscl . -read /Users/$USER/ UserShell
+exec su - $USER
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;参考&quot;&gt;参考&lt;/h3&gt;
+
+&lt;p&gt;*1、&lt;a href=&quot;https://www.jianshu.com/p/677a9bb1ac29&quot;&gt;Mac 下使用zsh - 简书&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;*2、&lt;a href=&quot;https://www.howie6879.cn/post/2019/06_oh_my_zsh/&quot;&gt;oh-my-zsh：让终端飞 - 老胡的储物柜&lt;/a&gt;&lt;/p&gt;
+
+</description>
+				<pubDate>Mon, 30 Sep 2019 00:00:00 +0800</pubDate>
+				<link>/zsh.html</link>
+				<guid isPermaLink="true">/zsh.html</guid>
+			</item>
+		
+			<item>
 				<title>gitlab出现502问题</title>
 				<description>&lt;h3 id=&quot;问题概述&quot;&gt;问题概述&lt;/h3&gt;
 &lt;p&gt;上周，公司内部服务器重启，自搭建的gitlab仓库返回502。在这里先说明gitlab的搭建情况，用了宝塔管理，已经有了
@@ -739,9 +808,17 @@ implicit_flush 为on&lt;/p&gt;
 
 &lt;h2 id=&quot;参考&quot;&gt;参考&lt;/h2&gt;
 
-&lt;p&gt;1、&lt;a href=&quot;https://www.cnblogs.com/devcjq/articles/6072945.html&quot;&gt;关于PHP 刷新缓冲区操作(边执行边输出)简单分析&lt;/a&gt;
-2、&lt;a href=&quot;https://www.cnblogs.com/raobenjun/p/8086051.html&quot;&gt;深入理解php的输出缓冲区(output buffer) - EzrealR - 博客园&lt;/a&gt;
-3、&lt;a href=&quot;https://www.cnblogs.com/raobenjun/p/8085957.html&quot;&gt;php缓冲区 - EzrealR - 博客园&lt;/a&gt;&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;1、&lt;a href=&quot;https://www.cnblogs.com/devcjq/articles/6072945.html&quot;&gt;关于PHP 刷新缓冲区操作(边执行边输出)简单分析&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;2、&lt;a href=&quot;https://www.cnblogs.com/raobenjun/p/8086051.html&quot;&gt;深入理解php的输出缓冲区(output buffer) - EzrealR - 博客园&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;3、&lt;a href=&quot;https://www.cnblogs.com/raobenjun/p/8085957.html&quot;&gt;php缓冲区 - EzrealR - 博客园&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
 
 </description>
 				<pubDate>Sat, 07 Sep 2019 00:00:00 +0800</pubDate>
@@ -830,7 +907,9 @@ public function setDocument(){
 
 &lt;h2 id=&quot;参考&quot;&gt;参考&lt;/h2&gt;
 
-&lt;p&gt;1、&lt;a href=&quot;https://blog.csdn.net/daily886/article/details/92558512&quot;&gt;nginx 配置接口超时时间 10分钟 - daily886的博客 - CSDN博客&lt;/a&gt;&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;1、&lt;a href=&quot;https://blog.csdn.net/daily886/article/details/92558512&quot;&gt;nginx 配置接口超时时间 10分钟 - daily886的博客 - CSDN博客&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
 
 </description>
 				<pubDate>Fri, 06 Sep 2019 00:00:00 +0800</pubDate>
@@ -1247,15 +1326,23 @@ static function searchDocuments($index,array $body){
 
 &lt;h2 id=&quot;参考&quot;&gt;参考&lt;/h2&gt;
 
-&lt;p&gt;1、&lt;a href=&quot;https://blog.csdn.net/weixin_33692284/article/details/92170069&quot;&gt;图解Elasticsearch中的_source、_all、store和index属性 - weixin_33692284的博客 - CSDN博客&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;2、&lt;a href=&quot;https://www.elastic.co/guide/en/elasticsearch/client/php-api/current/overview.html&quot;&gt;官方说明文档：&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;3、&lt;a href=&quot;https://github.com/elastic/elasticsearch-php&quot;&gt;官方开发的php客户端组件:&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;4、&lt;a href=&quot;https://www.jianshu.com/p/88f0546d5955&quot;&gt;Elasticsearch7.*版本 1.入门 - 简书&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;5、&lt;a href=&quot;https://www.cnblogs.com/zlslch/p/6419948.html&quot;&gt;elasticsearch-.yml（中文配置详解） - 大数据和AI躺过的坑 - 博客园&lt;/a&gt;&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;1、&lt;a href=&quot;https://blog.csdn.net/weixin_33692284/article/details/92170069&quot;&gt;图解Elasticsearch中的_source、_all、store和index属性 - weixin_33692284的博客 - CSDN博客&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;2、&lt;a href=&quot;https://www.elastic.co/guide/en/elasticsearch/client/php-api/current/overview.html&quot;&gt;官方说明文档：&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;3、&lt;a href=&quot;https://github.com/elastic/elasticsearch-php&quot;&gt;官方开发的php客户端组件:&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;4、&lt;a href=&quot;https://www.jianshu.com/p/88f0546d5955&quot;&gt;Elasticsearch7.*版本 1.入门 - 简书&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;5、&lt;a href=&quot;https://www.cnblogs.com/zlslch/p/6419948.html&quot;&gt;elasticsearch-.yml（中文配置详解） - 大数据和AI躺过的坑 - 博客园&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
 </description>
 				<pubDate>Mon, 02 Sep 2019 00:00:00 +0800</pubDate>
 				<link>/elasticsearch-learning.html</link>
@@ -1446,21 +1533,6 @@ server{
 				<pubDate>Mon, 15 Jul 2019 00:00:00 +0800</pubDate>
 				<link>/location-gitlab-outside-visit.html</link>
 				<guid isPermaLink="true">/location-gitlab-outside-visit.html</guid>
-			</item>
-		
-			<item>
-				<title>基于slim框架搭建Oauth2</title>
-				<description>&lt;h3 id=&quot;官方文档和官方源&quot;&gt;官方文档和官方源&lt;/h3&gt;
-&lt;p&gt;Oauth2源：https://github.com/thephpleague/oauth2-server&lt;/p&gt;
-
-&lt;p&gt;Slim源：https://github.com/slimphp/Slim&lt;/p&gt;
-
-&lt;h3 id=&quot;待更新&quot;&gt;待更新&lt;/h3&gt;
-
-</description>
-				<pubDate>Mon, 03 Jun 2019 00:00:00 +0800</pubDate>
-				<link>/oauth2-slim.html</link>
-				<guid isPermaLink="true">/oauth2-slim.html</guid>
 			</item>
 		
 	</channel>

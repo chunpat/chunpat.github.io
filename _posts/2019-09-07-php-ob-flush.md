@@ -38,7 +38,9 @@ implicit_flush 为on
 
 ## 参考
 
-1、[关于PHP 刷新缓冲区操作(边执行边输出)简单分析](https://www.cnblogs.com/devcjq/articles/6072945.html)
-2、[深入理解php的输出缓冲区(output buffer) - EzrealR - 博客园](https://www.cnblogs.com/raobenjun/p/8086051.html)
-3、[php缓冲区 - EzrealR - 博客园](https://www.cnblogs.com/raobenjun/p/8085957.html)
+* 1、[关于PHP 刷新缓冲区操作(边执行边输出)简单分析](https://www.cnblogs.com/devcjq/articles/6072945.html)
+
+* 2、[深入理解php的输出缓冲区(output buffer) - EzrealR - 博客园](https://www.cnblogs.com/raobenjun/p/8086051.html)
+
+* 3、[php缓冲区 - EzrealR - 博客园](https://www.cnblogs.com/raobenjun/p/8085957.html)
 

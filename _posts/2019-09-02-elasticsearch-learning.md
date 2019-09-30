@@ -345,12 +345,12 @@ low disk watermark [85%] exceeded on …，replicas will not be assigned to this
 
 ## 参考
 
-1、[图解Elasticsearch中的_source、_all、store和index属性 - weixin_33692284的博客 - CSDN博客](https://blog.csdn.net/weixin_33692284/article/details/92170069)
+* 1、[图解Elasticsearch中的_source、_all、store和index属性 - weixin_33692284的博客 - CSDN博客](https://blog.csdn.net/weixin_33692284/article/details/92170069)
 
-2、[官方说明文档：](https://www.elastic.co/guide/en/elasticsearch/client/php-api/current/overview.html)
+* 2、[官方说明文档：](https://www.elastic.co/guide/en/elasticsearch/client/php-api/current/overview.html)
 
-3、[官方开发的php客户端组件:](https://github.com/elastic/elasticsearch-php)
+* 3、[官方开发的php客户端组件:](https://github.com/elastic/elasticsearch-php)
 
-4、[Elasticsearch7.*版本 1.入门 - 简书](https://www.jianshu.com/p/88f0546d5955)
+* 4、[Elasticsearch7.*版本 1.入门 - 简书](https://www.jianshu.com/p/88f0546d5955)
 
-5、[elasticsearch-.yml（中文配置详解） - 大数据和AI躺过的坑 - 博客园](https://www.cnblogs.com/zlslch/p/6419948.html)
+* 5、[elasticsearch-.yml（中文配置详解） - 大数据和AI躺过的坑 - 博客园](https://www.cnblogs.com/zlslch/p/6419948.html)
