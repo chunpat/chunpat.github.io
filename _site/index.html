@@ -106,21 +106,16 @@
 <div class="post-preview">
     <a href="/mysql-in.html">
         <h2 class="post-title">            
-            Mysql使用IN的注意事项
+            Mysql使用IN功能相关与性能对比
         </h2>
         
         <div class="post-content-preview">
             问题概述
-平时Mysql喜欢用in后面接（id，id，……）去查找数据，但是随着时间增长，数据量越来越多，响应时间越来越慢。查阅相关文章，
-并实际测试之后发现in后面加主键字符串是效率最低的方法。
+平时Mysql喜欢先sql语句找出id字符串，然后用in后面接（id，id，……）去查找数据。查阅相关文章，说sql语句长度有限制，随着数据增长就不能执行，但是
+这个长度却很大，一般可以不用考虑。
 
-动手是验证真理的唯一标准
-
-  1、IN后面接主键字符串
-
-
-代码
-EXPLAIN SELEC...
+查看方法。
+mysql&gt;show variables like '%max_a...
         </div>
     </a>
     <p class="post-meta">Posted by zzhpeng on October 7, 2019</p>

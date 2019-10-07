@@ -7,14 +7,27 @@
 		<atom:link href="/" rel="self" type="application/rss+xml" />
 		
 			<item>
-				<title>Mysql使用IN的注意事项</title>
+				<title>Mysql使用IN功能相关与性能对比</title>
 				<description>&lt;h3 id=&quot;问题概述&quot;&gt;问题概述&lt;/h3&gt;
-&lt;p&gt;平时Mysql喜欢用in后面接（id，id，……）去查找数据，但是随着时间增长，数据量越来越多，响应时间越来越慢。查阅相关文章，
-并实际测试之后发现in后面加主键字符串是效率最低的方法。&lt;/p&gt;
+&lt;p&gt;平时Mysql喜欢先sql语句找出id字符串，然后用in后面接（id，id，……）去查找数据。查阅相关文章，说sql语句长度有限制，随着数据增长就不能执行，但是
+这个长度却很大，一般可以不用考虑。&lt;/p&gt;
 
-&lt;h3 id=&quot;动手是验证真理的唯一标准&quot;&gt;动手是验证真理的唯一标准&lt;/h3&gt;
+&lt;p&gt;查看方法。&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;mysql&amp;gt;show variables like '%max_allowed_pack%'
++--------------------------+-----------------+
+| Variable_name            | Value           |
++--------------------------+-----------------+
+| max_allowed_packet       | 1073741824      |
+| slave_max_allowed_packet | 1073741824      |
++--------------------------+-----------------+
+返回行数：[2]，耗时：7 ms.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;根据返回结果可以看出，这个最大长度是很大的。&lt;/p&gt;
+
+&lt;h3 id=&quot;in相关操作和替代方法对比&quot;&gt;IN相关操作和替代方法对比&lt;/h3&gt;
+
 &lt;blockquote&gt;
-  &lt;p&gt;1、IN后面接主键字符串&lt;/p&gt;
+  &lt;p&gt;1、IN后面接主键字符串（ 概念错误SELECT GROUP_CONCAT(order_id,’’) FROM order_action WHERE NAME = ‘user_add’ 查找出来的并不是字符串，而是数据集 ）&lt;/p&gt;
 &lt;/blockquote&gt;
 
 &lt;p&gt;代码&lt;/p&gt;
@@ -23,7 +36,7 @@
 FROM
 	`order` 
 WHERE
-	id IN ( SELECT GROUP_CONCAT(order_id,',') FROM order_action WHERE NAME = 'user_add' )
+	id IN ( SELECT GROUP_CONCAT(order_id,'') FROM order_action WHERE NAME = 'user_add' )
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;结果显示，order表需要找全部行，order_action也是。&lt;/p&gt;
@@ -84,7 +97,7 @@ FROM
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;blockquote&gt;
-  &lt;p&gt;4、exist 替代 in （不行）&lt;/p&gt;
+  &lt;p&gt;4、exist 替代 in （效率不行）&lt;/p&gt;
 &lt;/blockquote&gt;
 
 &lt;p&gt;代码&lt;/p&gt;
@@ -96,7 +109,7 @@ WHERE
 	EXISTS ( SELECT order_id FROM order_action oat WHERE ot.id = oat.order_id AND NAME = 'user_add' ) 
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;结果测试的是两张关联的表都查了所有。所以exist行不通。&lt;/p&gt;
+&lt;p&gt;结果测试的是两张关联的表都查了所有。所以exist效率不行。&lt;/p&gt;
 &lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;+----+--------------------+-------+------------+------+---------------+------+---------+------+-------+----------+-------------+
 | id | select_type        | table | partitions | type | possible_keys | key  | key_len | ref  | rows  | filtered | Extra       |
 +----+--------------------+-------+------------+------+---------------+------+---------+------+-------+----------+-------------+

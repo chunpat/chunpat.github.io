@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="fromChinaBoy">
 
-    <title>Mysql使用IN的注意事项 - Blog</title>
+    <title>Mysql使用IN功能相关与性能对比 - Blog</title>
 
     <link rel="canonical" href="http://localhost:4000/mysql-in.html">
 
@@ -99,7 +99,7 @@
                         <a class="tag" href="/Tags/#mysql" title="mysql">mysql</a>
                         
                     </div>
-                    <h1>Mysql使用IN的注意事项</h1>
+                    <h1>Mysql使用IN功能相关与性能对比</h1>
                     
                     <span class="meta">Posted by zzhpeng on October 7, 2019</span>
                 </div>
@@ -115,12 +115,25 @@
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 post-container">
 
                 <h3 id="问题概述">问题概述</h3>
-<p>平时Mysql喜欢用in后面接（id，id，……）去查找数据，但是随着时间增长，数据量越来越多，响应时间越来越慢。查阅相关文章，
-并实际测试之后发现in后面加主键字符串是效率最低的方法。</p>
+<p>平时Mysql喜欢先sql语句找出id字符串，然后用in后面接（id，id，……）去查找数据。查阅相关文章，说sql语句长度有限制，随着数据增长就不能执行，但是
+这个长度却很大，一般可以不用考虑。</p>
 
-<h3 id="动手是验证真理的唯一标准">动手是验证真理的唯一标准</h3>
+<p>查看方法。</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mysql&gt;show variables like '%max_allowed_pack%'
++--------------------------+-----------------+
+| Variable_name            | Value           |
++--------------------------+-----------------+
+| max_allowed_packet       | 1073741824      |
+| slave_max_allowed_packet | 1073741824      |
++--------------------------+-----------------+
+返回行数：[2]，耗时：7 ms.
+</code></pre></div></div>
+<p>根据返回结果可以看出，这个最大长度是很大的。</p>
+
+<h3 id="in相关操作和替代方法对比">IN相关操作和替代方法对比</h3>
+
 <blockquote>
-  <p>1、IN后面接主键字符串</p>
+  <p>1、IN后面接主键字符串（ 概念错误SELECT GROUP_CONCAT(order_id,’’) FROM order_action WHERE NAME = ‘user_add’ 查找出来的并不是字符串，而是数据集 ）</p>
 </blockquote>
 
 <p>代码</p>
@@ -129,7 +142,7 @@
 FROM
 	`order` 
 WHERE
-	id IN ( SELECT GROUP_CONCAT(order_id,',') FROM order_action WHERE NAME = 'user_add' )
+	id IN ( SELECT GROUP_CONCAT(order_id,'') FROM order_action WHERE NAME = 'user_add' )
 </code></pre></div></div>
 
 <p>结果显示，order表需要找全部行，order_action也是。</p>
@@ -190,7 +203,7 @@ FROM
 </code></pre></div></div>
 
 <blockquote>
-  <p>4、exist 替代 in （不行）</p>
+  <p>4、exist 替代 in （效率不行）</p>
 </blockquote>
 
 <p>代码</p>
@@ -202,7 +215,7 @@ WHERE
 	EXISTS ( SELECT order_id FROM order_action oat WHERE ot.id = oat.order_id AND NAME = 'user_add' ) 
 </code></pre></div></div>
 
-<p>结果测试的是两张关联的表都查了所有。所以exist行不通。</p>
+<p>结果测试的是两张关联的表都查了所有。所以exist效率不行。</p>
 <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>+----+--------------------+-------+------------+------+---------------+------+---------+------+-------+----------+-------------+
 | id | select_type        | table | partitions | type | possible_keys | key  | key_len | ref  | rows  | filtered | Extra       |
 +----+--------------------+-------+------------+------+---------------+------+---------+------+-------+----------+-------------+
