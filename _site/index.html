@@ -104,6 +104,31 @@
 		<div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
 			
 <div class="post-preview">
+    <a href="/mysql-in.html">
+        <h2 class="post-title">            
+            Mysql使用IN的注意事项
+        </h2>
+        
+        <div class="post-content-preview">
+            问题概述
+平时Mysql喜欢用in后面接（id，id，……）去查找数据，但是随着时间增长，数据量越来越多，响应时间越来越慢。查阅相关文章，
+并实际测试之后发现in后面加主键字符串是效率最低的方法。
+
+动手是验证真理的唯一标准
+
+  1、IN后面接主键字符串
+
+
+代码
+EXPLAIN SELEC...
+        </div>
+    </a>
+    <p class="post-meta">Posted by zzhpeng on October 7, 2019</p>
+</div>
+
+<hr>
+
+<div class="post-preview">
     <a href="/zsh.html">
         <h2 class="post-title">            
             更换mac默认bash shell为zsh
@@ -277,24 +302,6 @@ outp...
         </div>
     </a>
     <p class="post-meta">Posted by zzhpeng on September 7, 2019</p>
-</div>
-
-<hr>
-
-<div class="post-preview">
-    <a href="/timed-out.html">
-        <h2 class="post-title">            
-            web服务超时处理
-        </h2>
-        
-        <div class="post-content-preview">
-            事由
-执行285675条mysql数据操作的时候，页面出现nginx异常An error occurred.报错。查看日志，详情如下：
-
-2019/09/06 14:32:46 [error] 9#9: *7 upstream timed out (110: Connection timed ...
-        </div>
-    </a>
-    <p class="post-meta">Posted by zzhpeng on September 6, 2019</p>
 </div>
 
 <hr>

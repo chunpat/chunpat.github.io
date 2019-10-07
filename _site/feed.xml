@@ -7,6 +7,181 @@
 		<atom:link href="/" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>Mysql使用IN的注意事项</title>
+				<description>&lt;h3 id=&quot;问题概述&quot;&gt;问题概述&lt;/h3&gt;
+&lt;p&gt;平时Mysql喜欢用in后面接（id，id，……）去查找数据，但是随着时间增长，数据量越来越多，响应时间越来越慢。查阅相关文章，
+并实际测试之后发现in后面加主键字符串是效率最低的方法。&lt;/p&gt;
+
+&lt;h3 id=&quot;动手是验证真理的唯一标准&quot;&gt;动手是验证真理的唯一标准&lt;/h3&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;1、IN后面接主键字符串&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;代码&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;EXPLAIN SELECT
+	* 
+FROM
+	`order` 
+WHERE
+	id IN ( SELECT GROUP_CONCAT(order_id,',') FROM order_action WHERE NAME = 'user_add' )
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;结果显示，order表需要找全部行，order_action也是。&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;+----+--------------------+--------------+------------+------+---------------+------+---------+------+-------+----------+-------------+
+| id | select_type        | table        | partitions | type | possible_keys | key  | key_len | ref  | rows  | filtered | Extra       |
++----+--------------------+--------------+------------+------+---------------+------+---------+------+-------+----------+-------------+
+|  1 | PRIMARY            | order        | NULL       | ALL  | NULL          | NULL | NULL    | NULL | 17239 |   100.00 | Using where |
+|  2 | DEPENDENT SUBQUERY | order_action | NULL       | ALL  | NULL          | NULL | NULL    | NULL | 20660 |    10.00 | Using where |
++----+--------------------+--------------+------------+------+---------------+------+---------+------+-------+----------+-------------+
+2 rows in set, 1 warning (0.01 sec)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;2、in 后面接 select 数据集&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;代码&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;EXPLAIN SELECT
+	* 
+FROM
+	`order` 
+WHERE
+	id IN ( SELECT order_id FROM order_action WHERE NAME = 'user_add' )
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;结果显示，会创建临时表&lt;subquery2&gt;，order表只需要查1rows，order_action表查所有行。&lt;/subquery2&gt;&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;+----+--------------+--------------+------------+--------+---------------+---------+---------+----------------------+-------+----------+-------------+
+| id | select_type  | table        | partitions | type   | possible_keys | key     | key_len | ref                  | rows  | filtered | Extra       |
++----+--------------+--------------+------------+--------+---------------+---------+---------+----------------------+-------+----------+-------------+
+|  1 | SIMPLE       | &amp;lt;subquery2&amp;gt;  | NULL       | ALL    | NULL          | NULL    | NULL    | NULL                 |  NULL |   100.00 | NULL        |
+|  1 | SIMPLE       | order        | NULL       | eq_ref | PRIMARY       | PRIMARY | 4       | &amp;lt;subquery2&amp;gt;.order_id |     1 |   100.00 | NULL        |
+|  2 | MATERIALIZED | order_action | NULL       | ALL    | NULL          | NULL    | NULL    | NULL                 | 20649 |    10.00 | Using where |
++----+--------------+--------------+------------+--------+---------------+---------+---------+----------------------+-------+----------+-------------+
+3 rows in set, 1 warning (0.00 sec)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;3、用 join 替换 in&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;代码&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;EXPLAIN SELECT
+	* 
+FROM
+	`order` AS ot
+	INNER JOIN order_action oat ON oat.order_id = ot.id 
+	AND oat.NAME = 'user_add'
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;结果显示，不创建临时表，但order表只需要查1rows，order_action表查所有行。&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;+----+-------------+-------+------------+--------+---------------+---------+---------+-------------------+-------+----------+-------------+
+| id | select_type | table | partitions | type   | possible_keys | key     | key_len | ref               | rows  | filtered | Extra       |
++----+-------------+-------+------------+--------+---------------+---------+---------+-------------------+-------+----------+-------------+
+|  1 | SIMPLE      | oat   | NULL       | ALL    | NULL          | NULL    | NULL    | NULL              | 20653 |    10.00 | Using where |
+|  1 | SIMPLE      | ot    | NULL       | eq_ref | PRIMARY       | PRIMARY | 4       | sima.oat.order_id |     1 |   100.00 | NULL        |
++----+-------------+-------+------------+--------+---------------+---------+---------+-------------------+-------+----------+-------------+
+2 rows in set, 1 warning (0.00 sec)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;4、exist 替代 in （不行）&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;代码&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;EXPLAIN SELECT
+	* 
+FROM
+	`order` AS ot 
+WHERE
+	EXISTS ( SELECT order_id FROM order_action oat WHERE ot.id = oat.order_id AND NAME = 'user_add' ) 
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;结果测试的是两张关联的表都查了所有。所以exist行不通。&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;+----+--------------------+-------+------------+------+---------------+------+---------+------+-------+----------+-------------+
+| id | select_type        | table | partitions | type | possible_keys | key  | key_len | ref  | rows  | filtered | Extra       |
++----+--------------------+-------+------------+------+---------------+------+---------+------+-------+----------+-------------+
+|  1 | PRIMARY            | ot    | NULL       | ALL  | NULL          | NULL | NULL    | NULL | 17233 |   100.00 | Using where |
+|  2 | DEPENDENT SUBQUERY | oat   | NULL       | ALL  | NULL          | NULL | NULL    | NULL | 20656 |     1.00 | Using where |
++----+--------------------+-------+------------+------+---------------+------+---------+------+-------+----------+-------------+
+2 rows in set, 2 warnings (0.00 sec)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;explain-分析-sql-语句的相关属性解析&quot;&gt;explain 分析 sql 语句的相关属性解析&lt;/h3&gt;
+
+&lt;p&gt;连接操作的TYPE类型&lt;/p&gt;
+
+&lt;p&gt;（1）SYSTEM&lt;/p&gt;
+
+&lt;p&gt;CONST的特例，当表上只有一条元组匹配&lt;/p&gt;
+
+&lt;p&gt;（2）CONST&lt;/p&gt;
+
+&lt;p&gt;WHERE条件筛选后表上至多有一条元组匹配时，比如WHERE ID = 2 （ID是主键，值为2的要么有一条要么没有）&lt;/p&gt;
+
+&lt;p&gt;（3）EQ_REF&lt;/p&gt;
+
+&lt;p&gt;参与连接运算的表是内表（在代码实现的算法中，两表连接时作为循环中的内循环遍历的对象，这样的表称为内表）。
+基于索引（连接字段上存在唯一索引或者主键索引，且操作符必须是“=”谓词，索引值不能为NULL）做扫描，使得对外表的一条元组，内表只有唯一一条元组与之对应。&lt;/p&gt;
+
+&lt;p&gt;（4）REF&lt;/p&gt;
+
+&lt;p&gt;可以用于单表扫描或者连接。参与连接运算的表，是内表。
+基于索引（连接字段上的索引是非唯一索引，操作符必须是“=”谓词，连接字段值不可为NULL）做扫描，使得对外表的一条元组，内表可有若干条元组与之对应。&lt;/p&gt;
+
+&lt;p&gt;（5）REF_OR_NULL&lt;/p&gt;
+
+&lt;p&gt;类似REF，只是搜索条件包括：连接字段的值可以为NULL的情况，比如 where col = 2 or col is null&lt;/p&gt;
+
+&lt;p&gt;（6）RANGE&lt;/p&gt;
+
+&lt;p&gt;范围扫描，基于索引做范围扫描，为诸如BETWEEN，IN，&amp;gt;=，LIKE类操作提供支持&lt;/p&gt;
+
+&lt;p&gt;（7）INDEX_SCAN&lt;/p&gt;
+
+&lt;p&gt;索引做扫描，是基于索引在索引的叶子节点上找满足条件的数据（不需要访问数据文件）&lt;/p&gt;
+
+&lt;p&gt;（8）ALL&lt;/p&gt;
+
+&lt;p&gt;全表扫描或者范围扫描：不使用索引，顺序扫描，直接读取表上的数据（访问数据文件）&lt;/p&gt;
+
+&lt;p&gt;（9）UNIQUE_SUBQUERY&lt;/p&gt;
+
+&lt;p&gt;在子查询中，基于唯一索引进行扫描，类似于EQ_REF&lt;/p&gt;
+
+&lt;p&gt;（10）INDEX_SUBQUERY&lt;/p&gt;
+
+&lt;p&gt;在子查询中，基于除唯一索引之外的索引进行扫描&lt;/p&gt;
+
+&lt;p&gt;（11）INDEX_MERGE&lt;/p&gt;
+
+&lt;p&gt;多重范围扫描。两表连接的每个表的连接字段上均有索引存在且索引有序，结果合并在一起。适用于作集合的并、交操作。&lt;/p&gt;
+
+&lt;p&gt;（12）FT&lt;/p&gt;
+
+&lt;p&gt;FULL TEXT，全文检索&lt;/p&gt;
+
+&lt;h3 id=&quot;结论&quot;&gt;结论&lt;/h3&gt;
+
+&lt;p&gt;实际测试显示，in数据集是最快的。所有优先考虑in数据集这种会创建临时表的方式。&lt;/p&gt;
+
+&lt;h3 id=&quot;参考&quot;&gt;参考&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;1、&lt;a href=&quot;https://blog.csdn.net/seelye/article/details/46453651&quot;&gt;mysql explain 的type解释&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;2、&lt;a href=&quot;https://blog.csdn.net/fukaiit/article/details/83515439&quot;&gt;MySql中in查询效率低的替代方法&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+				<pubDate>Mon, 07 Oct 2019 00:00:00 +0800</pubDate>
+				<link>/mysql-in.html</link>
+				<guid isPermaLink="true">/mysql-in.html</guid>
+			</item>
+		
+			<item>
 				<title>更换mac默认bash shell为zsh</title>
 				<description>&lt;h3 id=&quot;问题概述&quot;&gt;问题概述&lt;/h3&gt;
 &lt;p&gt;原本的bash shell用起来也挺快捷，但是在git操作切换分支之类的没有提醒用起来没那么爽。很久前老大推荐我用，
@@ -65,9 +240,14 @@ exec su - $USER
 
 &lt;h3 id=&quot;参考&quot;&gt;参考&lt;/h3&gt;
 
-&lt;p&gt;*1、&lt;a href=&quot;https://www.jianshu.com/p/677a9bb1ac29&quot;&gt;Mac 下使用zsh - 简书&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;*2、&lt;a href=&quot;https://www.howie6879.cn/post/2019/06_oh_my_zsh/&quot;&gt;oh-my-zsh：让终端飞 - 老胡的储物柜&lt;/a&gt;&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;1、&lt;a href=&quot;https://www.jianshu.com/p/677a9bb1ac29&quot;&gt;Mac 下使用zsh - 简书&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;2、&lt;a href=&quot;https://www.howie6879.cn/post/2019/06_oh_my_zsh/&quot;&gt;oh-my-zsh：让终端飞 - 老胡的储物柜&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
 
 </description>
 				<pubDate>Mon, 30 Sep 2019 00:00:00 +0800</pubDate>
@@ -1347,192 +1527,6 @@ static function searchDocuments($index,array $body){
 				<pubDate>Mon, 02 Sep 2019 00:00:00 +0800</pubDate>
 				<link>/elasticsearch-learning.html</link>
 				<guid isPermaLink="true">/elasticsearch-learning.html</guid>
-			</item>
-		
-			<item>
-				<title>基于frp,gitlab的docker镜像实现本地gitlab外网访问(一)</title>
-				<description>&lt;h3 id=&quot;基础&quot;&gt;基础&lt;/h3&gt;
-&lt;ul&gt;
-  &lt;li&gt;
-    &lt;p&gt;会git的基本操作&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;会docker和docker-compose的基本操作&lt;/p&gt;
-  &lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&quot;基于gitlab的docker镜像安装内网git仓库&quot;&gt;基于gitlab的docker镜像安装内网git仓库&lt;/h3&gt;
-&lt;blockquote&gt;
-  &lt;p&gt;1、这里docker-compose管理安装&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://img.zzhpeng.cn/FgO-PtshY7SQ52npAmUL4en4WGCO&quot; alt=&quot;FgO-PtshY7SQ52npAmUL4en4WGCO&quot; /&gt;
-然后在当前目录运行docker-compose up,执行时间可能会有点久，请耐性等待。
-当执行到开始写日志的时候，就证明本地的gitlab安装成功了。如下图：
-&lt;img src=&quot;http://img.zzhpeng.cn/FrMofWRxKkWDy7Nn2Lb4JwjAesJz&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;2、访问127.0.0.1:8686测试&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;h3 id=&quot;内网穿透frp&quot;&gt;内网穿透frp&lt;/h3&gt;
-&lt;blockquote&gt;
-  &lt;p&gt;1、在frp的release找到相应系统的压缩包，里面包含服务端frps和客户端frpc&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;
-    &lt;p&gt;mac系统下载frp_0.27.1_darwin_amd64.tar.gz&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;linux系统下载frp_0.27.1_linux_amd64.tar.gz&lt;/p&gt;
-  &lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;2、下载包&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;我在内网用的是mac测试，所以用了frp_0.27.1_darwin_amd64.tar.gz这个包，
-外网用linux的frp_0.27.1_linux_amd64.tar.gz。&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;3、配置&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;本地客户端frpc配置&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[common]
-server_addr = *.*.*.* #填写自己的外网服务器的ip
-server_port = 7000
-
-[web] 
-type = http
-local_port = 8686
-custom_domains = gitlab.zzhpeng.cn                               
-
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;外网frps配置&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[common]
-bind_port = 7000
-vhost_http_port = 8080
-subdomain_host = gitlab.zzhpeng.cn                            
-
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;4、启动&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;client端启动&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;./frpc -c ./frpc.ini
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;server端启动&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;./frps -c ./frps.ini
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h3 id=&quot;外网域名配置与测试&quot;&gt;外网域名配置与测试&lt;/h3&gt;
-&lt;blockquote&gt;
-  &lt;p&gt;1、做域名解析，腾讯云云服务器如下配置&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://img.zzhpeng.cn/Fpud9LMVf-xDNvznnHnfWusl8N7W&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;2、域名http://gitlab.zzhpeng.cn:8080访问测试&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://img.zzhpeng.cn/FuPWVEIWOixgp6wM2vmBfP84_emk&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;h3 id=&quot;外网域名访问优化nginx转发&quot;&gt;外网域名访问优化–nginx转发&lt;/h3&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;
-server{
-    listen 80;
-    server_name  gitlab.zzhpeng.cn;
-    root /var/www/html/goShares/public; # 该项要修改为你准备存放相关网页的路径
-
-    #access_log /dev/null;
-    #access_log  /var/log/nginx/nginx.localhost.access.log  main;
-    error_log  /var/log/nginx/wx.zzhpeng.cn.log  warn;
-
-    location / {
-        #resolver 127.0.0.1; #通过配置/etc/dnsmasq.conf，本地解析域名
-        proxy_ssl_server_name on;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_set_header Host $host;
-        proxy_pass http://gitlab.zzhpeng.cn:8080; #通过域名访问frp服务
-    }
-
-    location = /favicon.ico {
-         log_not_found off;
-         access_log off;
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p&gt;效果图如下：
-&lt;img src=&quot;http://img.zzhpeng.cn/FiasTv3nEaiDaxUK_PcotivGkE9F&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;h3 id=&quot;其他优化qa&quot;&gt;其他优化Q&amp;amp;A&lt;/h3&gt;
-&lt;blockquote&gt;
-  &lt;p&gt;Q:本地服务器是宝塔搭建的，已经有nginx环境。不用gitlab的docker镜像安装，用一键安装方法，又会帮你弄一个nginx环境，起冲突。该怎么办？&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;A:一键安装可以选择是否安装nginx，然后参考gitlab的nginx的转发。&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Q:本地开发与公司内部git仓库交流不用翻到外网再到公司内网，直接与内网地址连接，怎么做？&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;A:上面本地docker-compose搭建的环境，将映射出去的8686端口改为80，映射出来的config配置文件下有gitlab.rb，修改如下配置项并改公司路由器的host：&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; # For HTTP
- external_url &quot;http://gitlab.example.com:8929&quot;
-
- or
-
- # For HTTPS (notice the https)
- external_url &quot;https://gitlab.example.com:8929&quot;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Q:不用gitlab自带的nginx转发，用宝塔的nginx转发报502。&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;https://stackoverflow.com/questions/35327882/what-permissions-does-nginx-need-for-the-gitlab-workhorse-socket&lt;/p&gt;
-
-&lt;h3 id=&quot;参考&quot;&gt;参考&lt;/h3&gt;
-&lt;ul&gt;
-  &lt;li&gt;
-    &lt;p&gt;1、&lt;a href=&quot;https://github.com/fatedier/frp&quot;&gt;frp的github仓库&lt;/a&gt;&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;2、&lt;a href=&quot;https://github.com/gitlabhq/gitlabhq&quot;&gt;gitlab的github仓库&lt;/a&gt;&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;3、&lt;a href=&quot;https://docs.gitlab.com/omnibus/docker/&quot;&gt;gitlab的docker安装指导文档&lt;/a&gt;&lt;/p&gt;
-  &lt;/li&gt;
-&lt;/ul&gt;
-
-</description>
-				<pubDate>Mon, 15 Jul 2019 00:00:00 +0800</pubDate>
-				<link>/location-gitlab-outside-visit.html</link>
-				<guid isPermaLink="true">/location-gitlab-outside-visit.html</guid>
 			</item>
 		
 	</channel>
