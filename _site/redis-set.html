@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="fromChinaBoy">
+
+    <title>Redis的原子性解决并发问题 - Blog</title>
+
+    <link rel="canonical" href="http://localhost:4000/redis-set.html">
+
+    <!-- Icons -->
+  <link rel="shortcut icon" href="img/favicon.ico">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/clean-blog.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    <!-- Custom Fonts -->
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href='//fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+
+
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a href="/">Home</a>
+                </li>
+                
+                <li>
+                    <a href="/About.html">About</a>
+                </li>
+                
+                <li>
+                    <a href="/Tools.html">Tools</a>
+                </li>
+                
+                <li>
+                    <a href="/tags.html">Tags</a>
+                </li>
+                
+
+            </ul>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+
+
+    <!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/fantasy.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="Tags">
+                        
+                        <a class="tag" href="/Tags/#redis" title="redis">redis</a>
+                        
+                        <a class="tag" href="/Tags/#set" title="set">set</a>
+                        
+                        <a class="tag" href="/Tags/#setnx" title="setnx">setnx</a>
+                        
+                        <a class="tag" href="/Tags/#并发" title="并发">并发</a>
+                        
+                    </div>
+                    <h1>Redis的原子性解决并发问题</h1>
+                    
+                    <span class="meta">Posted by zzhpeng on November 2, 2019</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 post-container">
+
+                <h3 id="问题概述">问题概述</h3>
+
+<p>最近根据运营那边提供BUG反馈信息提示，出现了仓库商品冻结数量少了，导致出库异常现象。仓库商品库存信息
+表设计是库存num，冻结数frozen_num。当下订单的时候，frozen_num + 1。订单结束，商品库存num - 
+出库数量，冻结数frozen_num - 出库数量。但是在高并发下，多个请求同时进来，订单下了多个，frozen_num只加了1，那样出库的时候就会产生异常。</p>
+
+<h3 id="初步方案选择利用redis的原子性实现锁">初步方案选择，利用redis的原子性，实现锁</h3>
+<blockquote>
+  <p>1、Redis SETNX</p>
+</blockquote>
+
+<p>Redis SETNX的用法是SETNX key value。而返回值，如果设置key成功会返回1，没有被设置会返回0。
+简单说就是SET if Not eXists，不存在就可以被设置。</p>
+
+<p>然后根据这个特性，用SETNX的value设置过期时间，结合Redis DEL key [key …]，用过期时间和程序
+是否执行完成，去判断是否可以删除这个key来实现原子性控制。伪代码如下：</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>if 获取锁成功
+    1、执行程序
+    2、解锁
+else 
+    //获取锁失败，判断过期时间
+    if 过期并且超时，
+        1、解锁
+    if 再次获取锁
+        1.执行程序
+        2、解锁   
+    else
+        不处理，请求结束
+}
+
+</code></pre></div></div>
+
+<p>获取锁失败，判断value这个过期时间解锁很好的解决了进程异常解锁程序不执行产生死锁问题，但是程序解锁再获取锁的过程
+是非原子性的，所以会存在极端现象，假设有进程P1、P2，会出现如下情况。</p>
+
+<ul>
+  <li>1、P1和P2都获取锁失败，同时进行过期判断，并且都通过。</li>
+  <li>2、P1解锁成功，再获取锁。</li>
+  <li>3、P2又解锁成功，也获取了锁。</li>
+  <li>4、P1、P2同时获取锁成功。</li>
+</ul>
+
+<p>不过官方给了替换方案，原话为</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Anyway even assuming a single-instance locking primitive, starting with 2.6.12
+it is possible to create a much simpler locking primitive, equivalent to the 
+one discussed here, using the SET command to acquire the lock, and a simple 
+Lua script to release the lock. The pattern is documented in the SET command 
+page.
+</code></pre></div></div>
+
+<p>表达的就是从redis 2.6.12版本起,可以用set实现setnx功能并且可以设置锁过期时间和原子性语言的lua脚本释放锁，去替换了setnx。</p>
+
+<blockquote>
+  <p>2、Redis SET</p>
+</blockquote>
+
+<p>用了set之后程序就不用去判断是否过期去程序解锁了，也实现了原子性。伪代码变为：</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>if 获取锁成功
+    1、执行程序
+    2、解锁
+else 
+    //获取锁失败
+    1、不处理
+}
+
+</code></pre></div></div>
+
+<h3 id="演示代码">演示代码</h3>
+
+<blockquote>
+  <p>数据库</p>
+</blockquote>
+
+<p>订单表</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>DROP TABLE IF EXISTS `order`;
+CREATE TABLE `order` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `num` int(11) NOT NULL DEFAULT '0' COMMENT '销售商品数量',
+  `store_depot_batch_id` int(11) NOT NULL COMMENT '门店仓库批次id',
+  `create_time` timestamp NULL DEFAULT NULL COMMENT '添加时间，',
+  `update_time` timestamp NULL DEFAULT NULL COMMENT '更新时间',
+  `delete_time` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='订单表';
+
+</code></pre></div></div>
+
+<p>门店仓库批次表</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>DROP TABLE IF EXISTS `depot_store_depot_batch`;
+CREATE TABLE `depot_store_depot_batch` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `num` int(11) NOT NULL DEFAULT '0' COMMENT '总数量，有效数量=总数-冻结数量',
+  `frozen_num` int(11) NOT NULL DEFAULT '0' COMMENT '冻结数量',
+  `create_time` timestamp NULL DEFAULT NULL COMMENT '添加时间，入库时间',
+  `update_time` timestamp NULL DEFAULT NULL COMMENT '更新时间',
+  `delete_time` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='门店仓库批次管理';
+
+INSERT INTO `depot_store_depot_batch` VALUES(1,10,0,NOW(),NOW(),NULL);
+
+</code></pre></div></div>
+
+<p>门店仓库批次冻结操作表</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>DROP TABLE IF EXISTS `depot_store_depot_batch_frozen_record`;
+CREATE TABLE `depot_store_depot_batch_frozen_record` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `depot_store_depot_batch_id` int(11) NOT NULL COMMENT '门店仓库批次管理id',
+  `before_frozen_num` int(11) NOT NULL COMMENT '仓库冻结数量变动前',
+  `after_frozen_num` int(11) NOT NULL COMMENT '仓库冻结数量变动后',
+  `frozen_num` int(11) DEFAULT '0',
+  `desc` varchar(100) NOT NULL COMMENT '描述',
+  `create_time` timestamp NULL DEFAULT NULL COMMENT '添加时间',
+  `update_time` timestamp NULL DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='门店仓库冻结记录';
+
+</code></pre></div></div>
+
+<blockquote>
+  <p>代码，实现下单、更新仓库冻结数和添加冻结操作记录</p>
+</blockquote>
+
+<h4 id="没有加redis锁的代码">没有加redis锁的代码</h4>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;?php</span>
+<span class="sd">/**
+ * Created by PhpStorm.
+ * User: zzhpeng
+ * Date: 2019/11/2
+ * Time: 11:32 AM
+ */</span>
+
+<span class="nv">$pdo</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">PDO</span><span class="p">(</span><span class="s1">'mysql:host=127.0.0.1;dbname=store'</span><span class="p">,</span> <span class="s1">'root'</span><span class="p">,</span> <span class="s1">'123456789'</span><span class="p">);</span>
+
+<span class="c1">//销售数量</span>
+<span class="nv">$num</span> <span class="o">=</span> <span class="nv">$_GET</span><span class="p">[</span><span class="s1">'num'</span><span class="p">]</span> <span class="o">??</span> <span class="mi">1</span><span class="p">;</span>
+
+<span class="k">try</span><span class="p">{</span>
+    <span class="c1">//查询门店仓库批次信息</span>
+    <span class="nv">$depotStoreDepotBatchSql</span><span class="o">=</span><span class="s2">"select * from  `depot_store_depot_batch` where id =1 limit 1"</span><span class="p">;</span>
+    <span class="nv">$depotStoreDepotBatchRes</span> <span class="o">=</span> <span class="nv">$pdo</span><span class="o">-&gt;</span><span class="na">query</span><span class="p">(</span><span class="nv">$depotStoreDepotBatchSql</span><span class="p">)</span><span class="o">-&gt;</span><span class="na">fetch</span><span class="p">();</span>
+
+    <span class="c1">//操作后冻结数量</span>
+    <span class="nv">$afterFrozenNum</span> <span class="o">=</span>  <span class="nv">$num</span> <span class="o">+</span> <span class="nv">$depotStoreDepotBatchRes</span><span class="p">[</span><span class="s1">'frozen_num'</span><span class="p">];</span>
+    <span class="nv">$activeNumber</span> <span class="o">=</span> <span class="nv">$depotStoreDepotBatchRes</span><span class="p">[</span><span class="s1">'num'</span><span class="p">]</span> <span class="o">-</span> <span class="nv">$afterFrozenNum</span><span class="p">;</span>
+
+    <span class="c1">//开启事务</span>
+    <span class="nv">$pdo</span><span class="o">-&gt;</span><span class="na">beginTransaction</span><span class="p">();</span>
+
+    <span class="k">if</span><span class="p">(</span><span class="nv">$activeNumber</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">){</span>
+        <span class="k">throw</span> <span class="k">new</span> <span class="nx">Exception</span><span class="p">(</span><span class="s1">'商品已售罄了'</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="c1">//下单主表</span>
+    <span class="nv">$orderSql</span> <span class="o">=</span><span class="s2">"insert into `order` VALUES (null,</span><span class="si">{</span><span class="nv">$num</span><span class="si">}</span><span class="s2">,1,NOW(),NOW(),null)"</span><span class="p">;</span>
+    <span class="nv">$pdo</span><span class="o">-&gt;</span><span class="na">query</span><span class="p">(</span><span class="nv">$orderSql</span><span class="p">);</span>
+    <span class="nv">$orderId</span> <span class="o">=</span> <span class="nv">$pdo</span><span class="o">-&gt;</span><span class="na">lastInsertId</span><span class="p">();</span>
+    <span class="k">if</span><span class="p">(</span><span class="nv">$orderId</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="nv">$depotStoreDepotBatchUpdateSql</span><span class="o">=</span><span class="s2">"update `depot_store_depot_batch` set `frozen_num`=</span><span class="si">{</span><span class="nv">$afterFrozenNum</span><span class="si">}</span><span class="s2"> WHERE id=1"</span><span class="p">;</span>
+        <span class="nv">$pdo</span><span class="o">-&gt;</span><span class="na">query</span><span class="p">(</span><span class="nv">$depotStoreDepotBatchUpdateSql</span><span class="p">);</span>
+
+        <span class="c1">//冻结记录操作sql</span>
+        <span class="nv">$actionSql</span> <span class="o">=</span><span class="s2">"insert into `depot_store_depot_batch_frozen_record` VALUES (null,1,</span><span class="si">{</span><span class="nv">$depotStoreDepotBatchRes</span><span class="p">[</span><span class="s1">'frozen_num'</span><span class="p">]</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="nv">$afterFrozenNum</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="nv">$num</span><span class="si">}</span><span class="s2">,'并发测试',NOW(),NOW())"</span><span class="p">;</span>
+        <span class="nv">$pdo</span><span class="o">-&gt;</span><span class="na">query</span><span class="p">(</span><span class="nv">$actionSql</span><span class="p">);</span>
+
+        <span class="c1">//提交事务</span>
+        <span class="nv">$pdo</span><span class="o">-&gt;</span><span class="na">commit</span><span class="p">();</span>
+    <span class="p">}</span>
+    <span class="k">echo</span> <span class="s1">'下单成功,订单id为'</span> <span class="o">.</span> <span class="nv">$orderId</span><span class="p">;</span>
+<span class="p">}</span><span class="k">catch</span> <span class="p">(</span><span class="nx">\Exception</span> <span class="nv">$e</span><span class="p">){</span>
+    <span class="c1">//回滚事务</span>
+    <span class="nv">$pdo</span><span class="o">-&gt;</span><span class="na">rollBack</span><span class="p">();</span>
+    <span class="k">echo</span> <span class="nv">$e</span><span class="o">-&gt;</span><span class="na">getMessage</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>ab压力测试，ab -n 100 -c 10 http://127.0.0.1:83/redis.php,然后查看三个表mysql记录。</p>
+
+<p>查看Order表情况，显示了35row order。</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mysql&gt; select * from `order`;
++----+-----+----------------------+---------------------+---------------------+-------------+
+| id | num | store_depot_batch_id | create_time         | update_time         | delete_time |
++----+-----+----------------------+---------------------+---------------------+-------------+
+|  1 |   1 |                    1 | 2019-11-03 19:08:06 | 2019-11-03 19:08:06 | NULL        |
+|  2 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+|  3 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+|  4 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+|  5 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+|  6 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+|  7 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+|  8 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+|  9 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+| 10 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+| 11 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+| 12 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+| 13 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+| 14 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+| 15 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+| 16 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+| 17 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+| 18 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+| 19 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+| 20 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+| 21 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+| 22 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+| 23 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+| 24 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+| 25 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+| 26 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+| 27 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+| 28 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+| 29 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+| 30 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+| 31 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+| 32 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+| 33 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+| 34 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+| 35 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
++----+-----+----------------------+---------------------+---------------------+-------------+
+35 rows in set (0.00 sec)
+</code></pre></div></div>
+<p>查看depot_store_depot_batch表情况，确实冻结了10个。</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mysql&gt; select * from `depot_store_depot_batch`;
++----+-----+------------+---------------------+---------------------+-------------+
+| id | num | frozen_num | create_time         | update_time         | delete_time |
++----+-----+------------+---------------------+---------------------+-------------+
+|  1 |  10 |         10 | 2019-11-03 19:06:59 | 2019-11-03 19:06:59 | NULL        |
++----+-----+------------+---------------------+---------------------+-------------+
+1 row in set (0.00 sec)
+</code></pre></div></div>
+
+<p>查看depot_store_depot_batch_frozen_record表情况，35row记录。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mysql&gt; select * from depot_store_depot_batch_frozen_record;
++------+----------------------------+-------------------+------------------+------------+------+---------------------+---------------------+
+| id   | depot_store_depot_batch_id | before_frozen_num | after_frozen_num | frozen_num | desc | create_time         | update_time         |
++------+----------------------------+-------------------+------------------+------------+------+---------------------+---------------------+
+| 2342 |                          1 |                 0 |                1 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2343 |                          1 |                 1 |                2 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2344 |                          1 |                 1 |                2 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2345 |                          1 |                 1 |                2 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2346 |                          1 |                 1 |                2 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2347 |                          1 |                 1 |                2 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2348 |                          1 |                 2 |                3 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2349 |                          1 |                 2 |                3 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2350 |                          1 |                 2 |                3 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2351 |                          1 |                 2 |                3 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2352 |                          1 |                 2 |                3 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2353 |                          1 |                 3 |                4 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2354 |                          1 |                 3 |                4 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2355 |                          1 |                 3 |                4 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2356 |                          1 |                 3 |                4 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2357 |                          1 |                 4 |                5 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2358 |                          1 |                 4 |                5 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2359 |                          1 |                 4 |                5 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2360 |                          1 |                 4 |                5 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2361 |                          1 |                 5 |                6 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2362 |                          1 |                 5 |                6 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2363 |                          1 |                 5 |                6 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2364 |                          1 |                 5 |                6 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2365 |                          1 |                 5 |                6 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2366 |                          1 |                 6 |                7 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2367 |                          1 |                 6 |                7 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2368 |                          1 |                 6 |                7 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2369 |                          1 |                 7 |                8 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2370 |                          1 |                 7 |                8 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2371 |                          1 |                 7 |                8 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2372 |                          1 |                 8 |                9 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2373 |                          1 |                 8 |                9 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2374 |                          1 |                 8 |                9 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2375 |                          1 |                 9 |               10 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2376 |                          1 |                 9 |               10 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
++------+----------------------------+-------------------+------------------+------------+------+---------------------+---------------------+
+35 rows in set (0.00 sec)
+</code></pre></div></div>
+
+<p><strong>结论就是，虽然冻结数是对了，但是出了很多超卖的订单</strong></p>
+
+<h4 id="加redis锁的代码">加redis锁的代码</h4>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;?php</span>
+<span class="sd">/**
+ * Created by PhpStorm.
+ * User: zzhpeng
+ * Date: 2019/11/2
+ * Time: 11:32 AM
+ */</span>
+
+<span class="k">class</span> <span class="nc">Lock</span>
+<span class="p">{</span>
+    <span class="k">private</span> <span class="k">static</span> <span class="nv">$_instance</span> <span class="p">;</span>
+    <span class="k">private</span>   <span class="nv">$_redis</span><span class="p">;</span>
+    <span class="k">private</span> <span class="k">function</span> <span class="nf">__construct</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">_redis</span> <span class="o">=</span>  <span class="k">new</span> <span class="nx">\Redis</span><span class="p">();</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">_redis</span> <span class="o">-&gt;</span><span class="na">connect</span><span class="p">(</span><span class="s1">'127.0.0.1'</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">public</span> <span class="k">static</span> <span class="k">function</span> <span class="nf">getInstance</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="k">if</span><span class="p">(</span><span class="nx">self</span><span class="o">::</span><span class="nv">$_instance</span> <span class="nx">instanceof</span> <span class="nx">self</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="k">return</span> <span class="nx">self</span><span class="o">::</span><span class="nv">$_instance</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="nx">self</span><span class="o">::</span><span class="nv">$_instance</span> <span class="o">=</span> <span class="k">new</span>  <span class="nx">self</span><span class="p">();</span>
+    <span class="p">}</span>
+
+    <span class="sd">/**
+     * 加锁
+     * @author: zzhpeng
+     * Date: 2019/11/2
+     * @param $key string 锁名称
+     * @param $expTTL int 多久过期，秒单位
+     *
+     * @return bool
+     */</span>
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">set</span><span class="p">(</span><span class="nv">$key</span><span class="p">,</span><span class="nv">$expTTL</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="c1">//set 实现setnx 和 expire()的效果</span>
+        <span class="nv">$isLock</span> <span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">_redis</span><span class="o">-&gt;</span><span class="na">set</span><span class="p">(</span><span class="nv">$key</span><span class="p">,</span><span class="nb">time</span><span class="p">()</span> <span class="o">+</span> <span class="nv">$expTTL</span> <span class="p">,[</span><span class="s1">'nx'</span><span class="p">,</span> <span class="s1">'ex'</span><span class="o">=&gt;</span><span class="nv">$expTTL</span><span class="p">]);</span>
+        <span class="k">if</span><span class="p">(</span><span class="nv">$isLock</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">return</span>  <span class="kc">false</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="sd">/**
+     * @param $key string 解锁
+     */</span>
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">del</span><span class="p">(</span><span class="nv">$key</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">_redis</span><span class="o">-&gt;</span><span class="na">del</span><span class="p">(</span><span class="nv">$key</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="nv">$pdo</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">PDO</span><span class="p">(</span><span class="s1">'mysql:host=127.0.0.1;dbname=store'</span><span class="p">,</span> <span class="s1">'root'</span><span class="p">,</span> <span class="s1">'123456789'</span><span class="p">);</span>
+
+<span class="c1">//销售数量</span>
+<span class="nv">$num</span> <span class="o">=</span> <span class="nv">$_GET</span><span class="p">[</span><span class="s1">'num'</span><span class="p">]</span> <span class="o">??</span> <span class="mi">1</span><span class="p">;</span>
+<span class="c1">//锁名</span>
+<span class="nv">$lockName</span> <span class="o">=</span> <span class="s1">'store_depot_batch_lock'</span><span class="p">;</span>
+
+<span class="k">try</span><span class="p">{</span>
+    <span class="c1">//加锁</span>
+    <span class="nv">$lock</span> <span class="o">=</span> <span class="nx">Lock</span><span class="o">::</span><span class="na">getInstance</span><span class="p">();</span>
+
+    <span class="c1">//加锁失败抛出网络异常错误</span>
+    <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="nv">$lock</span><span class="o">-&gt;</span><span class="na">set</span><span class="p">(</span><span class="nv">$lockName</span><span class="p">,</span><span class="mi">10</span><span class="p">)){</span>
+        <span class="k">throw</span> <span class="k">new</span> <span class="nx">RedisException</span><span class="p">(</span><span class="s1">'网络异常,请稍后再试'</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="c1">//开启事务</span>
+    <span class="nv">$pdo</span><span class="o">-&gt;</span><span class="na">beginTransaction</span><span class="p">();</span>
+
+    <span class="c1">//查询门店仓库批次信息</span>
+    <span class="nv">$depotStoreDepotBatchSql</span><span class="o">=</span><span class="s2">"select * from  `depot_store_depot_batch` where id =1 limit 1"</span><span class="p">;</span>
+    <span class="nv">$depotStoreDepotBatchRes</span> <span class="o">=</span> <span class="nv">$pdo</span><span class="o">-&gt;</span><span class="na">query</span><span class="p">(</span><span class="nv">$depotStoreDepotBatchSql</span><span class="p">)</span><span class="o">-&gt;</span><span class="na">fetch</span><span class="p">();</span>
+
+    <span class="c1">//操作后冻结数量</span>
+    <span class="nv">$afterFrozenNum</span> <span class="o">=</span>  <span class="nv">$num</span> <span class="o">+</span> <span class="nv">$depotStoreDepotBatchRes</span><span class="p">[</span><span class="s1">'frozen_num'</span><span class="p">];</span>
+    <span class="nv">$activeNumber</span> <span class="o">=</span> <span class="nv">$depotStoreDepotBatchRes</span><span class="p">[</span><span class="s1">'num'</span><span class="p">]</span> <span class="o">-</span> <span class="nv">$afterFrozenNum</span><span class="p">;</span>
+
+    <span class="k">if</span><span class="p">(</span><span class="nv">$activeNumber</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">){</span>
+        <span class="k">throw</span> <span class="k">new</span> <span class="nx">Exception</span><span class="p">(</span><span class="s1">'商品已售罄了'</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="c1">//下单主表</span>
+    <span class="nv">$orderSql</span> <span class="o">=</span><span class="s2">"insert into `order` VALUES (null,</span><span class="si">{</span><span class="nv">$num</span><span class="si">}</span><span class="s2">,1,NOW(),NOW(),null)"</span><span class="p">;</span>
+    <span class="nv">$pdo</span><span class="o">-&gt;</span><span class="na">query</span><span class="p">(</span><span class="nv">$orderSql</span><span class="p">);</span>
+    <span class="nv">$orderId</span> <span class="o">=</span> <span class="nv">$pdo</span><span class="o">-&gt;</span><span class="na">lastInsertId</span><span class="p">();</span>
+
+    <span class="c1">//下单是否成功判断</span>
+    <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="nv">$orderId</span><span class="p">){</span>
+        <span class="k">throw</span> <span class="k">new</span> <span class="nx">Exception</span><span class="p">(</span><span class="s1">'下单失败,请稍后再试'</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="c1">//更新仓库</span>
+    <span class="nv">$depotStoreDepotBatchUpdateSql</span><span class="o">=</span><span class="s2">"update `depot_store_depot_batch` set `frozen_num`=</span><span class="si">{</span><span class="nv">$afterFrozenNum</span><span class="si">}</span><span class="s2"> WHERE id=1"</span><span class="p">;</span>
+    <span class="nv">$pdo</span><span class="o">-&gt;</span><span class="na">query</span><span class="p">(</span><span class="nv">$depotStoreDepotBatchUpdateSql</span><span class="p">);</span>
+
+    <span class="c1">//冻结记录操作sql</span>
+    <span class="nv">$actionSql</span> <span class="o">=</span><span class="s2">"insert into `depot_store_depot_batch_frozen_record` VALUES (null,1,</span><span class="si">{</span><span class="nv">$depotStoreDepotBatchRes</span><span class="p">[</span><span class="s1">'frozen_num'</span><span class="p">]</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="nv">$afterFrozenNum</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="nv">$num</span><span class="si">}</span><span class="s2">,'并发测试',NOW(),NOW())"</span><span class="p">;</span>
+    <span class="nv">$pdo</span><span class="o">-&gt;</span><span class="na">query</span><span class="p">(</span><span class="nv">$actionSql</span><span class="p">);</span>
+
+    <span class="c1">//提交事务</span>
+    <span class="nv">$pdo</span><span class="o">-&gt;</span><span class="na">commit</span><span class="p">();</span>
+
+    <span class="c1">//解锁</span>
+    <span class="nv">$lock</span><span class="o">-&gt;</span><span class="na">del</span><span class="p">(</span><span class="nv">$lockName</span><span class="p">);</span>
+
+    <span class="k">echo</span> <span class="s1">'下单成功,订单id为'</span> <span class="o">.</span> <span class="nv">$orderId</span><span class="p">;</span>
+<span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="nx">\RedisException</span> <span class="nv">$e</span><span class="p">){</span>
+    <span class="k">echo</span> <span class="nv">$e</span><span class="o">-&gt;</span><span class="na">getMessage</span><span class="p">();</span>
+<span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="nx">\Exception</span> <span class="nv">$e</span><span class="p">){</span>
+    <span class="c1">//回滚事务</span>
+    <span class="k">if</span><span class="p">(</span><span class="nv">$pdo</span><span class="o">-&gt;</span><span class="na">inTransaction</span><span class="p">()){</span>
+        <span class="nv">$pdo</span><span class="o">-&gt;</span><span class="na">rollBack</span><span class="p">();</span>
+    <span class="p">}</span>
+   <span class="c1">//解锁</span>
+    <span class="nv">$lock</span><span class="o">-&gt;</span><span class="na">del</span><span class="p">(</span><span class="nv">$lockName</span><span class="p">);</span>
+    <span class="k">echo</span> <span class="nv">$e</span><span class="o">-&gt;</span><span class="na">getMessage</span><span class="p">();</span>
+<span class="p">}</span>
+
+</code></pre></div></div>
+
+<p>ab压力测试，ab -n 1000 -c 100 http://127.0.0.1:83/redis.php</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code> ~ ab -n 1000 -c 100 http://127.0.0.1:83/redis.php
+This is ApacheBench, Version 2.3 &lt;$Revision: 1826891 $&gt;
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking 127.0.0.1 (be patient)
+Completed 100 requests
+Completed 200 requests
+Completed 300 requests
+Completed 400 requests
+Completed 500 requests
+Completed 600 requests
+Completed 700 requests
+Completed 800 requests
+Completed 900 requests
+Completed 1000 requests
+Finished 1000 requests
+
+
+Server Software:        nginx/1.15.1
+Server Hostname:        127.0.0.1
+Server Port:            83
+
+Document Path:          /redis.php
+Document Length:        25 bytes
+
+Concurrency Level:      100
+Time taken for tests:   2.508 seconds
+Complete requests:      1000
+Failed requests:        991
+   (Connect: 0, Receive: 0, Length: 991, Exceptions: 0)
+Total transferred:      189001 bytes
+HTML transferred:       27001 bytes
+Requests per second:    398.65 [#/sec] (mean)
+Time per request:       250.845 [ms] (mean)
+Time per request:       2.508 [ms] (mean, across all concurrent requests)
+Transfer rate:          73.58 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   0.8      0       4
+Processing:    28  232  37.8    239     389
+Waiting:       28  232  37.8    239     389
+Total:         33  233  37.5    239     389
+
+Percentage of the requests served within a certain time (ms)
+  50%    239
+  66%    248
+  75%    254
+  80%    258
+  90%    269
+  95%    284
+  98%    312
+  99%    320
+ 100%    389 (longest request)
+</code></pre></div></div>
+
+<p>查看Order表情况，显示了10row order。</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mysql&gt; select * from `order`;
++----+-----+----------------------+---------------------+---------------------+-------------+
+| id | num | store_depot_batch_id | create_time         | update_time         | delete_time |
++----+-----+----------------------+---------------------+---------------------+-------------+
+|  1 |   1 |                    1 | 2019-11-04 06:34:40 | 2019-11-04 06:34:40 | NULL        |
+|  2 |   1 |                    1 | 2019-11-04 06:34:40 | 2019-11-04 06:34:40 | NULL        |
+|  3 |   1 |                    1 | 2019-11-04 06:34:40 | 2019-11-04 06:34:40 | NULL        |
+|  4 |   1 |                    1 | 2019-11-04 06:34:40 | 2019-11-04 06:34:40 | NULL        |
+|  5 |   1 |                    1 | 2019-11-04 06:34:40 | 2019-11-04 06:34:40 | NULL        |
+|  6 |   1 |                    1 | 2019-11-04 06:34:40 | 2019-11-04 06:34:40 | NULL        |
+|  7 |   1 |                    1 | 2019-11-04 06:34:40 | 2019-11-04 06:34:40 | NULL        |
+|  8 |   1 |                    1 | 2019-11-04 06:34:40 | 2019-11-04 06:34:40 | NULL        |
+|  9 |   1 |                    1 | 2019-11-04 06:34:40 | 2019-11-04 06:34:40 | NULL        |
+| 10 |   1 |                    1 | 2019-11-04 06:34:40 | 2019-11-04 06:34:40 | NULL        |
++----+-----+----------------------+---------------------+---------------------+-------------+
+10 rows in set (0.00 sec)
+</code></pre></div></div>
+
+<p>查看depot_store_depot_batch表情况，确实冻结了10个。</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mysql&gt; select * from `depot_store_depot_batch`;
++----+-----+------------+---------------------+---------------------+-------------+
+| id | num | frozen_num | create_time         | update_time         | delete_time |
++----+-----+------------+---------------------+---------------------+-------------+
+|  1 |  10 |         10 | 2019-11-04 06:33:43 | 2019-11-04 06:33:43 | NULL        |
++----+-----+------------+---------------------+---------------------+-------------+
+1 row in set (0.01 sec)
+</code></pre></div></div>
+
+<p>查看depot_store_depot_batch_frozen_record表情况，10row记录。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mysql&gt; select * from depot_store_depot_batch_frozen_record;
++----+----------------------------+-------------------+------------------+------------+------+---------------------+---------------------+
+| id | depot_store_depot_batch_id | before_frozen_num | after_frozen_num | frozen_num | desc | create_time         | update_time         |
++----+----------------------------+-------------------+------------------+------------+------+---------------------+---------------------+
+|  1 |                          1 |                 0 |                1 |          1 | ???? | 2019-11-04 06:34:40 | 2019-11-04 06:34:40 |
+|  2 |                          1 |                 1 |                2 |          1 | ???? | 2019-11-04 06:34:40 | 2019-11-04 06:34:40 |
+|  3 |                          1 |                 2 |                3 |          1 | ???? | 2019-11-04 06:34:40 | 2019-11-04 06:34:40 |
+|  4 |                          1 |                 3 |                4 |          1 | ???? | 2019-11-04 06:34:40 | 2019-11-04 06:34:40 |
+|  5 |                          1 |                 4 |                5 |          1 | ???? | 2019-11-04 06:34:40 | 2019-11-04 06:34:40 |
+|  6 |                          1 |                 5 |                6 |          1 | ???? | 2019-11-04 06:34:40 | 2019-11-04 06:34:40 |
+|  7 |                          1 |                 6 |                7 |          1 | ???? | 2019-11-04 06:34:40 | 2019-11-04 06:34:40 |
+|  8 |                          1 |                 7 |                8 |          1 | ???? | 2019-11-04 06:34:40 | 2019-11-04 06:34:40 |
+|  9 |                          1 |                 8 |                9 |          1 | ???? | 2019-11-04 06:34:40 | 2019-11-04 06:34:40 |
+| 10 |                          1 |                 9 |               10 |          1 | ???? | 2019-11-04 06:34:40 | 2019-11-04 06:34:40 |
++----+----------------------------+-------------------+------------------+------------+------+---------------------+---------------------+
+10 rows in set (0.00 sec)
+</code></pre></div></div>
+
+<p><strong>结论就是，我加大的压力测试，结果也是我们想要的</strong></p>
+
+<h3 id="注意与疑惑">注意与疑惑</h3>
+<p>注意：</p>
+
+<ul>
+  <li>1、要用多进程的php-fpm测试，不能用单进程的cli。</li>
+</ul>
+
+<p>疑惑：</p>
+
+<ul>
+  <li>1、在redis set 10秒过期后，糟糕情况就是程序还没执行完成set过期了，导致超卖现象。</li>
+</ul>
+
+<h3 id="参考">参考</h3>
+
+<ul>
+  <li>
+    <p>1、<a href="https://www.jianshu.com/p/0eadec61e737">利用Redis锁解决高并发问题 - 简书</a></p>
+  </li>
+  <li>
+    <p>2、<a href="http://www.sohu.com/a/240877096_99896109">漫画：什么是分布式锁？</a></p>
+  </li>
+</ul>
+
+
+
+                <hr>
+
+                <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/4.0/80x15.png" /></a><br />本作品采用<a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/">CC BY-NC-ND 4.0</a>进行许可。转载，请注明原作者 Zzhpeng 及本文源链接。
+
+                <hr>
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/mysql-in.html" data-toggle="tooltip" data-placement="top" title="Mysql使用IN功能相关与性能对比">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                </ul>
+
+                <!-- Utteranc -->
+
+                <script src="https://utteranc.es/client.js"
+                        repo="fromChinaBoy/fromChinaBoy.github.io"
+                        issue-term="pathname"
+                        theme="github-light"
+                        crossorigin="anonymous"
+                        async>
+                </script>
+                <!-- Share botton -->
+                <!-- Go to www.addthis.com/dashboard to customize your tools --> <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-5caaedc5f9567124"></script>
+
+            </div>
+        </div>
+     </div>
+  </article>
+</script>
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+  
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    <!-- kill the Facebook and Weibo -->
+                    <li>
+                        <a href="/feed.xml">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+
+                    
+                    <li>
+                        <a href="https://twitter.com/zzhpeng">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+
+                    
+                    <li>
+                        <a href="https://github.com/fromChinaBoy">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <!--
+                    
+                    <li>
+                        <a href="http://www.douban.com/people/zzhpeng">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-douban fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    -->
+
+                    <!--
+                    
+                    <li>
+                        <a href="https://www.facebook.com/zzhpeng">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    -->
+
+                    
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/zzhpeng">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                    
+
+                    <!--
+                    
+                    <li>
+                        <a target="_blank" href="http://weibo.com/zzhpeng">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    -->
+
+                </ul>
+                <p class="copyright text-muted">
+                &copy; 2011~2019 zzhpeng ♪ Powered by Jekyll.
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js "></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js "></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/clean-blog.min.js "></script>
+
+
+
+
+<!-- Highlight.js -->
+<!--<script>-->
+    <!--async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js",function(){-->
+        <!--hljs.initHighlightingOnLoad();-->
+    <!--})-->
+<!--</script>-->
+<!--<link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">-->
+
+
+</body>
+
+</html>

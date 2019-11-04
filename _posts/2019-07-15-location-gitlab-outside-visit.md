@@ -2,7 +2,7 @@
 layout: post
 title: 基于frp,gitlab的docker镜像实现本地gitlab外网访问(一)
 date: 2019-07-15 
-tags: frp,gitlab,docker
+tags: frp gitlab docker
 ---
 ### 基础
 * 会git的基本操作

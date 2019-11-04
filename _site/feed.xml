@@ -7,6 +7,553 @@
 		<atom:link href="/" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>Redis的原子性解决并发问题</title>
+				<description>&lt;h3 id=&quot;问题概述&quot;&gt;问题概述&lt;/h3&gt;
+
+&lt;p&gt;最近根据运营那边提供BUG反馈信息提示，出现了仓库商品冻结数量少了，导致出库异常现象。仓库商品库存信息
+表设计是库存num，冻结数frozen_num。当下订单的时候，frozen_num + 1。订单结束，商品库存num - 
+出库数量，冻结数frozen_num - 出库数量。但是在高并发下，多个请求同时进来，订单下了多个，frozen_num只加了1，那样出库的时候就会产生异常。&lt;/p&gt;
+
+&lt;h3 id=&quot;初步方案选择利用redis的原子性实现锁&quot;&gt;初步方案选择，利用redis的原子性，实现锁&lt;/h3&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;1、Redis SETNX&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Redis SETNX的用法是SETNX key value。而返回值，如果设置key成功会返回1，没有被设置会返回0。
+简单说就是SET if Not eXists，不存在就可以被设置。&lt;/p&gt;
+
+&lt;p&gt;然后根据这个特性，用SETNX的value设置过期时间，结合Redis DEL key [key …]，用过期时间和程序
+是否执行完成，去判断是否可以删除这个key来实现原子性控制。伪代码如下：&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;if 获取锁成功
+    1、执行程序
+    2、解锁
+else 
+    //获取锁失败，判断过期时间
+    if 过期并且超时，
+        1、解锁
+    if 再次获取锁
+        1.执行程序
+        2、解锁   
+    else
+        不处理，请求结束
+}
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;获取锁失败，判断value这个过期时间解锁很好的解决了进程异常解锁程序不执行产生死锁问题，但是程序解锁再获取锁的过程
+是非原子性的，所以会存在极端现象，假设有进程P1、P2，会出现如下情况。&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;1、P1和P2都获取锁失败，同时进行过期判断，并且都通过。&lt;/li&gt;
+  &lt;li&gt;2、P1解锁成功，再获取锁。&lt;/li&gt;
+  &lt;li&gt;3、P2又解锁成功，也获取了锁。&lt;/li&gt;
+  &lt;li&gt;4、P1、P2同时获取锁成功。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;不过官方给了替换方案，原话为&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Anyway even assuming a single-instance locking primitive, starting with 2.6.12
+it is possible to create a much simpler locking primitive, equivalent to the 
+one discussed here, using the SET command to acquire the lock, and a simple 
+Lua script to release the lock. The pattern is documented in the SET command 
+page.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;表达的就是从redis 2.6.12版本起,可以用set实现setnx功能并且可以设置锁过期时间和原子性语言的lua脚本释放锁，去替换了setnx。&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;2、Redis SET&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;用了set之后程序就不用去判断是否过期去程序解锁了，也实现了原子性。伪代码变为：&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;if 获取锁成功
+    1、执行程序
+    2、解锁
+else 
+    //获取锁失败
+    1、不处理
+}
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;演示代码&quot;&gt;演示代码&lt;/h3&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;数据库&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;订单表&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;DROP TABLE IF EXISTS `order`;
+CREATE TABLE `order` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `num` int(11) NOT NULL DEFAULT '0' COMMENT '销售商品数量',
+  `store_depot_batch_id` int(11) NOT NULL COMMENT '门店仓库批次id',
+  `create_time` timestamp NULL DEFAULT NULL COMMENT '添加时间，',
+  `update_time` timestamp NULL DEFAULT NULL COMMENT '更新时间',
+  `delete_time` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='订单表';
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;门店仓库批次表&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;DROP TABLE IF EXISTS `depot_store_depot_batch`;
+CREATE TABLE `depot_store_depot_batch` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `num` int(11) NOT NULL DEFAULT '0' COMMENT '总数量，有效数量=总数-冻结数量',
+  `frozen_num` int(11) NOT NULL DEFAULT '0' COMMENT '冻结数量',
+  `create_time` timestamp NULL DEFAULT NULL COMMENT '添加时间，入库时间',
+  `update_time` timestamp NULL DEFAULT NULL COMMENT '更新时间',
+  `delete_time` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='门店仓库批次管理';
+
+INSERT INTO `depot_store_depot_batch` VALUES(1,10,0,NOW(),NOW(),NULL);
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;门店仓库批次冻结操作表&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;DROP TABLE IF EXISTS `depot_store_depot_batch_frozen_record`;
+CREATE TABLE `depot_store_depot_batch_frozen_record` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `depot_store_depot_batch_id` int(11) NOT NULL COMMENT '门店仓库批次管理id',
+  `before_frozen_num` int(11) NOT NULL COMMENT '仓库冻结数量变动前',
+  `after_frozen_num` int(11) NOT NULL COMMENT '仓库冻结数量变动后',
+  `frozen_num` int(11) DEFAULT '0',
+  `desc` varchar(100) NOT NULL COMMENT '描述',
+  `create_time` timestamp NULL DEFAULT NULL COMMENT '添加时间',
+  `update_time` timestamp NULL DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='门店仓库冻结记录';
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;代码，实现下单、更新仓库冻结数和添加冻结操作记录&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h4 id=&quot;没有加redis锁的代码&quot;&gt;没有加redis锁的代码&lt;/h4&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;cp&quot;&gt;&amp;lt;?php&lt;/span&gt;
+&lt;span class=&quot;sd&quot;&gt;/**
+ * Created by PhpStorm.
+ * User: zzhpeng
+ * Date: 2019/11/2
+ * Time: 11:32 AM
+ */&lt;/span&gt;
+
+&lt;span class=&quot;nv&quot;&gt;$pdo&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;PDO&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'mysql:host=127.0.0.1;dbname=store'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'root'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'123456789'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;//销售数量&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;$num&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$_GET&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'num'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;??&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;try&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;//查询门店仓库批次信息&lt;/span&gt;
+    &lt;span class=&quot;nv&quot;&gt;$depotStoreDepotBatchSql&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;select * from  `depot_store_depot_batch` where id =1 limit 1&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;nv&quot;&gt;$depotStoreDepotBatchRes&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$pdo&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;query&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$depotStoreDepotBatchSql&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;fetch&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;//操作后冻结数量&lt;/span&gt;
+    &lt;span class=&quot;nv&quot;&gt;$afterFrozenNum&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;  &lt;span class=&quot;nv&quot;&gt;$num&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$depotStoreDepotBatchRes&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'frozen_num'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+    &lt;span class=&quot;nv&quot;&gt;$activeNumber&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$depotStoreDepotBatchRes&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'num'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$afterFrozenNum&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;//开启事务&lt;/span&gt;
+    &lt;span class=&quot;nv&quot;&gt;$pdo&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;beginTransaction&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$activeNumber&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;throw&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Exception&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'商品已售罄了'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;//下单主表&lt;/span&gt;
+    &lt;span class=&quot;nv&quot;&gt;$orderSql&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;insert into `order` VALUES (null,&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$num&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;,1,NOW(),NOW(),null)&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;nv&quot;&gt;$pdo&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;query&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$orderSql&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;nv&quot;&gt;$orderId&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$pdo&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;lastInsertId&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$orderId&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;nv&quot;&gt;$depotStoreDepotBatchUpdateSql&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;update `depot_store_depot_batch` set `frozen_num`=&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$afterFrozenNum&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt; WHERE id=1&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+        &lt;span class=&quot;nv&quot;&gt;$pdo&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;query&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$depotStoreDepotBatchUpdateSql&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+        &lt;span class=&quot;c1&quot;&gt;//冻结记录操作sql&lt;/span&gt;
+        &lt;span class=&quot;nv&quot;&gt;$actionSql&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;insert into `depot_store_depot_batch_frozen_record` VALUES (null,1,&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$depotStoreDepotBatchRes&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'frozen_num'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$afterFrozenNum&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$num&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;,'并发测试',NOW(),NOW())&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+        &lt;span class=&quot;nv&quot;&gt;$pdo&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;query&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$actionSql&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+        &lt;span class=&quot;c1&quot;&gt;//提交事务&lt;/span&gt;
+        &lt;span class=&quot;nv&quot;&gt;$pdo&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;commit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;echo&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'下单成功,订单id为'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$orderId&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;catch&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;\Exception&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$e&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;//回滚事务&lt;/span&gt;
+    &lt;span class=&quot;nv&quot;&gt;$pdo&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;rollBack&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;echo&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$e&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getMessage&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;ab压力测试，ab -n 100 -c 10 http://127.0.0.1:83/redis.php,然后查看三个表mysql记录。&lt;/p&gt;
+
+&lt;p&gt;查看Order表情况，显示了35row order。&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;mysql&amp;gt; select * from `order`;
++----+-----+----------------------+---------------------+---------------------+-------------+
+| id | num | store_depot_batch_id | create_time         | update_time         | delete_time |
++----+-----+----------------------+---------------------+---------------------+-------------+
+|  1 |   1 |                    1 | 2019-11-03 19:08:06 | 2019-11-03 19:08:06 | NULL        |
+|  2 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+|  3 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+|  4 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+|  5 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+|  6 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+|  7 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+|  8 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+|  9 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+| 10 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+| 11 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+| 12 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+| 13 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+| 14 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+| 15 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+| 16 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+| 17 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+| 18 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+| 19 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+| 20 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+| 21 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+| 22 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+| 23 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+| 24 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+| 25 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+| 26 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+| 27 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+| 28 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+| 29 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+| 30 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+| 31 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+| 32 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+| 33 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+| 34 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
+| 35 |   1 |                    1 | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 | NULL        |
++----+-----+----------------------+---------------------+---------------------+-------------+
+35 rows in set (0.00 sec)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;查看depot_store_depot_batch表情况，确实冻结了10个。&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;mysql&amp;gt; select * from `depot_store_depot_batch`;
++----+-----+------------+---------------------+---------------------+-------------+
+| id | num | frozen_num | create_time         | update_time         | delete_time |
++----+-----+------------+---------------------+---------------------+-------------+
+|  1 |  10 |         10 | 2019-11-03 19:06:59 | 2019-11-03 19:06:59 | NULL        |
++----+-----+------------+---------------------+---------------------+-------------+
+1 row in set (0.00 sec)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;查看depot_store_depot_batch_frozen_record表情况，35row记录。&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;mysql&amp;gt; select * from depot_store_depot_batch_frozen_record;
++------+----------------------------+-------------------+------------------+------------+------+---------------------+---------------------+
+| id   | depot_store_depot_batch_id | before_frozen_num | after_frozen_num | frozen_num | desc | create_time         | update_time         |
++------+----------------------------+-------------------+------------------+------------+------+---------------------+---------------------+
+| 2342 |                          1 |                 0 |                1 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2343 |                          1 |                 1 |                2 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2344 |                          1 |                 1 |                2 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2345 |                          1 |                 1 |                2 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2346 |                          1 |                 1 |                2 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2347 |                          1 |                 1 |                2 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2348 |                          1 |                 2 |                3 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2349 |                          1 |                 2 |                3 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2350 |                          1 |                 2 |                3 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2351 |                          1 |                 2 |                3 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2352 |                          1 |                 2 |                3 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2353 |                          1 |                 3 |                4 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2354 |                          1 |                 3 |                4 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2355 |                          1 |                 3 |                4 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2356 |                          1 |                 3 |                4 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2357 |                          1 |                 4 |                5 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2358 |                          1 |                 4 |                5 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2359 |                          1 |                 4 |                5 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2360 |                          1 |                 4 |                5 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2361 |                          1 |                 5 |                6 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2362 |                          1 |                 5 |                6 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2363 |                          1 |                 5 |                6 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2364 |                          1 |                 5 |                6 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2365 |                          1 |                 5 |                6 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2366 |                          1 |                 6 |                7 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2367 |                          1 |                 6 |                7 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2368 |                          1 |                 6 |                7 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2369 |                          1 |                 7 |                8 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2370 |                          1 |                 7 |                8 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2371 |                          1 |                 7 |                8 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2372 |                          1 |                 8 |                9 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2373 |                          1 |                 8 |                9 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2374 |                          1 |                 8 |                9 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2375 |                          1 |                 9 |               10 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
+| 2376 |                          1 |                 9 |               10 |          1 | ???? | 2019-11-03 19:08:07 | 2019-11-03 19:08:07 |
++------+----------------------------+-------------------+------------------+------------+------+---------------------+---------------------+
+35 rows in set (0.00 sec)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;strong&gt;结论就是，虽然冻结数是对了，但是出了很多超卖的订单&lt;/strong&gt;&lt;/p&gt;
+
+&lt;h4 id=&quot;加redis锁的代码&quot;&gt;加redis锁的代码&lt;/h4&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;cp&quot;&gt;&amp;lt;?php&lt;/span&gt;
+&lt;span class=&quot;sd&quot;&gt;/**
+ * Created by PhpStorm.
+ * User: zzhpeng
+ * Date: 2019/11/2
+ * Time: 11:32 AM
+ */&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Lock&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$_instance&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;private&lt;/span&gt;   &lt;span class=&quot;nv&quot;&gt;$_redis&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;__construct&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;nv&quot;&gt;$this&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;_redis&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;  &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;\Redis&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+        &lt;span class=&quot;nv&quot;&gt;$this&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;_redis&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;connect&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'127.0.0.1'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;getInstance&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$_instance&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;instanceof&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$_instance&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$_instance&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt;  &lt;span class=&quot;nx&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+    &lt;span class=&quot;sd&quot;&gt;/**
+     * 加锁
+     * @author: zzhpeng
+     * Date: 2019/11/2
+     * @param $key string 锁名称
+     * @param $expTTL int 多久过期，秒单位
+     *
+     * @return bool
+     */&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;set&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$expTTL&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;c1&quot;&gt;//set 实现setnx 和 expire()的效果&lt;/span&gt;
+        &lt;span class=&quot;nv&quot;&gt;$isLock&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$this&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;_redis&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;set&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;time&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$expTTL&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;,[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'nx'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'ex'&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$expTTL&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]);&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$isLock&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt;  &lt;span class=&quot;kc&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+    &lt;span class=&quot;sd&quot;&gt;/**
+     * @param $key string 解锁
+     */&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;del&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;nv&quot;&gt;$this&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;_redis&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;del&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;nv&quot;&gt;$pdo&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;PDO&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'mysql:host=127.0.0.1;dbname=store'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'root'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'123456789'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;//销售数量&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;$num&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$_GET&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'num'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;??&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;//锁名&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;$lockName&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'store_depot_batch_lock'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;try&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;//加锁&lt;/span&gt;
+    &lt;span class=&quot;nv&quot;&gt;$lock&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Lock&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getInstance&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;//加锁失败抛出网络异常错误&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$lock&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;set&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$lockName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)){&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;throw&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;RedisException&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'网络异常,请稍后再试'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;//开启事务&lt;/span&gt;
+    &lt;span class=&quot;nv&quot;&gt;$pdo&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;beginTransaction&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;//查询门店仓库批次信息&lt;/span&gt;
+    &lt;span class=&quot;nv&quot;&gt;$depotStoreDepotBatchSql&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;select * from  `depot_store_depot_batch` where id =1 limit 1&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;nv&quot;&gt;$depotStoreDepotBatchRes&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$pdo&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;query&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$depotStoreDepotBatchSql&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;fetch&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;//操作后冻结数量&lt;/span&gt;
+    &lt;span class=&quot;nv&quot;&gt;$afterFrozenNum&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;  &lt;span class=&quot;nv&quot;&gt;$num&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$depotStoreDepotBatchRes&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'frozen_num'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+    &lt;span class=&quot;nv&quot;&gt;$activeNumber&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$depotStoreDepotBatchRes&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'num'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$afterFrozenNum&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$activeNumber&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;throw&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Exception&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'商品已售罄了'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;//下单主表&lt;/span&gt;
+    &lt;span class=&quot;nv&quot;&gt;$orderSql&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;insert into `order` VALUES (null,&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$num&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;,1,NOW(),NOW(),null)&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;nv&quot;&gt;$pdo&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;query&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$orderSql&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;nv&quot;&gt;$orderId&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$pdo&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;lastInsertId&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;//下单是否成功判断&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$orderId&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;throw&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Exception&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'下单失败,请稍后再试'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;//更新仓库&lt;/span&gt;
+    &lt;span class=&quot;nv&quot;&gt;$depotStoreDepotBatchUpdateSql&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;update `depot_store_depot_batch` set `frozen_num`=&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$afterFrozenNum&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt; WHERE id=1&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;nv&quot;&gt;$pdo&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;query&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$depotStoreDepotBatchUpdateSql&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;//冻结记录操作sql&lt;/span&gt;
+    &lt;span class=&quot;nv&quot;&gt;$actionSql&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;insert into `depot_store_depot_batch_frozen_record` VALUES (null,1,&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$depotStoreDepotBatchRes&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'frozen_num'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$afterFrozenNum&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$num&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;,'并发测试',NOW(),NOW())&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;nv&quot;&gt;$pdo&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;query&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$actionSql&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;//提交事务&lt;/span&gt;
+    &lt;span class=&quot;nv&quot;&gt;$pdo&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;commit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;//解锁&lt;/span&gt;
+    &lt;span class=&quot;nv&quot;&gt;$lock&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;del&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$lockName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;echo&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'下单成功,订单id为'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$orderId&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;catch&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;\RedisException&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$e&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;echo&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$e&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getMessage&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;catch&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;\Exception&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$e&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;//回滚事务&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$pdo&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;inTransaction&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()){&lt;/span&gt;
+        &lt;span class=&quot;nv&quot;&gt;$pdo&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;rollBack&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+   &lt;span class=&quot;c1&quot;&gt;//解锁&lt;/span&gt;
+    &lt;span class=&quot;nv&quot;&gt;$lock&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;del&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$lockName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;echo&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$e&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getMessage&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;ab压力测试，ab -n 1000 -c 100 http://127.0.0.1:83/redis.php&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; ~ ab -n 1000 -c 100 http://127.0.0.1:83/redis.php
+This is ApacheBench, Version 2.3 &amp;lt;$Revision: 1826891 $&amp;gt;
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking 127.0.0.1 (be patient)
+Completed 100 requests
+Completed 200 requests
+Completed 300 requests
+Completed 400 requests
+Completed 500 requests
+Completed 600 requests
+Completed 700 requests
+Completed 800 requests
+Completed 900 requests
+Completed 1000 requests
+Finished 1000 requests
+
+
+Server Software:        nginx/1.15.1
+Server Hostname:        127.0.0.1
+Server Port:            83
+
+Document Path:          /redis.php
+Document Length:        25 bytes
+
+Concurrency Level:      100
+Time taken for tests:   2.508 seconds
+Complete requests:      1000
+Failed requests:        991
+   (Connect: 0, Receive: 0, Length: 991, Exceptions: 0)
+Total transferred:      189001 bytes
+HTML transferred:       27001 bytes
+Requests per second:    398.65 [#/sec] (mean)
+Time per request:       250.845 [ms] (mean)
+Time per request:       2.508 [ms] (mean, across all concurrent requests)
+Transfer rate:          73.58 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   0.8      0       4
+Processing:    28  232  37.8    239     389
+Waiting:       28  232  37.8    239     389
+Total:         33  233  37.5    239     389
+
+Percentage of the requests served within a certain time (ms)
+  50%    239
+  66%    248
+  75%    254
+  80%    258
+  90%    269
+  95%    284
+  98%    312
+  99%    320
+ 100%    389 (longest request)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;查看Order表情况，显示了10row order。&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;mysql&amp;gt; select * from `order`;
++----+-----+----------------------+---------------------+---------------------+-------------+
+| id | num | store_depot_batch_id | create_time         | update_time         | delete_time |
++----+-----+----------------------+---------------------+---------------------+-------------+
+|  1 |   1 |                    1 | 2019-11-04 06:34:40 | 2019-11-04 06:34:40 | NULL        |
+|  2 |   1 |                    1 | 2019-11-04 06:34:40 | 2019-11-04 06:34:40 | NULL        |
+|  3 |   1 |                    1 | 2019-11-04 06:34:40 | 2019-11-04 06:34:40 | NULL        |
+|  4 |   1 |                    1 | 2019-11-04 06:34:40 | 2019-11-04 06:34:40 | NULL        |
+|  5 |   1 |                    1 | 2019-11-04 06:34:40 | 2019-11-04 06:34:40 | NULL        |
+|  6 |   1 |                    1 | 2019-11-04 06:34:40 | 2019-11-04 06:34:40 | NULL        |
+|  7 |   1 |                    1 | 2019-11-04 06:34:40 | 2019-11-04 06:34:40 | NULL        |
+|  8 |   1 |                    1 | 2019-11-04 06:34:40 | 2019-11-04 06:34:40 | NULL        |
+|  9 |   1 |                    1 | 2019-11-04 06:34:40 | 2019-11-04 06:34:40 | NULL        |
+| 10 |   1 |                    1 | 2019-11-04 06:34:40 | 2019-11-04 06:34:40 | NULL        |
++----+-----+----------------------+---------------------+---------------------+-------------+
+10 rows in set (0.00 sec)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;查看depot_store_depot_batch表情况，确实冻结了10个。&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;mysql&amp;gt; select * from `depot_store_depot_batch`;
++----+-----+------------+---------------------+---------------------+-------------+
+| id | num | frozen_num | create_time         | update_time         | delete_time |
++----+-----+------------+---------------------+---------------------+-------------+
+|  1 |  10 |         10 | 2019-11-04 06:33:43 | 2019-11-04 06:33:43 | NULL        |
++----+-----+------------+---------------------+---------------------+-------------+
+1 row in set (0.01 sec)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;查看depot_store_depot_batch_frozen_record表情况，10row记录。&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;mysql&amp;gt; select * from depot_store_depot_batch_frozen_record;
++----+----------------------------+-------------------+------------------+------------+------+---------------------+---------------------+
+| id | depot_store_depot_batch_id | before_frozen_num | after_frozen_num | frozen_num | desc | create_time         | update_time         |
++----+----------------------------+-------------------+------------------+------------+------+---------------------+---------------------+
+|  1 |                          1 |                 0 |                1 |          1 | ???? | 2019-11-04 06:34:40 | 2019-11-04 06:34:40 |
+|  2 |                          1 |                 1 |                2 |          1 | ???? | 2019-11-04 06:34:40 | 2019-11-04 06:34:40 |
+|  3 |                          1 |                 2 |                3 |          1 | ???? | 2019-11-04 06:34:40 | 2019-11-04 06:34:40 |
+|  4 |                          1 |                 3 |                4 |          1 | ???? | 2019-11-04 06:34:40 | 2019-11-04 06:34:40 |
+|  5 |                          1 |                 4 |                5 |          1 | ???? | 2019-11-04 06:34:40 | 2019-11-04 06:34:40 |
+|  6 |                          1 |                 5 |                6 |          1 | ???? | 2019-11-04 06:34:40 | 2019-11-04 06:34:40 |
+|  7 |                          1 |                 6 |                7 |          1 | ???? | 2019-11-04 06:34:40 | 2019-11-04 06:34:40 |
+|  8 |                          1 |                 7 |                8 |          1 | ???? | 2019-11-04 06:34:40 | 2019-11-04 06:34:40 |
+|  9 |                          1 |                 8 |                9 |          1 | ???? | 2019-11-04 06:34:40 | 2019-11-04 06:34:40 |
+| 10 |                          1 |                 9 |               10 |          1 | ???? | 2019-11-04 06:34:40 | 2019-11-04 06:34:40 |
++----+----------------------------+-------------------+------------------+------------+------+---------------------+---------------------+
+10 rows in set (0.00 sec)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;strong&gt;结论就是，我加大的压力测试，结果也是我们想要的&lt;/strong&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;注意与疑惑&quot;&gt;注意与疑惑&lt;/h3&gt;
+&lt;p&gt;注意：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;1、要用多进程的php-fpm测试，不能用单进程的cli。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;疑惑：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;1、在redis set 10秒过期后，糟糕情况就是程序还没执行完成set过期了，导致超卖现象。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;参考&quot;&gt;参考&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;1、&lt;a href=&quot;https://www.jianshu.com/p/0eadec61e737&quot;&gt;利用Redis锁解决高并发问题 - 简书&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;2、&lt;a href=&quot;http://www.sohu.com/a/240877096_99896109&quot;&gt;漫画：什么是分布式锁？&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+				<pubDate>Sat, 02 Nov 2019 00:00:00 +0800</pubDate>
+				<link>/redis-set.html</link>
+				<guid isPermaLink="true">/redis-set.html</guid>
+			</item>
+		
+			<item>
 				<title>Mysql使用IN功能相关与性能对比</title>
 				<description>&lt;h3 id=&quot;问题概述&quot;&gt;问题概述&lt;/h3&gt;
 &lt;p&gt;平时Mysql喜欢先sql语句找出id字符串，然后用in后面接（id，id，……）去查找数据。查阅相关文章，说sql语句长度有限制，随着数据增长就不能执行，但是
@@ -1108,438 +1655,6 @@ public function setDocument(){
 				<pubDate>Fri, 06 Sep 2019 00:00:00 +0800</pubDate>
 				<link>/timed-out.html</link>
 				<guid isPermaLink="true">/timed-out.html</guid>
-			</item>
-		
-			<item>
-				<title>elasticsearch学习</title>
-				<description>&lt;h2 id=&quot;安装&quot;&gt;安装&lt;/h2&gt;
-&lt;p&gt;下载相应版本 https://www.elastic.co/cn/downloads/elasticsearch&lt;/p&gt;
-
-&lt;h2 id=&quot;配置&quot;&gt;配置&lt;/h2&gt;
-&lt;p&gt;1、修改配置，其他主机可以访问，单节点部署&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;vim config/elasticsearch.yml
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://img.zzhpeng.cn/FqYRhHL4hv5NrrJMumI_wtDGIng1&quot; alt=&quot;FhoCc45P5ISRy7oFsr5ZQLdhK-3P&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;其他配置：https://www.cnblogs.com/zlslch/p/6419948.html&lt;/p&gt;
-
-&lt;p&gt;2、修改占用内存大小&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;vim /config/jvm.options
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p&gt;个人开发小项目，可以把参数改小些&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;-Xms512m
--Xmx512m
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;3、启动报错&lt;/p&gt;
-
-&lt;p&gt;执行启动命令&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;.bin/elasticsearch
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p&gt;然后报错&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[1]: max virtual memory areas vm.max_map_count [65530] is too low, increase to at least [262144]
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;提示需要修改虚拟内存，切换到root用户，执行命令：&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sysctl -w vm.max_map_count=262144
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;上述方法修改之后，如果重启虚拟机将失效，所以：解决办法：在 /etc/sysctl.conf文件最后添加一行
-vm.max_map_count=262144
-即可永久修改&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;其他配置&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;table&gt;
-  &lt;thead&gt;
-    &lt;tr&gt;
-      &lt;th&gt;属性名&lt;/th&gt;
-      &lt;th&gt;说明&lt;/th&gt;
-    &lt;/tr&gt;
-  &lt;/thead&gt;
-  &lt;tbody&gt;
-    &lt;tr&gt;
-      &lt;td&gt;cluster.name&lt;/td&gt;
-      &lt;td&gt;配置elasticsearch的集群名称，默认是elasticsearch。建议修改成一个有意义的名称。&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;node.name&lt;/td&gt;
-      &lt;td&gt;节点名，es会默认随机指定一个名字，建议指定一个有意义的名称，方便管理&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;path.conf&lt;/td&gt;
-      &lt;td&gt;设置配置文件的存储路径，tar或zip包安装默认在es根目录下的config文件夹，rpm安装默认在/etc/ elasticsearch&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;path.data&lt;/td&gt;
-      &lt;td&gt;设置索引数据的存储路径，默认是es根目录下的data文件夹，可以设置多个存储路径，用逗号隔开&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;path.logs&lt;/td&gt;
-      &lt;td&gt;设置日志文件的存储路径，默认是es根目录下的logs文件夹&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;path.plugins&lt;/td&gt;
-      &lt;td&gt;设置插件的存放路径，默认是es根目录下的plugins文件夹&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;bootstrap.memory_lock&lt;/td&gt;
-      &lt;td&gt;设置为true可以锁住ES使用的内存，避免内存进行swap&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;network.host&lt;/td&gt;
-      &lt;td&gt;设置bind_host和publish_host，设置为0.0.0.0允许外网访问&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;http.port&lt;/td&gt;
-      &lt;td&gt;设置对外服务的http端口，默认为9200。&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;transport.tcp.port&lt;/td&gt;
-      &lt;td&gt;集群结点之间通信端口&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;discovery.zen.ping.timeout&lt;/td&gt;
-      &lt;td&gt;设置ES自动发现节点连接超时的时间，默认为3秒，如果网络延迟高可设置大些&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;discovery.zen.minimum_master_nodes&lt;/td&gt;
-      &lt;td&gt;主结点数量的最少值 ,此值的公式为：(master_eligible_nodes / 2) + 1 ，比如：有3个符合要求的主结点，那么这里要设置为2&lt;/td&gt;
-    &lt;/tr&gt;
-  &lt;/tbody&gt;
-&lt;/table&gt;
-
-&lt;h2 id=&quot;lk分词插件&quot;&gt;lk分词插件&lt;/h2&gt;
-&lt;p&gt;中文分词器，同lucene一样，在使用中文全文检索前，需要集成IK分词器。找到相应的发行版本安装。&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;./bin/elasticsearch-plugin install https://github.com/medcl/elasticsearch-analysis-ik/releases/download/v7.3.1/elasticsearch-analysis-ik-7.3.1.zip
-
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p&gt;如果报错，多数是网络问题，文件没下载完整。&lt;/p&gt;
-
-&lt;h2 id=&quot;kibana图形管理安装&quot;&gt;Kibana图形管理安装&lt;/h2&gt;
-&lt;p&gt;待。。。&lt;/p&gt;
-
-&lt;h2 id=&quot;php实战&quot;&gt;php实战&lt;/h2&gt;
-
-&lt;h3 id=&quot;基本概念&quot;&gt;基本概念&lt;/h3&gt;
-
-&lt;table&gt;
-  &lt;thead&gt;
-    &lt;tr&gt;
-      &lt;th&gt;概念&lt;/th&gt;
-      &lt;th&gt;说明&lt;/th&gt;
-    &lt;/tr&gt;
-  &lt;/thead&gt;
-  &lt;tbody&gt;
-    &lt;tr&gt;
-      &lt;td&gt;索引库（indices)&lt;/td&gt;
-      &lt;td&gt;indices是index的复数，代表许多的索引，&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;文档（document）&lt;/td&gt;
-      &lt;td&gt;存入索引库原始的数据。比如每一条商品信息，就是一个文档&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;字段（field）&lt;/td&gt;
-      &lt;td&gt;文档中的属性&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;映射配置（mappings）&lt;/td&gt;
-      &lt;td&gt;字段的数据类型、属性、是否索引、是否存储等特性&lt;/td&gt;
-    &lt;/tr&gt;
-  &lt;/tbody&gt;
-&lt;/table&gt;
-
-&lt;h3 id=&quot;代码实现&quot;&gt;代码实现&lt;/h3&gt;
-&lt;p&gt;这里用官方组出的客户端轮子https://github.com/elastic/elasticsearch-php.git&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;生成索引（index)&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;
- protected static $client = null;
-
-/**
- * @return mixed
- */
- public static function getClient()
- {
-    if(!isset(self::$client)){
-        $hosts = [
-            env('ELASTICSEARCH.HOST','192.168.199.254:9200'),     // IP + Port
-        ];
-        self::$client = ClientBuilder::create()           // Instantiate a new ClientBuilder
-        -&amp;gt;setHosts($hosts)      // Set the hosts
-        -&amp;gt;build();              // Build the client object
-    }
-    return self::$client;
- }
- 
-/**
- * 加属性
- * @author: zzhpeng
- * Date: 2019/9/5
- * @param array $param
- */
-public static function addCommonParams(array &amp;amp;$param){
-    // 统一添加404报错忽略
-    $param = array_merge($param,['client' =&amp;gt; [ 'ignore' =&amp;gt; 404 ]]);
-}
-
- /**
- * 创建索引
- * @author: zzhpeng
- * Date: 2019/9/5
- * @param string $index
- * @param array  $param
- *
- * @return mixed
- */
-public static function setIndex(string $index, array $param = []){
-    $client = self::getClient();
-    if(empty($param)){
-        $params = [
-            //索引名
-            'index' =&amp;gt; $index,
-            'body' =&amp;gt; [
-                'settings' =&amp;gt; [
-                //一般以（节点数*1.5或3倍）来计算，比如有4个节点，分片数量一般是6个到12个，每个分片一般分配一个副本
-                    'number_of_shards' =&amp;gt; 1,
-                    'number_of_replicas' =&amp;gt; 1
-                ],
-                //mappings是定义字段和类型的。
-                'mappings' =&amp;gt; [
-                    //文档的源数据
-                    '_source' =&amp;gt; [
-                        'enabled' =&amp;gt; true
-                    ],
-                    //设置属性类型
-                    'properties' =&amp;gt; [
-                        'name' =&amp;gt; [
-                            'type' =&amp;gt; 'text',
-                        ],
-                        'search_name' =&amp;gt; [
-                            //type：类型，可以是text、long、short、date、integer、object等
-                            'type' =&amp;gt; 'text',
-                            //analyzer：分词器，这里的ik_max_word即使用ik分词器
-                            'analyzer' =&amp;gt; 'ik_max_word',
-                            'search_analyzer' =&amp;gt; 'ik_smart',
-                        ],
-                        'goods_detail_id' =&amp;gt; [
-                            'type' =&amp;gt; 'integer'
-                        ],
-                        'classify_type_id' =&amp;gt; [
-                            'type' =&amp;gt; 'integer'
-                        ],
-                        'store_id' =&amp;gt; [
-                            'type' =&amp;gt; 'integer'
-                        ]
-                    ]
-                ]
-            ]
-        ];
-    }
-    $response = $client-&amp;gt;indices()-&amp;gt;create($params);
-    return $response;
-}
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;删除索引（index)&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;/**
- * 删除索引
- * @author: zzhpeng
- * Date: 2019/9/5
- * @param string $index
- *
- * @return mixed
- */
-public static function deleteIndex(string $index){
-    $client = self::getClient();
-    $params = ['index' =&amp;gt; $index];
-    self::addCommonParams($params);
-    $response = $client-&amp;gt;indices()-&amp;gt;delete($params);
-    return $response;
-}
-
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;查看索引（index)&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;/**
- * 查询索引
- * @author: zzhpeng
- * Date: 2019/9/5
- * @param string $index
- *
- * @return mixed
- */
-static function getIndex(string $index){
-    // Get mappings for all indexes
-    $client = self::getClient();
-
-    $params = ['index' =&amp;gt; $index];
-    $response = $client-&amp;gt;indices()-&amp;gt;getMapping($params);
-    return $response;
-// Get mappings in 'my_index'
-    $params = ['index' =&amp;gt; 'my_index'];
-    $response = $client-&amp;gt;indices()-&amp;gt;getMapping($params);
-}
-
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;创建文档（document）&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;/**
- * 建立文档
- * @author: zzhpeng
- * Date: 2019/9/5
- * @param string $index
- * @param array  $documents
- *
- * @return bool
- */
-static function setDocoments(string $index,array $documents){
-    
-    // Get mappings for all indexes
-    $client = self::getClient();
-
-    //二位数组 $documents
-    foreach ($documents as $key =&amp;gt; $document){
-        $params = [
-            'index' =&amp;gt; $index,
-//                'id'    =&amp;gt; $key,
-            'body'  =&amp;gt; $document
-
-        ];
-        
-        $client-&amp;gt;index($params);
-        unset($params);
-    }
-    return true;
-}
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;删除文档（document）&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;
-/**
- * 获取文档
- * @author: zzhpeng
- * Date: 2019/9/5
- * @param $index
- * @param $id
- *
- * @return mixed
- */
-static function deleteDocuments($index,$id){
-    $client = self::getClient();
-    $params = [
-        'index' =&amp;gt; $index,
-        'id'    =&amp;gt; $id
-    ];
-
-// Delete doc at /my_index/_doc_/my_id
-    return $client-&amp;gt;delete($params);
-}
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;搜索文档（document）&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;
-    &lt;p&gt;match是经过analyer的，也就是说，文档首先被分析器给处理了。根据不同的分析器，分析的结果也稍显不同，然后再根据分词结果进行匹配。&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;term则不经过分词，它是直接去倒排索引中查找了精确的值了。&lt;/p&gt;
-  &lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$body = [
-    'query' =&amp;gt; [
-        'bool' =&amp;gt; [
-            'must' =&amp;gt; [
-                [ 'match' =&amp;gt; [ 'search_name' =&amp;gt; $key ] ],
-                [ 'bool'=&amp;gt;
-                    ['should' =&amp;gt; [
-                        [ 'match' =&amp;gt; [ 'store_id' =&amp;gt; 681 ] ],
-                        [ 'match' =&amp;gt; [ 'store_id' =&amp;gt; 0 ] ],
-                    ]
-                    ]
-                ]
-            ]
-        ]
-    ]
-];
-
-
-//搜索文档
-static function searchDocuments($index,array $body){
-    $client = self::getClient();
-
-    $params = [
-        'index' =&amp;gt; $index,
-        'body'  =&amp;gt; $body
-    ];
-
-// Get doc at /my_index/_doc/my_id
-    return $response = $client-&amp;gt;search($params);
-}
-
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h2 id=&quot;问题&quot;&gt;问题&lt;/h2&gt;
-
-&lt;h3 id=&quot;查看-elasticsearch-使用情况&quot;&gt;查看 elasticsearch 使用情况&lt;/h3&gt;
-&lt;p&gt;curl -X GET “http://192.168.199.254:9200/_cat/indices?v”
-&lt;img src=&quot;http://img.zzhpeng.cn/Fo3ZNz38wF3ij-z9_kAZ0RAAwCzJ&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;h3 id=&quot;磁盘容量超过90会不给链接操作&quot;&gt;磁盘容量超过90%会不给链接操作&lt;/h3&gt;
-&lt;p&gt;报错信息&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;low disk watermark [85%] exceeded on …，replicas will not be assigned to this node
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h3 id=&quot;高频写入down机&quot;&gt;高频写入down机&lt;/h3&gt;
-&lt;p&gt;待。。。&lt;/p&gt;
-
-&lt;h2 id=&quot;参考&quot;&gt;参考&lt;/h2&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;
-    &lt;p&gt;1、&lt;a href=&quot;https://blog.csdn.net/weixin_33692284/article/details/92170069&quot;&gt;图解Elasticsearch中的_source、_all、store和index属性 - weixin_33692284的博客 - CSDN博客&lt;/a&gt;&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;2、&lt;a href=&quot;https://www.elastic.co/guide/en/elasticsearch/client/php-api/current/overview.html&quot;&gt;官方说明文档：&lt;/a&gt;&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;3、&lt;a href=&quot;https://github.com/elastic/elasticsearch-php&quot;&gt;官方开发的php客户端组件:&lt;/a&gt;&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;4、&lt;a href=&quot;https://www.jianshu.com/p/88f0546d5955&quot;&gt;Elasticsearch7.*版本 1.入门 - 简书&lt;/a&gt;&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;5、&lt;a href=&quot;https://www.cnblogs.com/zlslch/p/6419948.html&quot;&gt;elasticsearch-.yml（中文配置详解） - 大数据和AI躺过的坑 - 博客园&lt;/a&gt;&lt;/p&gt;
-  &lt;/li&gt;
-&lt;/ul&gt;
-</description>
-				<pubDate>Mon, 02 Sep 2019 00:00:00 +0800</pubDate>
-				<link>/elasticsearch-learning.html</link>
-				<guid isPermaLink="true">/elasticsearch-learning.html</guid>
 			</item>
 		
 	</channel>

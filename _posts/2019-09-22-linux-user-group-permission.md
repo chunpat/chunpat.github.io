@@ -2,7 +2,7 @@
 layout: post
 title: gitlab出现502问题
 date: 2019-09-22
-tags: gitlab,宝塔,nginx,linux
+tags: gitlab 宝塔 nginx linux
 ---
 ### 问题概述
 上周，公司内部服务器重启，自搭建的gitlab仓库返回502。在这里先说明gitlab的搭建情况，用了宝塔管理，已经有了
