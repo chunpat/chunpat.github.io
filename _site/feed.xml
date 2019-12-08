@@ -7,6 +7,232 @@
 		<atom:link href="/" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>生成环境出现nginx502,导致十来分钟系统奔溃（Tp5.1的session bug）</title>
+				<description>&lt;h2 id=&quot;问题概述&quot;&gt;问题概述&lt;/h2&gt;
+&lt;p&gt;使用PHP的ThinkPHP5.1开发框架，生产环境使用宝塔管理，其中nginx直接报错502，继续时间10来分钟。而且通过观察，一段时间又会出现，特别是复杂频繁的操作。&lt;/p&gt;
+
+&lt;h2 id=&quot;排查数据&quot;&gt;排查数据&lt;/h2&gt;
+&lt;p&gt;nginx抛出502,证明是它的反向代理出错，这个代理php-cgi挂掉了，我用的是php-fpm，出了问题。在宝塔默认php-fpm配置有设置日志输出&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[global]
+error_log = /www/server/php/72/var/log/php-fpm.log
+[www]
+slowlog = var/log/slow.log
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;php-fpm-配置&quot;&gt;php-fpm 配置&lt;/h3&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[global]
+pid = /www/server/php/72/var/run/php-fpm.pid
+error_log = /www/server/php/72/var/log/php-fpm.log
+log_level = notice
+
+[www]
+listen = /tmp/php-cgi-72.sock
+listen.backlog = -1
+listen.allowed_clients = 127.0.0.1
+listen.owner = www
+listen.group = www
+listen.mode = 0666
+user = www
+group = www
+pm = dynamic
+pm.status_path = /phpfpm_72_status
+pm.max_children = 150
+pm.start_servers = 30
+pm.min_spare_servers = 30
+pm.max_spare_servers = 150
+request_terminate_timeout = 100
+request_slowlog_timeout = 30
+slowlog = var/log/slow.log
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;ul&gt;
+  &lt;li&gt;机器配置阿里云4 vCPU 8 GiB ( 共享计算型 n1, ecs.n1.large )，&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;查看php-fpmlog-部分内容&quot;&gt;查看php-fpm.log 部分内容&lt;/h3&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://img.zzhpeng.cn/Fu0ZUUtbHNQ0b4nh7d2QN4_LJvtB&quot; alt=&quot;Fu0ZUUtbHNQ0b4nh7d2QN4_LJvtB&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;这张图显示，有两部分内容：&lt;/p&gt;
+
+&lt;p&gt;1、php-fpm worker进程由于处理的程序超过109s左右(环境request_terminate_timeout = 100)，进程发出的signal 15(SIGTERM)。
+对于signal 15(SIGTERM) 的 SIGTERM，查阅了下，是说：系统会发送一个SIGTERM的信号给对应的程序。
+当程序接收到该signal后，将会发生以下的事情：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;1、程序立刻停止&lt;/li&gt;
+  &lt;li&gt;2、该程序释放相应资源后再停止&lt;/li&gt;
+  &lt;li&gt;3、程序可能仍然继续运行&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;大部分程序接收到SIGTERM信号后，会先释放自己的资源，然后在停止。但是也有程序可以在接受到信号量后，做一些其他的事情，
+并且这些事情是可以配置的。如果程序正在等待IO，可能就不会立马做出响应。也就是说，SIGTERM多半是会被阻塞的、忽略。&lt;/p&gt;
+
+&lt;p&gt;2、带有请求的具体链接，显示请求太慢，超过了39s(request_slowlog_timeout = 30),记录了log。&lt;/p&gt;
+
+&lt;h3 id=&quot;查看slowlog-部分内容&quot;&gt;查看slow.log 部分内容&lt;/h3&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://img.zzhpeng.cn/FnNWSnsLDg0mjBKt2x4ARGIBrlk6&quot; alt=&quot;Fu0ZUUtbHNQ0b4nh7d2QN4_LJvtB&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;这张图显示，请求处理只到了框架初始代码和权限验证那块，并没用实际到达业务代码程序。可排除sql慢查询或者
+业务代码问题。&lt;/p&gt;
+
+&lt;h3 id=&quot;查看框架的tp51-log-部分内容&quot;&gt;查看框架的TP5.1 log 部分内容&lt;/h3&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://img.zzhpeng.cn/FjPr7FPhs1lf91PR__DOZIN6ZRzO&quot; alt=&quot;Fu0ZUUtbHNQ0b4nh7d2QN4_LJvtB&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;这张图显示，请求处理还没到csrf验证层就阻塞了!!!&lt;/p&gt;
+
+&lt;h3 id=&quot;面板进程情况&quot;&gt;面板进程情况&lt;/h3&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://img.zzhpeng.cn/FnfJPvsSClmAGAbKGbCP2bhcVLI7&quot; alt=&quot;FnfJPvsSClmAGAbKGbCP2bhcVLI7&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;这张图显示是那个时间段抛出502宕机10来分钟php-fpm记录下来的status。数据显示，请求数量有53441,但是活跃进程数只有1个，
+并且产生了450个慢查询数量。&lt;/p&gt;
+
+&lt;h3 id=&quot;session-阻塞&quot;&gt;Session 阻塞&lt;/h3&gt;
+&lt;p&gt;既然不是慢SQL产生的问题，并且有大量请求没有达到crsf验证层，只到达了crsf层上面的权限验证层，权限又是基于cookies和session的，那就推断是session阻塞引起的。
+什么会引起session阻塞呢？查阅了资料，并写下面代码在本地测试。&lt;/p&gt;
+
+&lt;p&gt;前端js code（三个请求ajax1、ajax2、ajax3同时进行）&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&amp;lt;script src=&quot;https://cdn.bootcss.com/jquery/3.4.0/jquery.js&quot;&amp;gt;&amp;lt;/script&amp;gt;
+&amp;lt;script&amp;gt;
+    var a = 1;
+    var b = 1;
+    var c = 1;
+    function ajax1(){
+        $.get('/hello?from=a', function(){
+            console.log('a' , a);
+            a++;
+            ajax1();
+        });
+    }
+    function ajax2(){
+        $.get('/hello?from=b', function(){
+            console.log('b',b);
+            b++;
+            ajax2();
+        });
+    }
+    function ajax3(){
+        $.get('/hello?from=c', function(){
+            console.log('c',c);
+            c++;
+            ajax3();
+        });
+    }
+
+    function beginAjax(){
+        ajax1();
+        ajax2();
+        ajax3();
+    }
+    beginAjax();
+&amp;lt;/script&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;TP5.1后端code&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;cp&quot;&gt;&amp;lt;?php&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;namespace&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;app\index\controller&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;use&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;think\Controller&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Index&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;extends&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Controller&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;index&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$this&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;fetch&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;hello&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$name&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'ThinkPHP5'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;nx&quot;&gt;session&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'qanda'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'1'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//session是tp5.1的定义的方法&lt;/span&gt;
+        &lt;span class=&quot;nb&quot;&gt;sleep&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;json&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;([&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'data'&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;session_id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()]);&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;php-fpm.conf配置&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;request_slowlog_timeout = 16
+request_terminate_timeout = 20
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;火狐浏览器&quot;&gt;火狐浏览器&lt;/h3&gt;
+&lt;p&gt;&lt;img src=&quot;http://img.zzhpeng.cn/Fi30BAxREfNBpYLRLMXJrS_vCzop&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;火狐浏览器测试，偶尔会出现刚开始返回的session_id不一致问题同时响应的时间a,b,c三个不一样参数请求响应都在5s多一点，
+不过后面返回的session_id就一致了，同时响应的时间也变为了15s+了。&lt;/p&gt;
+
+&lt;h3 id=&quot;chrome浏览器&quot;&gt;chrome浏览器&lt;/h3&gt;
+&lt;p&gt;&lt;img src=&quot;http://img.zzhpeng.cn/FvVEgokNtB95OjJRUcH21E2BCvCY&quot; alt=&quot;&quot; /&gt;
+chrome浏览器刚开始返回的session_id就一致，但是耗时较长，后面趋于稳定的15s+。&lt;/p&gt;
+
+&lt;h3 id=&quot;将测试code放到laravel62测试&quot;&gt;将测试code放到Laravel6.2测试。&lt;/h3&gt;
+&lt;p&gt;&lt;img src=&quot;http://img.zzhpeng.cn/Fn6BmTtjJNXJgOyGdGe74yt10cpd&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;稳定输出5s+，那就是TP5.1的session出现bug了！！！&lt;/p&gt;
+
+&lt;h3 id=&quot;tp51的session为什么会出现问题&quot;&gt;TP5.1的Session为什么会出现问题&lt;/h3&gt;
+&lt;p&gt;Session阻塞的原因网上大部分说是session_start(),使用完记得session_write_close()。难道TP5.1使用了后没close???
+查看TP5.1源码：&lt;/p&gt;
+
+&lt;p&gt;1、
+&lt;img src=&quot;http://img.zzhpeng.cn/FqC_5ivD1cFKjx2A06w6gALb4pzo&quot; alt=&quot;&quot; /&gt;
+2、
+&lt;img src=&quot;http://img.zzhpeng.cn/FsD9JQa5VlMSAhK-ijYmwEMx0t01&quot; alt=&quot;&quot; /&gt;
+3、
+&lt;img src=&quot;http://img.zzhpeng.cn/FjgcLLdJglPrpHiWnnbjfIyQMit2&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;还真是TP5.1没close，这bug就很容易让系统处于502状态，竟然没人遇到过并且修复吗？反映并且提交issue修复！看了下最新的TP6,借鉴Laravel的Session、Cookies组件化了
+TP的这个bug也就不存在了。&lt;/p&gt;
+
+&lt;h2 id=&quot;解决&quot;&gt;解决&lt;/h2&gt;
+&lt;p&gt;系统还是要用，修改配置文件，用TP5.1 session锁，code 如下：&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;return [
+    'id'             =&amp;gt; '',
+    // SESSION_ID的提交变量,解决flash上传跨域
+    'var_session_id' =&amp;gt; '',
+    // SESSION 前缀
+    'prefix'         =&amp;gt; 'think',
+    // 驱动方式 支持redis memcache memcached
+    'type'           =&amp;gt; '',
+    // 是否自动开启 SESSION
+    'auto_start'     =&amp;gt; true,
+    'use_lock'     =&amp;gt; true,
+];
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;修改后，响应时间正常了
+&lt;img src=&quot;http://img.zzhpeng.cn/FiRwyQzfDp9ZYp8EzPCH6GCWXEb7&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;注意与疑惑&quot;&gt;注意与疑惑&lt;/h2&gt;
+&lt;h3 id=&quot;注意&quot;&gt;注意&lt;/h3&gt;
+&lt;p&gt;1、查到资料看到不是代码的引起的502，而是环境配置。
+https://www.cnblogs.com/zenghansen/p/4647004.html&lt;/p&gt;
+
+&lt;h3 id=&quot;疑惑&quot;&gt;疑惑&lt;/h3&gt;
+&lt;p&gt;1、为什么执行时间session_write_close不执行，返回时间会累加呢？&lt;/p&gt;
+
+&lt;h2 id=&quot;参考&quot;&gt;参考&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;1、&lt;a href=&quot;https://www.cnblogs.com/skillCoding/archive/2012/04/09/2439296.html&quot;&gt;PHP的Session阻塞问题探讨&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;2、&lt;a href=&quot;https://www.cnblogs.com/yufeng218/p/9911368.html&quot;&gt;session 和 cookie&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;3、&lt;a href=&quot;https://blog.csdn.net/qq_26836575/article/details/82147558&quot;&gt;SIGKILL和SIGTERM、SIGINT&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;4、&lt;a href=&quot;https://www.cnblogs.com/pheye/p/7890065.html&quot;&gt;如何管理Session(防止恶意共享账号)——理论篇&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;5、&lt;a href=&quot;https://www.cnblogs.com/zenghansen/p/4647004.html&quot;&gt;nginx下php频繁卡死502&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+				<pubDate>Mon, 25 Nov 2019 00:00:00 +0800</pubDate>
+				<link>/nginx502.html</link>
+				<guid isPermaLink="true">/nginx502.html</guid>
+			</item>
+		
+			<item>
 				<title>Redis的原子性解决并发问题</title>
 				<description>&lt;h3 id=&quot;问题概述&quot;&gt;问题概述&lt;/h3&gt;
 
@@ -1564,97 +1790,6 @@ implicit_flush 为on&lt;/p&gt;
 				<pubDate>Sat, 07 Sep 2019 00:00:00 +0800</pubDate>
 				<link>/php-ob-flush.html</link>
 				<guid isPermaLink="true">/php-ob-flush.html</guid>
-			</item>
-		
-			<item>
-				<title>web服务超时处理</title>
-				<description>&lt;h2 id=&quot;事由&quot;&gt;事由&lt;/h2&gt;
-&lt;p&gt;执行285675条mysql数据操作的时候，页面出现nginx异常An error occurred.报错。查看日志，详情如下：&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;2019/09/06 14:32:46 [error] 9#9: *7 upstream timed out (110: Connection timed out) while 
-
-reading response header from upstream, client: 172.26.0.1, server: localhost, request: 
-
-&quot;GET /index/elasticsearch/setDocument HTTP/1.1&quot;, upstream: &quot;fastcgi://172.26.0.3:9000&quot;, 
-
-host: &quot;192.168.199.182:8002&quot;
-
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h2 id=&quot;解决&quot;&gt;解决&lt;/h2&gt;
-&lt;p&gt;本地开发环境，由于要执行这些数据的处理，加长超时时间处理，所以:&lt;/p&gt;
-
-&lt;p&gt;nginx.conf&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;
-http {
-    keepalive_timeout  600; //10分钟
-    client_header_timeout 600;
-    client_body_timeout 600;
- 
-    server{
-         proxy_read_timeout 600;
- 
-         location ~ \.php$ {
-                  fastcgi_connect_timeout 600s;
-                  fastcgi_send_timeout 600s;
-                  fastcgi_read_timeout 600s;
-                  ...
-         }
-    }
- 
-}
-
-
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;php对应的方法下加上 set_time_limit(0);&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;
-/**
- * 数据写入
- * @author: zzhpeng
- * Date: 2019/9/5
- * @return \think\Response
- */
-public function setDocument(){
-    set_time_limit(0);
-    $count = DepotGoodsDetail::count();
-
-    $pageSize = 500;
-    for ($i = 0;$i&amp;lt; ceil($count / $pageSize); $i++){
-        $offset = $pageSize * $i;
-        $data = DepotGoodsDetail::limit($offset,$pageSize)-&amp;gt;column('id,goods_sn,goods_name,skus_json,classify_type_id,store_id');
-        $documents = [];
-        foreach ($data as $id =&amp;gt; $vo) {
-            $sku = implode(&quot; &quot;, json_decode($vo['skus_json'], true));
-            $documents[] = [
-                'goods_detail_id' =&amp;gt; $vo['id'],
-                'name' =&amp;gt; $vo['goods_sn'] . ' ' . $vo['goods_name'] . ' ' . $sku,
-                'search_name' =&amp;gt; $vo['goods_sn'] . ' ' . trim($vo['goods_name'] . $sku),
-                'classify_type_id' =&amp;gt; $vo['classify_type_id'],
-                'store_id' =&amp;gt; $vo['store_id'],
-            ];
-        }
-        ElasticsearchLogic::setDocoments('oh_depot_goods_name_list',$documents);
-        unset($documents);
-        sleep(2);
-    }
-
-    return $this-&amp;gt;successResponse();
-}
-
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h2 id=&quot;参考&quot;&gt;参考&lt;/h2&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;1、&lt;a href=&quot;https://blog.csdn.net/daily886/article/details/92558512&quot;&gt;nginx 配置接口超时时间 10分钟 - daily886的博客 - CSDN博客&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-</description>
-				<pubDate>Fri, 06 Sep 2019 00:00:00 +0800</pubDate>
-				<link>/timed-out.html</link>
-				<guid isPermaLink="true">/timed-out.html</guid>
 			</item>
 		
 	</channel>
