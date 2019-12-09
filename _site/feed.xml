@@ -7,7 +7,7 @@
 		<atom:link href="/" rel="self" type="application/rss+xml" />
 		
 			<item>
-				<title>生成环境出现nginx502,导致十来分钟系统奔溃（Tp5.1的session bug）</title>
+				<title>生产环境出现nginx502,导致十来分钟系统奔溃（Tp5.1的session bug）</title>
 				<description>&lt;h2 id=&quot;问题概述&quot;&gt;问题概述&lt;/h2&gt;
 &lt;p&gt;使用PHP的ThinkPHP5.1开发框架，生产环境使用宝塔管理，其中nginx直接报错502，继续时间10来分钟。而且通过观察，一段时间又会出现，特别是复杂频繁的操作。&lt;/p&gt;
 
