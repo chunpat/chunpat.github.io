@@ -8,9 +8,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="fromChinaBoy">
 
-    <title>jenkins启动一段时间后掉线 - Blog</title>
+    <title>生产环境又出现nginx502了！！ - Blog</title>
 
-    <link rel="canonical" href="http://localhost:4000/jenkins-auto-down.html">
+    <link rel="canonical" href="http://localhost:4000/nginx502_2.html">
 
     <!-- Icons -->
   <link rel="shortcut icon" href="img/favicon.ico">
@@ -96,12 +96,14 @@
                 <div class="post-heading">
                     <div class="Tags">
                         
-                        <a class="tag" href="/Tags/#jenkins" title="jenkins">jenkins</a>
+                        <a class="tag" href="/Tags/#nginx502" title="nginx502">nginx502</a>
+                        
+                        <a class="tag" href="/Tags/#并发" title="并发">并发</a>
                         
                     </div>
-                    <h1>jenkins启动一段时间后掉线</h1>
+                    <h1>生产环境又出现nginx502了！！</h1>
                     
-                    <span class="meta">Posted by zzhpeng on September 18, 2019</span>
+                    <span class="meta">Posted by zzhpeng on December 26, 2019</span>
                 </div>
             </div>
         </div>
@@ -114,51 +116,128 @@
         <div class="row">
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 post-container">
 
-                <h2 id="问题">问题</h2>
-<blockquote>
-  <p>和gitlab使用的端口8080冲突，修改为了8088。然后每次jenkins启动过一段时间后会自动的down服务，
-启动命令是service jenkins start。</p>
-</blockquote>
+                <h2 id="问题概述">问题概述</h2>
 
-<p>使用lsof -i:8080查看端口使用情况：
-<img src="http://img.zzhpeng.cn/FhgyPfOl3dr5UBcyGy0iMjavJ_3c" alt="" /></p>
+<p>在某段时间段，网站出现nginx 502，通过宝塔查看，负载状态是100%，查看监控，磁盘IO飙高，如下为近7日IO磁盘图：</p>
 
-<h2 id="解决路程">解决路程</h2>
-<blockquote>
-  <p>尝试用另外一种方法启动,但还是使用旧的端口问题。</p>
-</blockquote>
+<p><img src="http://img.zzhpeng.cn/FilqyanVhrxGwgOxksnDlyWAnw-W" alt="FilqyanVhrxGwgOxksnDlyWAnw-W" /></p>
 
-<p><img src="http://img.zzhpeng.cn/Fiy7cWxbK29pDZZdUnqaosW5BDfC" alt="" /></p>
+<h2 id="排查数据">排查数据</h2>
 
-<p>搜索了下，找到了可以直接在启动后面加参数，改使用端口。</p>
+<p>nginx抛出502，证明是它的反向代理出错，这个代理php-cgi出了问题，我用的是php-fpm，出了问题。
+查看php-fpm 日志，发现并没有什么异常，提示需要提升start_servers是因为在这个时候我reload了php-fpm，
+但是reload后并没作用。然后重启了nginx，才恢复了正常。</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>java -jar jenkins.war --ajp13Port=-1 --httpPort=8088
+<p><img src="http://img.zzhpeng.cn/FvPOyQL4h5T7VN73ltMSw5TyGP9L" alt="FilqyanVhrxGwgOxksnDlyWAnw-W" /></p>
+
+<p>查看nginx 日志，出现了很多*12359859 connect() to unix:/tmp/php-cgi-72.sock failed
+ (11: Resource temporarily unavailable) while connecting to upstream</p>
+
+<p><img src="http://img.zzhpeng.cn/FqX_zzcPU42pDzGR9dXbL9m-DG3p" alt="FilqyanVhrxGwgOxksnDlyWAnw-W" /></p>
+
+<p>根据nginx这个提示查了相关资料，得到了3个解决方案</p>
+<h3 id="1php-fpm的sock通讯方式-改为-tcp">1、php-fpm的sock通讯方式 改为 tcp</h3>
+<p><code class="highlighter-rouge">结论：不考虑，查了相关的blog，出现了相同问题，还从tcp改为sock模式呢！！</code></p>
+
+<h3 id="2用两个php-fpm-socknginx负载均衡">2、用两个php-fpm sock，nginx负载均衡</h3>
+<p>2.1、复制一份配置文件，修改里边的pid sock
+cp /usr/local/php/etc/php-fpm.conf cp /usr/local/php/etc/php-fpm2.conf</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[global]
+pid = /usr/local/php/var/run/php-fpm2.pid
+error_log = /usr/local/php/var/log/php-fpm2.log
+log_level = notice
+
+[www]
+listen = /tmp/php-cgi2.sock
 </code></pre></div></div>
 
-<p>挂在后台</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>nohup java -jar jenkins.war --ajp13Port=-1 --httpPort=8088 &amp;
+<p>2.2、复制一个启动文件，也修改相关的信息</p>
+
+<p>cp /etc/init.d/php-fpm /etc/init.d/php-fpm2</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>php_fpm_BIN=${exec_prefix}/sbin/php-fpm
+php_fpm_CONF=${prefix}/etc/php-fpm2.conf
+php_fpm_PID=${prefix}/var/run/php-fpm2.pid
 </code></pre></div></div>
 
-<h2 id="再次出现问题">再次出现问题</h2>
-<blockquote>
-  <p>两种启动的数据文件不是用同一个的，用挂在后台的是新的数据库，需要重新注册admin，重新配置。</p>
-</blockquote>
+<p>2.3、启动
+/etc/init.d/php-fpm2 start</p>
 
-<p>解决~~待。。。。</p>
+<p>2.4、nginx 配置文件，增加 upstream模块</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>upstream backend{
+    server unix:/tmp/php-cgi.sock;
+    server unix:/tmp/php-cgi2.sock;
+}
+</code></pre></div></div>
 
-<h2 id="后续">后续</h2>
-<p>这个问题，最终是用加大linux物理内存,机器是8G的内存。默认是没有设置swap的，我设置了8G的，最终java相关的应用，观察了几个月，如Eleasticsearch、Jenkis都稳定了。</p>
+<p>2.5、把fastcgi_pass unix:/tmp/php-cgi.sock;改成 fastcgi_pass  backend;
+重新加载
+/etc/init.d/nginx reload</p>
+
+<p><code class="highlighter-rouge">结论：这个方法，和我直接调大php-fpm max_children差不多，不考虑。</code></p>
+
+<h3 id="3php-fpm的listenbacklog默认-1改为1024或者4096即是调大">3、php-fpm的listen.backlog默认-1改为1024或者4096，即是调大</h3>
+<p>V友:onepunch回复，整理如下</p>
+
+<h4 id="调查">调查</h4>
+<p>nginx (客户端) 和 php-fpm （服务端） 通过 unix socket 通信，在 connet() 时，会进行类似 tcp 的三次握手,
+如果 accpet queue 队列满了，server 将发送一个 ECONNREFUSED 错误信息 Connection refused 到 client。
+这样 nginx 就会报这个错了，连接不上。php-fpm 的 backlog 是 accpet queue 的最大长度</p>
+
+<p>查看系统内核的最大长度</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cat /proc/sys/net/core/somaxconn 128
+</code></pre></div></div>
+
+<p>查看 php-fpm 里的配置 listen.backlog 是 4096，由于会取这 2 个的最小值， 所以是 128。</p>
+
+<p>验证当时的请求：</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>grep '2019-12-06T16:48' bi_svc.access.log.1 | wc -l //9903
+</code></pre></div></div>
+
+<p>计算9903/60等于每秒请求数165，165&gt;128 了, 请求太多了，应该是 accpet queue 满了</p>
+
+<h4 id="解决办法">解决办法</h4>
+<p>vi /etc/sysctl.conf</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>net.core.somaxconn = 1024
+</code></pre></div></div>
+<p>将 /proc/sys/net/core/somaxconn 改成 1024 就不会出问题了</p>
+
+<p><code class="highlighter-rouge">结论：这个方法是稳定PV提升、IO提升的解决方案，不过我这边遇到的是突然的提升，所以我这边不会这样子做</code></p>
+
+<h2 id="更多服务器信息">更多服务器信息</h2>
+<h3 id="1云服务器ecs">1、云服务器ECS</h3>
+<p>1.1、系统磁盘BPS，其他监控内容无太大的异常
+<img src="http://img.zzhpeng.cn/Fuk7Hg7v9LETTlt6lJIe7EcKeLoD" alt="FilqyanVhrxGwgOxksnDlyWAnw-W" /></p>
+
+<h3 id="2rds数据库">2、RDS数据库</h3>
+<p>2.1、-网络流量
+<img src="http://img.zzhpeng.cn/Fo5pktGwx-j4lERPURRBcVnQekPA" alt="FilqyanVhrxGwgOxksnDlyWAnw-W" /></p>
+
+<p>2.2、RDS数据库-CPU使用率
+<img src="http://img.zzhpeng.cn/Fs_A1vSJ9M5MrVF9dLMktQ6vq5u5" alt="FilqyanVhrxGwgOxksnDlyWAnw-W" /></p>
+
+<p>2.3、RDS数据库-TPS/QPS
+<img src="http://img.zzhpeng.cn/FuCeHHk2YnWJkzsfGBEHQGp2MhAc" alt="FilqyanVhrxGwgOxksnDlyWAnw-W" /></p>
+
+<p>2.4、RDS数据库-慢日志
+<img src="http://img.zzhpeng.cn/FsSPL2M079cfnmeqN7LmX7-wE3lo" alt="FilqyanVhrxGwgOxksnDlyWAnw-W" /></p>
+
+<h2 id="最后选择">最后选择</h2>
+<p>用户请求飙升，平台又没有做什么活动，查看了nginx access log，分析同一个ip，同一时间段上百个请求同
+一个访问链接，所以决定iptable限制下，控制单个IP的最大30并发连接数。</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo iptables -I INPUT -p tcp --dport 443 -m connlimit --connlimit-above 30 -j REJECT
+sudo iptables -I INPUT -p tcp --dport 80 -m connlimit --connlimit-above 30 -j REJECT
+</code></pre></div></div>
 
 <h2 id="迭代">迭代</h2>
 <ul>
-  <li>2019年09月18日 00:00:00 初稿</li>
-  <li>2019年12月27日 15:29:00 修改</li>
+  <li>2019年12月27日 15:29:00 初稿</li>
 </ul>
 
 <h2 id="参考">参考</h2>
 <ul>
-  <li>1、<a href="https://blog.csdn.net/panruifang/article/details/14223323">Jenkins 安装Address already in use问题</a></li>
-  <li>2、<a href="https://blog.csdn.net/sirchenhua/article/details/87861709">Linux SWAP交换分区应该设置多大？</a></li>
+  <li><a href="https://www.v2ex.com/t/632647">nginx+ PHP -fpm 出现 502</a></li>
+  <li><a href="https://blog.csdn.net/chengxuyuanyonghu/article/details/54409523">iptables限制同一IP连接数</a></li>
+  <li><a href="https://www.cnblogs.com/lilidun/p/5801437.html">centos 7 iptables基本配置</a></li>
 </ul>
 
 
@@ -171,13 +250,9 @@
                 <ul class="pager">
                     
                     <li class="previous">
-                        <a href="/elasticsearch-actual_problem.html" data-toggle="tooltip" data-placement="top" title="elasticsearch业务问题">&larr; Previous Post</a>
+                        <a href="/nginx502_1.html" data-toggle="tooltip" data-placement="top" title="生产环境出现nginx502,导致十来分钟系统奔溃（Tp5.1的session bug）">&larr; Previous Post</a>
                     </li>
                     
-                    
-                    <li class="next">
-                        <a href="/linux-user-group-permission.html" data-toggle="tooltip" data-placement="top" title="gitlab出现502问题">Next Post &rarr;</a>
-                    </li>
                     
                 </ul>
 

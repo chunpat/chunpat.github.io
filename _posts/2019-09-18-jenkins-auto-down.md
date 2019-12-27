@@ -33,5 +33,14 @@ nohup java -jar jenkins.war --ajp13Port=-1 --httpPort=8088 &
 
 解决~~待。。。。
 
+## 后续
+这个问题，最终是用加大linux物理内存,机器是8G的内存。默认是没有设置swap的，我设置了8G的，最终java相关的应用，观察了几个月，如Eleasticsearch、Jenkis都稳定了。
+
+## 迭代
+* 2019年09月18日 00:00:00 初稿
+* 2019年12月27日 15:29:00 修改
+
+
 ## 参考
 * 1、[Jenkins 安装Address already in use问题](https://blog.csdn.net/panruifang/article/details/14223323)
+* 2、[Linux SWAP交换分区应该设置多大？](https://blog.csdn.net/sirchenhua/article/details/87861709)

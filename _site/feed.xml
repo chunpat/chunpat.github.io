@@ -7,6 +7,137 @@
 		<atom:link href="/" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>生产环境又出现nginx502了！！</title>
+				<description>&lt;h2 id=&quot;问题概述&quot;&gt;问题概述&lt;/h2&gt;
+
+&lt;p&gt;在某段时间段，网站出现nginx 502，通过宝塔查看，负载状态是100%，查看监控，磁盘IO飙高，如下为近7日IO磁盘图：&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://img.zzhpeng.cn/FilqyanVhrxGwgOxksnDlyWAnw-W&quot; alt=&quot;FilqyanVhrxGwgOxksnDlyWAnw-W&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;排查数据&quot;&gt;排查数据&lt;/h2&gt;
+
+&lt;p&gt;nginx抛出502，证明是它的反向代理出错，这个代理php-cgi出了问题，我用的是php-fpm，出了问题。
+查看php-fpm 日志，发现并没有什么异常，提示需要提升start_servers是因为在这个时候我reload了php-fpm，
+但是reload后并没作用。然后重启了nginx，才恢复了正常。&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://img.zzhpeng.cn/FvPOyQL4h5T7VN73ltMSw5TyGP9L&quot; alt=&quot;FilqyanVhrxGwgOxksnDlyWAnw-W&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;查看nginx 日志，出现了很多*12359859 connect() to unix:/tmp/php-cgi-72.sock failed
+ (11: Resource temporarily unavailable) while connecting to upstream&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://img.zzhpeng.cn/FqX_zzcPU42pDzGR9dXbL9m-DG3p&quot; alt=&quot;FilqyanVhrxGwgOxksnDlyWAnw-W&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;根据nginx这个提示查了相关资料，得到了3个解决方案&lt;/p&gt;
+&lt;h3 id=&quot;1php-fpm的sock通讯方式-改为-tcp&quot;&gt;1、php-fpm的sock通讯方式 改为 tcp&lt;/h3&gt;
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;结论：不考虑，查了相关的blog，出现了相同问题，还从tcp改为sock模式呢！！&lt;/code&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;2用两个php-fpm-socknginx负载均衡&quot;&gt;2、用两个php-fpm sock，nginx负载均衡&lt;/h3&gt;
+&lt;p&gt;2.1、复制一份配置文件，修改里边的pid sock
+cp /usr/local/php/etc/php-fpm.conf cp /usr/local/php/etc/php-fpm2.conf&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[global]
+pid = /usr/local/php/var/run/php-fpm2.pid
+error_log = /usr/local/php/var/log/php-fpm2.log
+log_level = notice
+
+[www]
+listen = /tmp/php-cgi2.sock
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;2.2、复制一个启动文件，也修改相关的信息&lt;/p&gt;
+
+&lt;p&gt;cp /etc/init.d/php-fpm /etc/init.d/php-fpm2&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;php_fpm_BIN=${exec_prefix}/sbin/php-fpm
+php_fpm_CONF=${prefix}/etc/php-fpm2.conf
+php_fpm_PID=${prefix}/var/run/php-fpm2.pid
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;2.3、启动
+/etc/init.d/php-fpm2 start&lt;/p&gt;
+
+&lt;p&gt;2.4、nginx 配置文件，增加 upstream模块&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;upstream backend{
+    server unix:/tmp/php-cgi.sock;
+    server unix:/tmp/php-cgi2.sock;
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;2.5、把fastcgi_pass unix:/tmp/php-cgi.sock;改成 fastcgi_pass  backend;
+重新加载
+/etc/init.d/nginx reload&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;结论：这个方法，和我直接调大php-fpm max_children差不多，不考虑。&lt;/code&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;3php-fpm的listenbacklog默认-1改为1024或者4096即是调大&quot;&gt;3、php-fpm的listen.backlog默认-1改为1024或者4096，即是调大&lt;/h3&gt;
+&lt;p&gt;V友:onepunch回复，整理如下&lt;/p&gt;
+
+&lt;h4 id=&quot;调查&quot;&gt;调查&lt;/h4&gt;
+&lt;p&gt;nginx (客户端) 和 php-fpm （服务端） 通过 unix socket 通信，在 connet() 时，会进行类似 tcp 的三次握手,
+如果 accpet queue 队列满了，server 将发送一个 ECONNREFUSED 错误信息 Connection refused 到 client。
+这样 nginx 就会报这个错了，连接不上。php-fpm 的 backlog 是 accpet queue 的最大长度&lt;/p&gt;
+
+&lt;p&gt;查看系统内核的最大长度&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;cat /proc/sys/net/core/somaxconn 128
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;查看 php-fpm 里的配置 listen.backlog 是 4096，由于会取这 2 个的最小值， 所以是 128。&lt;/p&gt;
+
+&lt;p&gt;验证当时的请求：&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;grep '2019-12-06T16:48' bi_svc.access.log.1 | wc -l //9903
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;计算9903/60等于每秒请求数165，165&amp;gt;128 了, 请求太多了，应该是 accpet queue 满了&lt;/p&gt;
+
+&lt;h4 id=&quot;解决办法&quot;&gt;解决办法&lt;/h4&gt;
+&lt;p&gt;vi /etc/sysctl.conf&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;net.core.somaxconn = 1024
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;将 /proc/sys/net/core/somaxconn 改成 1024 就不会出问题了&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;结论：这个方法是稳定PV提升、IO提升的解决方案，不过我这边遇到的是突然的提升，所以我这边不会这样子做&lt;/code&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;更多服务器信息&quot;&gt;更多服务器信息&lt;/h2&gt;
+&lt;h3 id=&quot;1云服务器ecs&quot;&gt;1、云服务器ECS&lt;/h3&gt;
+&lt;p&gt;1.1、系统磁盘BPS，其他监控内容无太大的异常
+&lt;img src=&quot;http://img.zzhpeng.cn/Fuk7Hg7v9LETTlt6lJIe7EcKeLoD&quot; alt=&quot;FilqyanVhrxGwgOxksnDlyWAnw-W&quot; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;2rds数据库&quot;&gt;2、RDS数据库&lt;/h3&gt;
+&lt;p&gt;2.1、-网络流量
+&lt;img src=&quot;http://img.zzhpeng.cn/Fo5pktGwx-j4lERPURRBcVnQekPA&quot; alt=&quot;FilqyanVhrxGwgOxksnDlyWAnw-W&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;2.2、RDS数据库-CPU使用率
+&lt;img src=&quot;http://img.zzhpeng.cn/Fs_A1vSJ9M5MrVF9dLMktQ6vq5u5&quot; alt=&quot;FilqyanVhrxGwgOxksnDlyWAnw-W&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;2.3、RDS数据库-TPS/QPS
+&lt;img src=&quot;http://img.zzhpeng.cn/FuCeHHk2YnWJkzsfGBEHQGp2MhAc&quot; alt=&quot;FilqyanVhrxGwgOxksnDlyWAnw-W&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;2.4、RDS数据库-慢日志
+&lt;img src=&quot;http://img.zzhpeng.cn/FsSPL2M079cfnmeqN7LmX7-wE3lo&quot; alt=&quot;FilqyanVhrxGwgOxksnDlyWAnw-W&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;最后选择&quot;&gt;最后选择&lt;/h2&gt;
+&lt;p&gt;用户请求飙升，平台又没有做什么活动，查看了nginx access log，分析同一个ip，同一时间段上百个请求同
+一个访问链接，所以决定iptable限制下，控制单个IP的最大30并发连接数。&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo iptables -I INPUT -p tcp --dport 443 -m connlimit --connlimit-above 30 -j REJECT
+sudo iptables -I INPUT -p tcp --dport 80 -m connlimit --connlimit-above 30 -j REJECT
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;迭代&quot;&gt;迭代&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;2019年12月27日 15:29:00 初稿&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;参考&quot;&gt;参考&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://www.v2ex.com/t/632647&quot;&gt;nginx+ PHP -fpm 出现 502&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://blog.csdn.net/chengxuyuanyonghu/article/details/54409523&quot;&gt;iptables限制同一IP连接数&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://www.cnblogs.com/lilidun/p/5801437.html&quot;&gt;centos 7 iptables基本配置&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+				<pubDate>Thu, 26 Dec 2019 00:00:00 +0800</pubDate>
+				<link>/nginx502_2.html</link>
+				<guid isPermaLink="true">/nginx502_2.html</guid>
+			</item>
+		
+			<item>
 				<title>生产环境出现nginx502,导致十来分钟系统奔溃（Tp5.1的session bug）</title>
 				<description>&lt;h2 id=&quot;问题概述&quot;&gt;问题概述&lt;/h2&gt;
 &lt;p&gt;使用PHP的ThinkPHP5.1开发框架，生产环境使用宝塔管理，其中nginx直接报错502，继续时间10来分钟。而且通过观察，一段时间又会出现，特别是复杂频繁的操作。&lt;/p&gt;
@@ -228,8 +359,8 @@ https://www.cnblogs.com/zenghansen/p/4647004.html&lt;/p&gt;
 
 </description>
 				<pubDate>Mon, 25 Nov 2019 00:00:00 +0800</pubDate>
-				<link>/nginx502.html</link>
-				<guid isPermaLink="true">/nginx502.html</guid>
+				<link>/nginx502_1.html</link>
+				<guid isPermaLink="true">/nginx502_1.html</guid>
 			</item>
 		
 			<item>
@@ -1194,9 +1325,19 @@ sudo gitlab-ctl restart
 
 &lt;p&gt;解决~~待。。。。&lt;/p&gt;
 
+&lt;h2 id=&quot;后续&quot;&gt;后续&lt;/h2&gt;
+&lt;p&gt;这个问题，最终是用加大linux物理内存,机器是8G的内存。默认是没有设置swap的，我设置了8G的，最终java相关的应用，观察了几个月，如Eleasticsearch、Jenkis都稳定了。&lt;/p&gt;
+
+&lt;h2 id=&quot;迭代&quot;&gt;迭代&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;2019年09月18日 00:00:00 初稿&lt;/li&gt;
+  &lt;li&gt;2019年12月27日 15:29:00 修改&lt;/li&gt;
+&lt;/ul&gt;
+
 &lt;h2 id=&quot;参考&quot;&gt;参考&lt;/h2&gt;
 &lt;ul&gt;
   &lt;li&gt;1、&lt;a href=&quot;https://blog.csdn.net/panruifang/article/details/14223323&quot;&gt;Jenkins 安装Address already in use问题&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;2、&lt;a href=&quot;https://blog.csdn.net/sirchenhua/article/details/87861709&quot;&gt;Linux SWAP交换分区应该设置多大？&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 </description>
 				<pubDate>Wed, 18 Sep 2019 00:00:00 +0800</pubDate>
@@ -1738,58 +1879,6 @@ vim ./config/jvm.options&lt;/p&gt;
 				<pubDate>Mon, 09 Sep 2019 00:00:00 +0800</pubDate>
 				<link>/elasticsearch-production.html</link>
 				<guid isPermaLink="true">/elasticsearch-production.html</guid>
-			</item>
-		
-			<item>
-				<title>PHP缓冲区</title>
-				<description>&lt;h2 id=&quot;事由&quot;&gt;事由&lt;/h2&gt;
-&lt;p&gt;上一篇文章中，写了关于nginx和php-fpm组合 请求超时的解决方案,
-设置了保持长时间请求不断。但是，又遇到个问题就是缓冲区，需要边保持请求连接边打印东西
-到浏览器。&lt;/p&gt;
-
-&lt;h2 id=&quot;解决&quot;&gt;解决&lt;/h2&gt;
-&lt;p&gt;涉及php.ini属性概念与修改
-output_buffering
-implicit_flush
-output_handler&lt;/p&gt;
-
-&lt;h3 id=&quot;cli模式的缓冲区强制不开启&quot;&gt;cli模式的缓冲区强制不开启&lt;/h3&gt;
-&lt;p&gt;output_buffering 为off
-implicit_flush 为on&lt;/p&gt;
-
-&lt;h3 id=&quot;php-fpm-才可以用phpini的设置&quot;&gt;php-fpm 才可以用php.ini的设置&lt;/h3&gt;
-
-&lt;p&gt;默认设置是 output_buffering=4096，implicit_flush 为off,所以要缓冲区输出的话就要手动填充或者改配置，然后flush出来。&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;    for ($i = 0; $i&amp;lt; 10;$i++){
-        ob_start();
-        //查看执行情况
-        echo '完成:' .$i . '/100' . PHP_EOL;
-        echo str_repeat(&quot; &quot;, 1024 * 2);//人为将缓冲数据扩充到2k
-
-        ob_end_clean();
-        sleep(1);
-    }
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h2 id=&quot;参考&quot;&gt;参考&lt;/h2&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;
-    &lt;p&gt;1、&lt;a href=&quot;https://www.cnblogs.com/devcjq/articles/6072945.html&quot;&gt;关于PHP 刷新缓冲区操作(边执行边输出)简单分析&lt;/a&gt;&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;2、&lt;a href=&quot;https://www.cnblogs.com/raobenjun/p/8086051.html&quot;&gt;深入理解php的输出缓冲区(output buffer) - EzrealR - 博客园&lt;/a&gt;&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;3、&lt;a href=&quot;https://www.cnblogs.com/raobenjun/p/8085957.html&quot;&gt;php缓冲区 - EzrealR - 博客园&lt;/a&gt;&lt;/p&gt;
-  &lt;/li&gt;
-&lt;/ul&gt;
-
-</description>
-				<pubDate>Sat, 07 Sep 2019 00:00:00 +0800</pubDate>
-				<link>/php-ob-flush.html</link>
-				<guid isPermaLink="true">/php-ob-flush.html</guid>
 			</item>
 		
 	</channel>
