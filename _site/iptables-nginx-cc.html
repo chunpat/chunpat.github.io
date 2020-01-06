@@ -8,9 +8,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="fromChinaBoy">
 
-    <title>Mysql使用IN功能相关与性能对比 - Blog</title>
+    <title>iptables和nginx配置防御cc学习 - Blog</title>
 
-    <link rel="canonical" href="http://localhost:4000/mysql-in.html">
+    <link rel="canonical" href="http://localhost:4000/iptables-nginx-cc.html">
 
     <!-- Icons -->
   <link rel="shortcut icon" href="img/favicon.ico">
@@ -96,12 +96,14 @@
                 <div class="post-heading">
                     <div class="Tags">
                         
-                        <a class="tag" href="/Tags/#mysql" title="mysql">mysql</a>
+                        <a class="tag" href="/Tags/#iptables" title="iptables">iptables</a>
+                        
+                        <a class="tag" href="/Tags/#nginx" title="nginx">nginx</a>
                         
                     </div>
-                    <h1>Mysql使用IN功能相关与性能对比</h1>
+                    <h1>iptables和nginx配置防御cc学习</h1>
                     
-                    <span class="meta">Posted by zzhpeng on October 7, 2019</span>
+                    <span class="meta">Posted by zzhpeng on January 6, 2020</span>
                 </div>
             </div>
         </div>
@@ -114,184 +116,153 @@
         <div class="row">
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 post-container">
 
-                <h3 id="问题概述">问题概述</h3>
-<p>平时Mysql喜欢先sql语句找出id字符串，然后用in后面接（id，id，……）去查找数据。查阅相关文章，说sql语句长度有限制，随着数据增长就不能执行，但是
-这个长度却很大，一般可以不用考虑。</p>
+                <h2 id="问题概述">问题概述</h2>
+<p>上一篇文章配置了iptables两条命令，就觉得没问题了，但是我太天真了。</p>
 
-<p>查看方法。</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mysql&gt;show variables like '%max_allowed_pack%'
-+--------------------------+-----------------+
-| Variable_name            | Value           |
-+--------------------------+-----------------+
-| max_allowed_packet       | 1073741824      |
-| slave_max_allowed_packet | 1073741824      |
-+--------------------------+-----------------+
-返回行数：[2]，耗时：7 ms.
+<p>配置的iptables两条命令</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo iptables -I INPUT -p tcp --dport 443 -m connlimit --connlimit-above 30 -j REJECT
+sudo iptables -I INPUT -p tcp --dport 80 -m connlimit --connlimit-above 30 -j REJECT
 </code></pre></div></div>
-<p>根据返回结果可以看出，这个最大长度是很大的。</p>
+<p>解释下这两条命令，意思都是表示在同一时刻最大的tcp为30连接数限制，超过30就会reject拒绝。</p>
 
-<h3 id="in相关操作和替代方法对比">IN相关操作和替代方法对比</h3>
+<p><code class="highlighter-rouge">记住是同一时刻！！!</code></p>
+
+<p>但是配置完后，过几天又出现了nginx的502情况，在nginx error查看当时的那个时间段的该ip的请求数</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>grep '2020/01/01 19:02:31' xxx.com.error.log|wc -l   //结果显示62
+</code></pre></div></div>
+
+<p>结果显示62! ？？？不是设置了iptables限制了单个ip 30个并发吗？为什么会出现62个？这里上面有提示，同一时刻呀，即是tcp处于
+ESTABLISHED建立状态的。那这些怎么看呢？</p>
 
 <blockquote>
-  <p>1、IN后面接主键字符串（ 概念错误SELECT GROUP_CONCAT(order_id,’’) FROM order_action WHERE NAME = ‘user_add’ 查找出来的并不是字符串，而是数据集 ）</p>
+  <p>统计443端口连接数</p>
 </blockquote>
 
-<p>代码</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>EXPLAIN SELECT
-	* 
-FROM
-	`order` 
-WHERE
-	id IN ( SELECT GROUP_CONCAT(order_id,'') FROM order_action WHERE NAME = 'user_add' )
-</code></pre></div></div>
-
-<p>结果显示，order表需要找全部行，order_action也是。</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>+----+--------------------+--------------+------------+------+---------------+------+---------+------+-------+----------+-------------+
-| id | select_type        | table        | partitions | type | possible_keys | key  | key_len | ref  | rows  | filtered | Extra       |
-+----+--------------------+--------------+------------+------+---------------+------+---------+------+-------+----------+-------------+
-|  1 | PRIMARY            | order        | NULL       | ALL  | NULL          | NULL | NULL    | NULL | 17239 |   100.00 | Using where |
-|  2 | DEPENDENT SUBQUERY | order_action | NULL       | ALL  | NULL          | NULL | NULL    | NULL | 20660 |    10.00 | Using where |
-+----+--------------------+--------------+------------+------+---------------+------+---------+------+-------+----------+-------------+
-2 rows in set, 1 warning (0.01 sec)
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>netstat -nat|grep -i "443"|wc -l
 </code></pre></div></div>
 
 <blockquote>
-  <p>2、in 后面接 select 数据集</p>
+  <p>统计已连接上的，状态为“established</p>
 </blockquote>
 
-<p>代码</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>EXPLAIN SELECT
-	* 
-FROM
-	`order` 
-WHERE
-	id IN ( SELECT order_id FROM order_action WHERE NAME = 'user_add' )
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>netstat -nat | grep ESTABLISHED | grep :443 | wc -l  
 </code></pre></div></div>
 
-<p>结果显示，会创建临时表<subquery2>，order表只需要查1rows，order_action表查所有行。</subquery2></p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>+----+--------------+--------------+------------+--------+---------------+---------+---------+----------------------+-------+----------+-------------+
-| id | select_type  | table        | partitions | type   | possible_keys | key     | key_len | ref                  | rows  | filtered | Extra       |
-+----+--------------+--------------+------------+--------+---------------+---------+---------+----------------------+-------+----------+-------------+
-|  1 | SIMPLE       | &lt;subquery2&gt;  | NULL       | ALL    | NULL          | NULL    | NULL    | NULL                 |  NULL |   100.00 | NULL        |
-|  1 | SIMPLE       | order        | NULL       | eq_ref | PRIMARY       | PRIMARY | 4       | &lt;subquery2&gt;.order_id |     1 |   100.00 | NULL        |
-|  2 | MATERIALIZED | order_action | NULL       | ALL    | NULL          | NULL    | NULL    | NULL                 | 20649 |    10.00 | Using where |
-+----+--------------+--------------+------------+--------+---------------+---------+---------+----------------------+-------+----------+-------------+
-3 rows in set, 1 warning (0.00 sec)
+<h2 id="iptables学习与测试">iptables学习与测试</h2>
+<p>本测试在测试环境测试，环境配偶4g内存2核心1M带宽，系统环境是ubuntu16.4,该发行版本的默认管理防火墙的工具是ufw。</p>
+
+<h3 id="无任何防御测试">无任何防御测试</h3>
+<p>压测服务器ab命令 ab -c 20 -n 1000 https://dev.xxx.com/，全部通过
+<img src="http://img.zzhpeng.cn/FrN6NF5LYoD3J9BZL37rzHsm0OVK" alt="ab命令" /></p>
+
+<p>服务器tcp连接数变化
+<img src="http://img.zzhpeng.cn/FsCP9OnEiddWnKI1bMMQtKdTSEV0" alt="tcp连接数变化" /></p>
+
+<h3 id="iptables防御">iptables防御</h3>
+
+<blockquote>
+  <p>查看iptables状态</p>
+</blockquote>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo ufw status  //会显示 Status: active ，证明已经开启
 </code></pre></div></div>
 
 <blockquote>
-  <p>3、用 join 替换 in</p>
+  <p>iptables 命令</p>
 </blockquote>
 
-<p>代码</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>EXPLAIN SELECT
-	* 
-FROM
-	`order` AS ot
-	INNER JOIN order_action oat ON oat.order_id = ot.id 
-	AND oat.NAME = 'user_add'
+<p>添加，防御20并发</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo iptables -I INPUT -p tcp --dport 443 -m connlimit --connlimit-above 20 -j REJECT
 </code></pre></div></div>
 
-<p>结果显示，不创建临时表，但order表只需要查1rows，order_action表查所有行。</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>+----+-------------+-------+------------+--------+---------------+---------+---------+-------------------+-------+----------+-------------+
-| id | select_type | table | partitions | type   | possible_keys | key     | key_len | ref               | rows  | filtered | Extra       |
-+----+-------------+-------+------------+--------+---------------+---------+---------+-------------------+-------+----------+-------------+
-|  1 | SIMPLE      | oat   | NULL       | ALL    | NULL          | NULL    | NULL    | NULL              | 20653 |    10.00 | Using where |
-|  1 | SIMPLE      | ot    | NULL       | eq_ref | PRIMARY       | PRIMARY | 4       | sima.oat.order_id |     1 |   100.00 | NULL        |
-+----+-------------+-------+------------+--------+---------------+---------+---------+-------------------+-------+----------+-------------+
-2 rows in set, 1 warning (0.00 sec)
+<p>删除防御20并发</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo iptables -D INPUT -p tcp --dport 443 -m connlimit --connlimit-above 20 -j REJECT
+</code></pre></div></div>
+
+<p>查看是否生效</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo iptables -nL
+</code></pre></div></div>
+
+<p>开机生效</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>自查
 </code></pre></div></div>
 
 <blockquote>
-  <p>4、exist 替代 in （效率不行）</p>
+  <p>iptables 测试</p>
 </blockquote>
 
-<p>代码</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>EXPLAIN SELECT
-	* 
-FROM
-	`order` AS ot 
-WHERE
-	EXISTS ( SELECT order_id FROM order_action oat WHERE ot.id = oat.order_id AND NAME = 'user_add' ) 
+<p>压测服务器ab命令 ab -c 20 -n 1000 https://dev.xxx.com/，少部分失败
+<img src="http://img.zzhpeng.cn/FjGLx-JepP-Q4JvMxYOOnNIMMQEW" alt="ab命令" /></p>
+
+<p>服务器tcp连接数变化,压测中的建立连接数不超过20
+<img src="http://img.zzhpeng.cn/FhjpjR9Px6Y4sbo1l6f_d3ek0XIk" alt="tcp连接数变化" /></p>
+
+<p>加强压测，压测服务器ab命令 ab -c 25 -n 1000 https://dev.xxx.com/ 
+<img src="http://img.zzhpeng.cn/FoJbn_IqOilb6IX1SYq-npWaMxmA" alt="ab命令" /></p>
+
+<p>服务器tcp连接数变化，压测中的建立连接数不超过20
+<img src="http://img.zzhpeng.cn/FgjeblbI2m_2fElE8MwK1cs-9Y5M" alt="tcp连接数变化" /></p>
+
+<h2 id="nginx-cc防御设置">nginx cc防御设置</h2>
+<p>即是是配置了iptables还是会出现502，查看大量请求的ip，这个ip是某个正常使用的门店，但是为什么会出现大量的请求呢？
+推测F5,模拟测试。</p>
+
+<blockquote>
+  <p>F5模拟测试</p>
+</blockquote>
+
+<p>F5模拟测试,果然系统抛出502，我按出了浏览器显示1300多个请求。
+<img src="http://img.zzhpeng.cn/Fuc5PefZ1BirVjv4jdqN_gNIcyIT" alt="tcp连接数变化" /></p>
+
+<p>tcp变化数查看，拦截到了20个并发。自我推测：持续1300个请求下来，数据库返回数据慢了或者奔溃了，
+php-fpm响应超时重启出现502。这里再次过滤，准确显示F5请求过来的ip。
+<img src="http://img.zzhpeng.cn/FuVheog1dHsPBFdOejEXILWFk7-n" alt="tcp连接数变化" /></p>
+
+<p><code class="highlighter-rouge">结论：单纯的iptable是防不住F5的，响应到数据库的都很危险，静态或者缓存资源的的响应是没问题的，所以这里找到了nginx的cc防御。</code></p>
+
+<blockquote>
+  <p>nginx.conf主配置</p>
+</blockquote>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    limit_conn_zone $binary_remote_addr zone=perip:10m;//远端ip 限制 
+    limit_conn_zone $server_name zone=perserver:10m;//服务器域名 限制
 </code></pre></div></div>
 
-<p>结果测试的是两张关联的表都查了所有。所以exist效率不行。</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>+----+--------------------+-------+------------+------+---------------+------+---------+------+-------+----------+-------------+
-| id | select_type        | table | partitions | type | possible_keys | key  | key_len | ref  | rows  | filtered | Extra       |
-+----+--------------------+-------+------------+------+---------------+------+---------+------+-------+----------+-------------+
-|  1 | PRIMARY            | ot    | NULL       | ALL  | NULL          | NULL | NULL    | NULL | 17233 |   100.00 | Using where |
-|  2 | DEPENDENT SUBQUERY | oat   | NULL       | ALL  | NULL          | NULL | NULL    | NULL | 20656 |     1.00 | Using where |
-+----+--------------------+-------+------------+------+---------------+------+---------+------+-------+----------+-------------+
-2 rows in set, 2 warnings (0.00 sec)
+<p><code class="highlighter-rouge">容器共使用10M的内存来对于IP传输开销</code></p>
+
+<blockquote>
+  <p>server.conf某个网站</p>
+</blockquote>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    limit_conn perserver 300;//远端服务器域名 300个并发限制
+    limit_conn perip 25;//远端ip25个并发 限制
+    limit_rate 1024k;
 </code></pre></div></div>
+<p><code class="highlighter-rouge">limit_rate 512k： 对每个连接限速512k. 注意，这里是对连接限速，而不是对IP限速。如果一个IP允许两个并发连接，那么这个IP就是限速limit_rate×2。</code></p>
 
-<h3 id="explain-分析-sql-语句的相关属性解析">explain 分析 sql 语句的相关属性解析</h3>
+<p>配置，这里我直接用了宝塔的UI配置，这里是在server外部配置的，全局。
+<img src="http://img.zzhpeng.cn/Fp8s437_mKXOffD-bKDyTub_vxg4" alt="宝塔设置" /></p>
 
-<p>连接操作的TYPE类型</p>
+<blockquote>
+  <p>F5再次模拟测试</p>
+</blockquote>
 
-<p>（1）SYSTEM</p>
+<p>再次显示f5 65次就网络出错了，f5防御成功。
+<img src="http://img.zzhpeng.cn/Fubhh6oFbkaA5UBA9Et61YUcPFLp" alt="F5再次模拟测试" /></p>
 
-<p>CONST的特例，当表上只有一条元组匹配</p>
+<h2 id="恍然大悟">恍然大悟</h2>
+<p>前几次出现的f5攻击，只有上千条就停了，并且出现nginx 502。而最近f5攻击达到了上万条，这个就是我的iptables做了限流作用了。</p>
 
-<p>（2）CONST</p>
-
-<p>WHERE条件筛选后表上至多有一条元组匹配时，比如WHERE ID = 2 （ID是主键，值为2的要么有一条要么没有）</p>
-
-<p>（3）EQ_REF</p>
-
-<p>参与连接运算的表是内表（在代码实现的算法中，两表连接时作为循环中的内循环遍历的对象，这样的表称为内表）。
-基于索引（连接字段上存在唯一索引或者主键索引，且操作符必须是“=”谓词，索引值不能为NULL）做扫描，使得对外表的一条元组，内表只有唯一一条元组与之对应。</p>
-
-<p>（4）REF</p>
-
-<p>可以用于单表扫描或者连接。参与连接运算的表，是内表。
-基于索引（连接字段上的索引是非唯一索引，操作符必须是“=”谓词，连接字段值不可为NULL）做扫描，使得对外表的一条元组，内表可有若干条元组与之对应。</p>
-
-<p>（5）REF_OR_NULL</p>
-
-<p>类似REF，只是搜索条件包括：连接字段的值可以为NULL的情况，比如 where col = 2 or col is null</p>
-
-<p>（6）RANGE</p>
-
-<p>范围扫描，基于索引做范围扫描，为诸如BETWEEN，IN，&gt;=，LIKE类操作提供支持</p>
-
-<p>（7）INDEX_SCAN</p>
-
-<p>索引做扫描，是基于索引在索引的叶子节点上找满足条件的数据（不需要访问数据文件）</p>
-
-<p>（8）ALL</p>
-
-<p>全表扫描或者范围扫描：不使用索引，顺序扫描，直接读取表上的数据（访问数据文件）</p>
-
-<p>（9）UNIQUE_SUBQUERY</p>
-
-<p>在子查询中，基于唯一索引进行扫描，类似于EQ_REF</p>
-
-<p>（10）INDEX_SUBQUERY</p>
-
-<p>在子查询中，基于除唯一索引之外的索引进行扫描</p>
-
-<p>（11）INDEX_MERGE</p>
-
-<p>多重范围扫描。两表连接的每个表的连接字段上均有索引存在且索引有序，结果合并在一起。适用于作集合的并、交操作。</p>
-
-<p>（12）FT</p>
-
-<p>FULL TEXT，全文检索</p>
-
-<h3 id="结论">结论</h3>
-
-<p>实际测试显示，in数据集是最快的。所有优先考虑in数据集这种会创建临时表的方式。</p>
-
-<h3 id="参考">参考</h3>
-
+<h2 id="迭代">迭代</h2>
 <ul>
-  <li>
-    <p>1、<a href="https://blog.csdn.net/seelye/article/details/46453651">mysql explain 的type解释</a></p>
-  </li>
-  <li>
-    <p>2、<a href="https://blog.csdn.net/fukaiit/article/details/83515439">MySql中in查询效率低的替代方法</a></p>
-  </li>
+  <li>2020年01月06日 16:54:00 初稿</li>
+</ul>
+
+<h2 id="参考">参考</h2>
+<ul>
+  <li><a href="https://help.ubuntu.com/community/UFW">UFW - Community Help Wiki</a></li>
+  <li><a href="https://help.ubuntu.com/community/IptablesHowTo">IptablesHowTo - Community Help Wiki</a></li>
+  <li><a href="https://www.cnblogs.com/MacoLee/p/6023201.html">Nginx限速遇到的问题 - MacoLee - 博客园</a></li>
 </ul>
 
 
@@ -305,13 +276,9 @@ WHERE
                 <ul class="pager">
                     
                     <li class="previous">
-                        <a href="/zsh.html" data-toggle="tooltip" data-placement="top" title="更换mac默认bash shell为zsh">&larr; Previous Post</a>
+                        <a href="/nginx502_2.html" data-toggle="tooltip" data-placement="top" title="生产环境又出现nginx502了！！">&larr; Previous Post</a>
                     </li>
                     
-                    
-                    <li class="next">
-                        <a href="/redis-set.html" data-toggle="tooltip" data-placement="top" title="Redis的原子性解决并发问题">Next Post &rarr;</a>
-                    </li>
                     
                 </ul>
 

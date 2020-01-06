@@ -7,9 +7,165 @@
 		<atom:link href="/" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>iptables和nginx配置防御cc学习</title>
+				<description>&lt;h2 id=&quot;问题概述&quot;&gt;问题概述&lt;/h2&gt;
+&lt;p&gt;上一篇文章配置了iptables两条命令，就觉得没问题了，但是我太天真了。&lt;/p&gt;
+
+&lt;p&gt;配置的iptables两条命令&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo iptables -I INPUT -p tcp --dport 443 -m connlimit --connlimit-above 30 -j REJECT
+sudo iptables -I INPUT -p tcp --dport 80 -m connlimit --connlimit-above 30 -j REJECT
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;解释下这两条命令，意思都是表示在同一时刻最大的tcp为30连接数限制，超过30就会reject拒绝。&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;记住是同一时刻！！!&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;但是配置完后，过几天又出现了nginx的502情况，在nginx error查看当时的那个时间段的该ip的请求数&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;grep '2020/01/01 19:02:31' xxx.com.error.log|wc -l   //结果显示62
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;结果显示62! ？？？不是设置了iptables限制了单个ip 30个并发吗？为什么会出现62个？这里上面有提示，同一时刻呀，即是tcp处于
+ESTABLISHED建立状态的。那这些怎么看呢？&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;统计443端口连接数&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;netstat -nat|grep -i &quot;443&quot;|wc -l
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;统计已连接上的，状态为“established&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;netstat -nat | grep ESTABLISHED | grep :443 | wc -l  
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;iptables学习与测试&quot;&gt;iptables学习与测试&lt;/h2&gt;
+&lt;p&gt;本测试在测试环境测试，环境配偶4g内存2核心1M带宽，系统环境是ubuntu16.4,该发行版本的默认管理防火墙的工具是ufw。&lt;/p&gt;
+
+&lt;h3 id=&quot;无任何防御测试&quot;&gt;无任何防御测试&lt;/h3&gt;
+&lt;p&gt;压测服务器ab命令 ab -c 20 -n 1000 https://dev.xxx.com/，全部通过
+&lt;img src=&quot;http://img.zzhpeng.cn/FrN6NF5LYoD3J9BZL37rzHsm0OVK&quot; alt=&quot;ab命令&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;服务器tcp连接数变化
+&lt;img src=&quot;http://img.zzhpeng.cn/FsCP9OnEiddWnKI1bMMQtKdTSEV0&quot; alt=&quot;tcp连接数变化&quot; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;iptables防御&quot;&gt;iptables防御&lt;/h3&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;查看iptables状态&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo ufw status  //会显示 Status: active ，证明已经开启
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;iptables 命令&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;添加，防御20并发&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo iptables -I INPUT -p tcp --dport 443 -m connlimit --connlimit-above 20 -j REJECT
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;删除防御20并发&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo iptables -D INPUT -p tcp --dport 443 -m connlimit --connlimit-above 20 -j REJECT
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;查看是否生效&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo iptables -nL
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;开机生效&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;自查
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;iptables 测试&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;压测服务器ab命令 ab -c 20 -n 1000 https://dev.xxx.com/，少部分失败
+&lt;img src=&quot;http://img.zzhpeng.cn/FjGLx-JepP-Q4JvMxYOOnNIMMQEW&quot; alt=&quot;ab命令&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;服务器tcp连接数变化,压测中的建立连接数不超过20
+&lt;img src=&quot;http://img.zzhpeng.cn/FhjpjR9Px6Y4sbo1l6f_d3ek0XIk&quot; alt=&quot;tcp连接数变化&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;加强压测，压测服务器ab命令 ab -c 25 -n 1000 https://dev.xxx.com/ 
+&lt;img src=&quot;http://img.zzhpeng.cn/FoJbn_IqOilb6IX1SYq-npWaMxmA&quot; alt=&quot;ab命令&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;服务器tcp连接数变化，压测中的建立连接数不超过20
+&lt;img src=&quot;http://img.zzhpeng.cn/FgjeblbI2m_2fElE8MwK1cs-9Y5M&quot; alt=&quot;tcp连接数变化&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;nginx-cc防御设置&quot;&gt;nginx cc防御设置&lt;/h2&gt;
+&lt;p&gt;即是是配置了iptables还是会出现502，查看大量请求的ip，这个ip是某个正常使用的门店，但是为什么会出现大量的请求呢？
+推测F5,模拟测试。&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;F5模拟测试&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;F5模拟测试,果然系统抛出502，我按出了浏览器显示1300多个请求。
+&lt;img src=&quot;http://img.zzhpeng.cn/Fuc5PefZ1BirVjv4jdqN_gNIcyIT&quot; alt=&quot;tcp连接数变化&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;tcp变化数查看，拦截到了20个并发。自我推测：持续1300个请求下来，数据库返回数据慢了或者奔溃了，
+php-fpm响应超时重启出现502。这里再次过滤，准确显示F5请求过来的ip。
+&lt;img src=&quot;http://img.zzhpeng.cn/FuVheog1dHsPBFdOejEXILWFk7-n&quot; alt=&quot;tcp连接数变化&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;结论：单纯的iptable是防不住F5的，响应到数据库的都很危险，静态或者缓存资源的的响应是没问题的，所以这里找到了nginx的cc防御。&lt;/code&gt;&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;nginx.conf主配置&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;    limit_conn_zone $binary_remote_addr zone=perip:10m;//远端ip 限制 
+    limit_conn_zone $server_name zone=perserver:10m;//服务器域名 限制
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;容器共使用10M的内存来对于IP传输开销&lt;/code&gt;&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;server.conf某个网站&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;    limit_conn perserver 300;//远端服务器域名 300个并发限制
+    limit_conn perip 25;//远端ip25个并发 限制
+    limit_rate 1024k;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;limit_rate 512k： 对每个连接限速512k. 注意，这里是对连接限速，而不是对IP限速。如果一个IP允许两个并发连接，那么这个IP就是限速limit_rate×2。&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;配置，这里我直接用了宝塔的UI配置，这里是在server外部配置的，全局。
+&lt;img src=&quot;http://img.zzhpeng.cn/Fp8s437_mKXOffD-bKDyTub_vxg4&quot; alt=&quot;宝塔设置&quot; /&gt;&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;F5再次模拟测试&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;再次显示f5 65次就网络出错了，f5防御成功。
+&lt;img src=&quot;http://img.zzhpeng.cn/Fubhh6oFbkaA5UBA9Et61YUcPFLp&quot; alt=&quot;F5再次模拟测试&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;恍然大悟&quot;&gt;恍然大悟&lt;/h2&gt;
+&lt;p&gt;前几次出现的f5攻击，只有上千条就停了，并且出现nginx 502。而最近f5攻击达到了上万条，这个就是我的iptables做了限流作用了。&lt;/p&gt;
+
+&lt;h2 id=&quot;迭代&quot;&gt;迭代&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;2020年01月06日 16:54:00 初稿&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;参考&quot;&gt;参考&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://help.ubuntu.com/community/UFW&quot;&gt;UFW - Community Help Wiki&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://help.ubuntu.com/community/IptablesHowTo&quot;&gt;IptablesHowTo - Community Help Wiki&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://www.cnblogs.com/MacoLee/p/6023201.html&quot;&gt;Nginx限速遇到的问题 - MacoLee - 博客园&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+				<pubDate>Mon, 06 Jan 2020 00:00:00 +0800</pubDate>
+				<link>/iptables-nginx-cc.html</link>
+				<guid isPermaLink="true">/iptables-nginx-cc.html</guid>
+			</item>
+		
+			<item>
 				<title>生产环境又出现nginx502了！！</title>
 				<description>&lt;h2 id=&quot;问题概述&quot;&gt;问题概述&lt;/h2&gt;
-
 &lt;p&gt;在某段时间段，网站出现nginx 502，通过宝塔查看，负载状态是100%，查看监控，磁盘IO飙高，如下为近7日IO磁盘图：&lt;/p&gt;
 
 &lt;p&gt;&lt;img src=&quot;http://img.zzhpeng.cn/FilqyanVhrxGwgOxksnDlyWAnw-W&quot; alt=&quot;FilqyanVhrxGwgOxksnDlyWAnw-W&quot; /&gt;&lt;/p&gt;
@@ -119,6 +275,9 @@ php_fpm_PID=${prefix}/var/run/php-fpm2.pid
 &lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo iptables -I INPUT -p tcp --dport 443 -m connlimit --connlimit-above 30 -j REJECT
 sudo iptables -I INPUT -p tcp --dport 80 -m connlimit --connlimit-above 30 -j REJECT
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;后续&quot;&gt;后续&lt;/h2&gt;
+&lt;p&gt;问题还是出现了，查看下一篇post&lt;/p&gt;
 
 &lt;h2 id=&quot;迭代&quot;&gt;迭代&lt;/h2&gt;
 &lt;ul&gt;
@@ -1763,122 +1922,6 @@ https://help.aliyun.com/document_detail/111738.html?spm=a2c4g.11186623.4.1.74dc7
 				<pubDate>Tue, 10 Sep 2019 00:00:00 +0800</pubDate>
 				<link>/disk-extend.html</link>
 				<guid isPermaLink="true">/disk-extend.html</guid>
-			</item>
-		
-			<item>
-				<title>elasticsearch生产部署</title>
-				<description>&lt;h1 id=&quot;ubuntu-系统下直接安装&quot;&gt;Ubuntu 系统下直接安装&lt;/h1&gt;
-&lt;h2 id=&quot;1安装opensdk&quot;&gt;1、安装OpenSdk&lt;/h2&gt;
-&lt;p&gt;sudo apt-get install openjdk-8-jdk&lt;/p&gt;
-
-&lt;p&gt;配置Java环境变量
-sudo vim /etc/profile
-在profile末尾添加以下内容:&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
-export JRE_HOME=$JAVA_HOME/jre
-export CLASSPATH=$JAVA_HOME/lib:$JRE_HOME/lib:$CLASSPATH
-export PATH=$JAVA_HOME/bin:$JRE_HOME/bin:$PATH
-
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;添加后保存并退出，用java -version查看是否配置成功&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;openjdk version &quot;1.8.0_191&quot;
-OpenJDK Runtime Environment (build 1.8.0_191-8u191-b12-2ubuntu0.18.04.1-b12)
-OpenJDK 64-Bit Server VM (build 25.191-b12, mixed mode)
-
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h2 id=&quot;2安装elasticsearch&quot;&gt;2、安装Elasticsearch&lt;/h2&gt;
-
-&lt;p&gt;选择相应版本，大小200多M，有点大，源不好，下载会有点慢，请耐性等待！！&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.3.1-linux-x86_64.tar.gz
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;解压&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;tar -zxvf elasticsearch-7.3.1-linux-x86_64.tar.gz
-cd elasticsearch-7.3.1
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h2 id=&quot;3安装elasticsearch-ik分词&quot;&gt;3、安装elasticsearch-ik分词&lt;/h2&gt;
-
-&lt;p&gt;源不好，下载会有点慢，请耐性等待！！&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo ./bin/elasticsearch-plugin install https://github.com/medcl/elasticsearch-analysis-ik/releases/download/v7.3.1/elasticsearch-analysis-ik-7.3.1.zip
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;下载完成后，记得选择Y,不然不会安装&lt;/p&gt;
-
-&lt;h2 id=&quot;4改配置-elasticsearchbinelasticsearchyml&quot;&gt;4、改配置 /elasticsearch/bin/elasticsearch.yml&lt;/h2&gt;
-
-&lt;h3 id=&quot;41切换root账户改vmmax_map_count&quot;&gt;4.1、切换root账户改vm.max_map_count&lt;/h3&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;报错信息&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; ERROR: bootstrap checks failed max virtual memory areas vm.max_map_count [65530] is
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;解决，切换到root用户修改配置sysctl.conf&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;vi /etc/sysctl.conf&lt;/p&gt;
-
-&lt;p&gt;加参数&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;vm.max_map_count=655360
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;使生效&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sysctl -p
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h3 id=&quot;42更改内存占用&quot;&gt;4.2、更改内存占用&lt;/h3&gt;
-
-&lt;p&gt;默认1G，修改为实际占用。
-vim ./config/jvm.options&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;-Xms512m
--Xmx512m
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h3 id=&quot;43内存不锁&quot;&gt;4.3、内存不锁&lt;/h3&gt;
-
-&lt;p&gt;vim ./config/elasticsearch.yml&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;bootstrap.memory_lock: false //原来是true
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h2 id=&quot;5启动&quot;&gt;5、启动&lt;/h2&gt;
-&lt;p&gt;启动命令&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&quot;language-$xslt&quot;&gt;./bin/elasticsearchg
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h1 id=&quot;docker-安装&quot;&gt;Docker 安装&lt;/h1&gt;
-
-&lt;p&gt;待~&lt;/p&gt;
-
-&lt;h2 id=&quot;参考&quot;&gt;参考&lt;/h2&gt;
-&lt;ul&gt;
-  &lt;li&gt;
-    &lt;p&gt;1、&lt;a href=&quot;https://cnblogs.com/xiaojianfeng/p/9435507.html&quot;&gt;Elasticsearch和Head插件安装 - v-imok - 博客园&lt;/a&gt;&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;2、&lt;a href=&quot;https://elasticsearch.cn/question/4136&quot;&gt;请教elasticsearch出现unassigned shards根本原因 - Elastic 中文社区&lt;/a&gt;&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;3、&lt;a href=&quot;https://www.elastic.co/guide/en/elasticsearch/reference/6.2/cluster-allocation-explain.html&quot;&gt;官方index检测&lt;/a&gt;&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;4、&lt;a href=&quot;https://discuss.elastic.co/t/cluster-yellow-reason-shards-started-kibana-0/93034&quot;&gt;状态为yellow的原因&lt;/a&gt;&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;5、&lt;a href=&quot;https://www.elastic.co/guide/en/kibana/current/targz.html&quot;&gt;kibana&lt;/a&gt;&lt;/p&gt;
-  &lt;/li&gt;
-&lt;/ul&gt;
-</description>
-				<pubDate>Mon, 09 Sep 2019 00:00:00 +0800</pubDate>
-				<link>/elasticsearch-production.html</link>
-				<guid isPermaLink="true">/elasticsearch-production.html</guid>
 			</item>
 		
 	</channel>

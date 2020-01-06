@@ -117,7 +117,6 @@
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 post-container">
 
                 <h2 id="问题概述">问题概述</h2>
-
 <p>在某段时间段，网站出现nginx 502，通过宝塔查看，负载状态是100%，查看监控，磁盘IO飙高，如下为近7日IO磁盘图：</p>
 
 <p><img src="http://img.zzhpeng.cn/FilqyanVhrxGwgOxksnDlyWAnw-W" alt="FilqyanVhrxGwgOxksnDlyWAnw-W" /></p>
@@ -228,6 +227,9 @@ php_fpm_PID=${prefix}/var/run/php-fpm2.pid
 sudo iptables -I INPUT -p tcp --dport 80 -m connlimit --connlimit-above 30 -j REJECT
 </code></pre></div></div>
 
+<h2 id="后续">后续</h2>
+<p>问题还是出现了，查看下一篇post</p>
+
 <h2 id="迭代">迭代</h2>
 <ul>
   <li>2019年12月27日 15:29:00 初稿</li>
@@ -253,6 +255,10 @@ sudo iptables -I INPUT -p tcp --dport 80 -m connlimit --connlimit-above 30 -j RE
                         <a href="/nginx502_1.html" data-toggle="tooltip" data-placement="top" title="生产环境出现nginx502,导致十来分钟系统奔溃（Tp5.1的session bug）">&larr; Previous Post</a>
                     </li>
                     
+                    
+                    <li class="next">
+                        <a href="/iptables-nginx-cc.html" data-toggle="tooltip" data-placement="top" title="iptables和nginx配置防御cc学习">Next Post &rarr;</a>
+                    </li>
                     
                 </ul>
 
@@ -401,7 +407,7 @@ sudo iptables -I INPUT -p tcp --dport 80 -m connlimit --connlimit-above 30 -j RE
 
                 </ul>
                 <p class="copyright text-muted">
-                &copy; 2011~2019 zzhpeng ♪ Powered by Jekyll.
+                &copy; 2011~2020 zzhpeng ♪ Powered by Jekyll.
                 </p>
             </div>
         </div>

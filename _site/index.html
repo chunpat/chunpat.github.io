@@ -104,6 +104,26 @@
 		<div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
 			
 <div class="post-preview">
+    <a href="/iptables-nginx-cc.html">
+        <h2 class="post-title">            
+            iptables和nginx配置防御cc学习
+        </h2>
+        
+        <div class="post-content-preview">
+            问题概述
+上一篇文章配置了iptables两条命令，就觉得没问题了，但是我太天真了。
+
+配置的iptables两条命令
+sudo iptables -I INPUT -p tcp --dport 443 -m connlimit --connlimit-above 30 -j REJECT
+s...
+        </div>
+    </a>
+    <p class="post-meta">Posted by zzhpeng on January 6, 2020</p>
+</div>
+
+<hr>
+
+<div class="post-preview">
     <a href="/nginx502_2.html">
         <h2 class="post-title">            
             生产环境又出现nginx502了！！
@@ -111,7 +131,6 @@
         
         <div class="post-content-preview">
             问题概述
-
 在某段时间段，网站出现nginx 502，通过宝塔查看，负载状态是100%，查看监控，磁盘IO飙高，如下为近7日IO磁盘图：
 
 
@@ -119,7 +138,7 @@
 排查数据
 
 nginx抛出502，证明是它的反向代理出错，这个代理php-cgi出了问题，我用的是php-fpm，出了问题。
-查看php-fpm 日志...
+查看php-fpm 日志，...
         </div>
     </a>
     <p class="post-meta">Posted by zzhpeng on December 26, 2019</p>
@@ -251,35 +270,6 @@ sudo vim /etc/gitlab/gitl...
 
 <hr>
 
-<div class="post-preview">
-    <a href="/elasticsearch-actual_problem.html">
-        <h2 class="post-title">            
-            elasticsearch业务问题
-        </h2>
-        
-        <div class="post-content-preview">
-            场景
-
-  要搜索的内容
-
-
-P92325 iphone 7s plus 4G 黑色 美版 无锁
-P92324 iphone 7 128g 金色 有锁 通用版
-
-
-
-  以为客户那边要求是，想的很简单
-
-
-
-  1、iphone7splus  搜索-&gt;P92325 iphone 7s p...
-        </div>
-    </a>
-    <p class="post-meta">Posted by zzhpeng on September 12, 2019</p>
-</div>
-
-<hr>
-
 
 <!-- Pager -->
 
@@ -405,7 +395,7 @@ P92324 iphone 7 128g 金色 有锁 通用版
 
                 </ul>
                 <p class="copyright text-muted">
-                &copy; 2011~2019 zzhpeng ♪ Powered by Jekyll.
+                &copy; 2011~2020 zzhpeng ♪ Powered by Jekyll.
                 </p>
             </div>
         </div>
