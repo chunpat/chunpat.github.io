@@ -5,40 +5,109 @@ date: 2020-01-06
 tags: iptables nginx
 ---
 ## 问题概述
-上一篇文章配置了iptables两条命令，就觉得没问题了，但是我太天真了。
+上一篇文章配置了iptables两条命令，就觉得没问题了，但是我太天真了，归咎原因还是没有好好
+学iptables的内在意思。
 
 配置的iptables两条命令
 ```
 sudo iptables -I INPUT -p tcp --dport 443 -m connlimit --connlimit-above 30 -j REJECT
 sudo iptables -I INPUT -p tcp --dport 80 -m connlimit --connlimit-above 30 -j REJECT
 ```
-解释下这两条命令，意思都是表示在同一时刻最大的tcp为30连接数限制，超过30就会reject拒绝。
+解释下这两条命令，意思都是表示在同一时刻最大的tcp为30连接数限制，超过30连接数就会被reject拒绝。
 
 `记住是同一时刻！！!`
 
-但是配置完后，过几天又出现了nginx的502情况，在nginx error查看当时的那个时间段的该ip的请求数
-```
-grep '2020/01/01 19:02:31' xxx.com.error.log|wc -l   //结果显示62
-```
+同一时刻，即是tcp处于ESTABLISHED连接状态的。那这些怎么看呢？
 
-结果显示62! ？？？不是设置了iptables限制了单个ip 30个并发吗？为什么会出现62个？这里上面有提示，同一时刻呀，即是tcp处于
-ESTABLISHED建立状态的。那这些怎么看呢？
+> 案例
 
 
-> 统计443端口连接数
+```
+netstat -nat  | grep :443
+
+Proto Recv-Q Send-Q Local-Address           Foreign-Address         State
+tcp        0      0 0.0.0.0:443             0.0.0.0:*               LISTEN     
+tcp        0      0 172.18.245.246:443      113.67.9.211:14451      TIME_WAIT  
+tcp        0      1 172.18.245.246:42776    47.106.188.48:443       SYN_SENT   
+tcp        0      0 172.18.245.246:443      113.67.9.211:14442      TIME_WAIT  
+tcp        0      0 172.18.245.246:42388    47.106.188.48:443       ESTABLISHED
+tcp        0      1 172.18.245.246:42748    47.106.188.48:443       SYN_SENT   
+tcp        0      0 172.18.245.246:443      113.67.9.211:14540      TIME_WAIT  
+tcp        0      1 172.18.245.246:42690    47.106.188.48:443       SYN_SENT   
+tcp        0      1 172.18.245.246:42682    47.106.188.48:443       SYN_SENT   
+tcp        0      0 172.18.245.246:443      113.67.9.211:14559      TIME_WAIT  
+tcp        0      1 172.18.245.246:42694    47.106.188.48:443       SYN_SENT   
+tcp        0      1 172.18.245.246:42564    47.106.188.48:443       SYN_SENT   
+tcp        0      1 172.18.245.246:42706    47.106.188.48:443       SYN_SENT   
+tcp        0      0 172.18.245.246:42380    47.106.188.48:443       ESTABLISHED
+tcp        0      1 172.18.245.246:42396    47.106.188.48:443       SYN_SENT   
+tcp        0      1 172.18.245.246:42674    47.106.188.48:443       SYN_SENT   
+tcp        0      0 172.18.245.246:443      47.106.188.48:42236     ESTABLISHED
+tcp        0      1 172.18.245.246:42610    47.106.188.48:443       SYN_SENT   
+tcp        0      1 172.18.245.246:42606    47.106.188.48:443       SYN_SENT   
+tcp        0      1 172.18.245.246:42592    47.106.188.48:443       SYN_SENT   
+tcp        0      0 172.18.245.246:42294    47.106.188.48:443       ESTABLISHED
+tcp        0      1 172.18.245.246:42342    47.106.188.48:443       SYN_SENT   
+tcp        0      0 172.18.245.246:443      113.67.9.211:14498      TIME_WAIT  
+tcp        0      0 172.18.245.246:443      47.106.188.48:42278     ESTABLISHED
+tcp        0      1 172.18.245.246:42558    47.106.188.48:443       SYN_SENT   
+tcp        0      0 172.18.245.246:443      47.106.188.48:42272     ESTABLISHED
+tcp        0      0 172.18.245.246:443      47.106.188.48:42252     ESTABLISHED
+tcp        0      0 172.18.245.246:443      113.67.9.211:14543      TIME_WAIT  
+tcp        0      1 172.18.245.246:42746    47.106.188.48:443       SYN_SENT   
+tcp        0      1 172.18.245.246:42788    47.106.188.48:443       SYN_SENT   
+tcp        0      0 172.18.245.246:443      113.67.9.211:14570      TIME_WAIT  
+tcp        0      0 172.18.245.246:42270    47.106.188.48:443       ESTABLISHED
+tcp        0      1 172.18.245.246:42792    47.106.188.48:443       SYN_SENT   
+tcp        0      0 172.18.245.246:443      113.67.9.211:14493      TIME_WAIT  
+tcp        0      0 172.18.245.246:42370    47.106.188.48:443       ESTABLISHED
+tcp        0      0 172.18.245.246:443      113.67.9.211:14445      TIME_WAIT  
+tcp        0      1 172.18.245.246:42688    47.106.188.48:443       SYN_SENT   
+tcp        0      1 172.18.245.246:42570    47.106.188.48:443       SYN_SENT   
+tcp        0      1 172.18.245.246:42328    47.106.188.48:443       SYN_SENT   
+tcp        0      0 172.18.245.246:443      47.106.188.48:42292     ESTABLISHED
+tcp        0      0 172.18.245.246:42278    47.106.188.48:443       ESTABLISHED
+tcp        0      1 172.18.245.246:42216    47.106.188.48:443       SYN_SENT   
+tcp        0      0 172.18.245.246:443      113.67.9.211:14550      TIME_WAIT  
+tcp        0      0 172.18.245.246:443      113.67.9.211:14487      TIME_WAIT  
+tcp        0      1 172.18.245.246:42774    47.106.188.48:443       SYN_SENT   
+tcp        0      0 172.18.245.246:443      113.67.9.211:14425      TIME_WAIT  
+tcp        0      1 172.18.245.246:42726    47.106.188.48:443       SYN_SENT   
+tcp        0      1 172.18.245.246:42390    47.106.188.48:443       SYN_SENT   
+tcp        0      0 172.18.245.246:443      113.67.9.211:14578      TIME_WAIT  
+tcp        0      0 172.18.245.246:443      113.67.9.211:14564      TIME_WAIT 
+```
+> 统计对外443端口连接数
 
 ```
-netstat -nat|grep -i "443"|wc -l
+netstat -nat|grep "47.106.188.48:443"|wc -l
 ```
 
-> 统计已连接上的，状态为“established
+> 统计对外443已连接上的，状态为ESTABLISHED
 
 ```
-netstat -nat | grep ESTABLISHED | grep :443 | wc -l  
+netstat -nat | grep ESTABLISHED | grep 47.106.188.48:443 | wc -l  
 ```
+
+> 统计对外443等待连接的，状态为SYN_SENT
+
+```
+netstat -nat | grep SYN_SENT | grep 47.106.188.48:443 | wc -l  
+```
+
+iptables配置完后，过几天又出现了nginx的502情况，在nginx error查看当时的那个时间段的该ip的请求失败数。
+```
+grep '2020/01/01 19:02:31' xxx.com.error.log|wc -l   //结果显示62个请求失败数
+```
+
+``初步猜想``：nginx error显示62个请求失败数! 保持30个连接数量，但是请求却是一直在请求，动态语言php-cgi处理不过来，nginx
+传过来的请求，就会直接返回错误。导致nginx直接将请求，记做错误写入error日志。
+
+画个流程图：
+![图](http://img.zzhpeng.cn/Fk7-M-U3c-LFEmPmzOe_bmNwuRNx)
 
 ## iptables学习与测试
-本测试在测试环境测试，环境配偶4g内存2核心1M带宽，系统环境是ubuntu16.4,该发行版本的默认管理防火墙的工具是ufw。
+本测试在测试环境测试，环境参数为4g内存2个核心1M带宽，系统环境是ubuntu16.4，该发行版本的默认管理防火墙的工具是ufw。
 
 ### 无任何防御测试
 压测服务器ab命令 ab -c 20 -n 1000 https://dev.xxx.com/，全部通过
@@ -57,12 +126,12 @@ sudo ufw status  //会显示 Status: active ，证明已经开启
 
 > iptables 命令
 
-添加，防御20并发
+添加，防御同一时刻20连接数限制
 ```
 sudo iptables -I INPUT -p tcp --dport 443 -m connlimit --connlimit-above 20 -j REJECT
 ```
 
-删除防御20并发
+删除防御同一时刻20连接数限制
 ```
 sudo iptables -D INPUT -p tcp --dport 443 -m connlimit --connlimit-above 20 -j REJECT
 ```
@@ -98,14 +167,18 @@ sudo iptables -nL
 
 > F5模拟测试
 
-F5模拟测试,果然系统抛出502，我按出了浏览器显示1300多个请求。
-![tcp连接数变化](http://img.zzhpeng.cn/Fuc5PefZ1BirVjv4jdqN_gNIcyIT)
+F5模拟测试,果然系统抛出502，我按出了浏览器显示差不多1200多个请求。
+![tcp连接数变化](http://img.zzhpeng.cn/FkNU7r-CYTOdCTYzFylfeR4PCdFr)
 
-tcp变化数查看，拦截到了20个并发。自我推测：持续1300个请求下来，数据库返回数据慢了或者奔溃了，
-php-fpm响应超时重启出现502。这里再次过滤，准确显示F5请求过来的ip。
-![tcp连接数变化](http://img.zzhpeng.cn/FuVheog1dHsPBFdOejEXILWFk7-n)
+然后，我在测试服务器，查看tcp变化数，限制到了20个连接数。自我推测：持续1200个请求下来，
+存在了很多等待连接的。数据库返回数据慢了或者奔溃了，php-fpm响应超时重启出现502。
 
-`结论：单纯的iptable是防不住F5的，响应到数据库的都很危险，静态或者缓存资源的的响应是没问题的，所以这里找到了nginx的cc防御。`
+如图下，为F5请求产生502后，查看服务器tcp情况，还保持着20个连接数，和80个准备连接数。
+![tcp连接数变化](http://img.zzhpeng.cn/FmQH6dfFWvqmgHrcTF_EcpYUjQPW)
+
+`结论：iptable的限制20个连接数，能限制流量，但是F5攻击触及到数据库，就存在数据库那边的读的压力。
+如果是静态或者缓存资源的的响应是没问题的，所以这里找到了nginx的cc防御。遇到一个时间段过多的流量可以抛出
+个网络异常或503响应给浏览器，这样用户持续的F5就不会影响服务器了`
 
 > nginx.conf主配置
 
@@ -136,7 +209,8 @@ php-fpm响应超时重启出现502。这里再次过滤，准确显示F5请求�
 
 
 ## 恍然大悟
-前几次出现的f5攻击，只有上千条就停了，并且出现nginx 502。而最近f5攻击达到了上万条，这个就是我的iptables做了限流作用了。
+前几次出现的f5攻击，只有上千条就停了，并且出现nginx 502。而最近f5攻击达到了上万条，这个就是
+设置的iptables做了限制作用了，只允许30个连接数。
 
 ## 迭代
 * 2020年01月06日 16:54:00 初稿
@@ -145,4 +219,5 @@ php-fpm响应超时重启出现502。这里再次过滤，准确显示F5请求�
 * [UFW - Community Help Wiki](https://help.ubuntu.com/community/UFW)
 * [IptablesHowTo - Community Help Wiki](https://help.ubuntu.com/community/IptablesHowTo)
 * [Nginx限速遇到的问题 - MacoLee - 博客园](https://www.cnblogs.com/MacoLee/p/6023201.html)
+* [服务器TIME_WAIT和CLOSE_WAIT分析和解决办法 - HttpClient 中文官网](http://www.httpclient.cn/archives/106.html)
 
