@@ -236,6 +236,7 @@ tcp        0      0 172.18.245.246:443      113.67.9.211:14564      TIME_WAIT
   &lt;li&gt;&lt;a href=&quot;https://www.cnblogs.com/MacoLee/p/6023201.html&quot;&gt;Nginx限速遇到的问题 - MacoLee - 博客园&lt;/a&gt;&lt;/li&gt;
   &lt;li&gt;&lt;a href=&quot;http://www.httpclient.cn/archives/106.html&quot;&gt;服务器TIME_WAIT和CLOSE_WAIT分析和解决办法 - HttpClient 中文官网&lt;/a&gt;&lt;/li&gt;
   &lt;li&gt;&lt;a href=&quot;https://www.cnblogs.com/williamjie/p/11075565.html&quot;&gt;一个 TCP 连接可以发多少个 HTTP 请求 - 割肉机 - 博客园&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://www.cnblogs.com/skynet/p/4173450.html&quot;&gt;Nginx + CGI/FastCGI + C/Cpp - 吴秦 - 博客园&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
 </description>

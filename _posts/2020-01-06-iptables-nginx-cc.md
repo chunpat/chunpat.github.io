@@ -224,4 +224,5 @@ F5模拟测试,果然系统抛出502，我按出了浏览器显示差不多1200�
 * [Nginx限速遇到的问题 - MacoLee - 博客园](https://www.cnblogs.com/MacoLee/p/6023201.html)
 * [服务器TIME_WAIT和CLOSE_WAIT分析和解决办法 - HttpClient 中文官网](http://www.httpclient.cn/archives/106.html)
 * [一个 TCP 连接可以发多少个 HTTP 请求 - 割肉机 - 博客园](https://www.cnblogs.com/williamjie/p/11075565.html)
+* [Nginx + CGI/FastCGI + C/Cpp - 吴秦 - 博客园](https://www.cnblogs.com/skynet/p/4173450.html)
 
