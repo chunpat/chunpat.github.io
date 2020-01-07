@@ -209,8 +209,11 @@ F5模拟测试,果然系统抛出502，我按出了浏览器显示差不多1200�
 
 
 ## 恍然大悟
-前几次出现的f5攻击，只有上千条就停了，并且出现nginx 502。而最近f5攻击达到了上万条，这个就是
-设置的iptables做了限制作用了，只允许30个连接数。
+1、前几次出现的f5攻击，只有上千条单个ip的error就停了，并且出现nginx 502。而最近f5攻击达到了上万条单个ip的error，这个就是
+设置的iptables做了限制作用了，只允许30个连接数，数据库短暂压力没那么大，可以持续更长的时间。
+
+2、iptables 设置了30个连接数限制，但是为什么单个ip会有上万个error错误呢？这里就牵着到了浏览器http2协议当中，一个tcp多路复用
+可以传输多个http请求。
 
 ## 迭代
 * 2020年01月06日 16:54:00 初稿
@@ -220,4 +223,5 @@ F5模拟测试,果然系统抛出502，我按出了浏览器显示差不多1200�
 * [IptablesHowTo - Community Help Wiki](https://help.ubuntu.com/community/IptablesHowTo)
 * [Nginx限速遇到的问题 - MacoLee - 博客园](https://www.cnblogs.com/MacoLee/p/6023201.html)
 * [服务器TIME_WAIT和CLOSE_WAIT分析和解决办法 - HttpClient 中文官网](http://www.httpclient.cn/archives/106.html)
+* [一个 TCP 连接可以发多少个 HTTP 请求 - 割肉机 - 博客园](https://www.cnblogs.com/williamjie/p/11075565.html)
 
