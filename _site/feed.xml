@@ -7,6 +7,314 @@
 		<atom:link href="/" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>局域网Web服务配置frp穿透与SSL证书</title>
+				<description>&lt;h2 id=&quot;搭建frp穿透结构图与ssl思路&quot;&gt;搭建frp穿透结构图与ssl思路&lt;/h2&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;结构图&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://img.zzhpeng.cn/FmRqrie4RVbiI2K2S_LporMhjaCH&quot; alt=&quot;Fu0ZUUtbHNQ0b4nh7d2QN4_LJvtB&quot; /&gt;&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;SSL思路&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;&lt;strong&gt;Frp&lt;/strong&gt;(https://github.com/fatedier/frp)有提供ssl设置。但是为了方便管理，把证书设置都放在nginx中。然后外网frp server到局域网都是用的是http type服务而不是https type，然后我们只需要在外网的nginx配置就可以了。&lt;/p&gt;
+
+&lt;h2 id=&quot;配置&quot;&gt;配置&lt;/h2&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;1、局域网服务器frpc.ini&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;frps.ini 设置:
+[common]
+bind_port = 7000
+token = jq666
+vhost_http_port = 8000
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;2、外网服务器frps.ini设置&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[common]
+server_addr = xxx.xx.188.48//外网ip
+server_port = 7000
+token = jq666
+
+[web1]
+type = http
+local_ip = 127.0.0.1
+local_port = 80
+custom_domains = gitlab.xxx.com
+
+[web2]
+type = http
+local_ip = 127.0.0.1
+local_port = 80
+custom_domains = packagist.xxx.com
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;3、公网服务器nginx配置&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;server {
+    listen 80;
+	listen 443 ssl http2;
+    server_name gitlab.xxx.com;
+    
+    #SSL-START SSL相关配置，请勿删除或修改下一行带注释的404规则
+    #error_page 404/404.html;
+    ssl_certificate    /etc/letsencrypt/live/gitlab.xxx.com/fullchain.pem;
+    ssl_certificate_key    /etc/letsencrypt/live/gitlab.xxx.com/privkey.pem;
+    ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+    ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:HIGH:!aNULL:!MD5:!RC4:!DHE;
+    ssl_prefer_server_ciphers on;
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 10m;
+    error_page 497  https://$host$request_uri;
+    #SSL-END
+    
+    #ERROR-PAGE-START  错误页配置，可以注释、删除或修改
+    error_page 404 /404.html;
+    error_page 502 /502.html;
+    #ERROR-PAGE-END
+    
+    #PHP-INFO-START  PHP引用配置，可以注释或修改
+    include enable-php-00.conf;
+    #PHP-INFO-END
+    
+    #REWRITE-START URL重写规则引用,修改后将导致面板设置的伪静态规则失效
+    include /www/server/panel/vhost/rewrite/gitlab.xxx.com.conf;
+    #REWRITE-END
+    
+    location / {
+      client_max_body_size 0;
+      gzip off;
+
+      proxy_read_timeout      300;
+      proxy_connect_timeout   300;
+      proxy_redirect          off;
+
+      proxy_http_version 1.1;
+
+      proxy_set_header    Host                $http_host;
+      #proxy_set_header	Host 				$host:$server_port;
+      proxy_set_header    X-Real-IP           $remote_addr;
+      proxy_set_header    X-Forwarded-Ssl     on;
+      proxy_set_header    X-Forwarded-For     $proxy_add_x_forwarded_for;
+      proxy_set_header    X-Forwarded-Proto   $scheme;
+      proxy_pass http://127.0.0.1:8000;
+ 	}
+    
+    access_log  /www/wwwlogs/gitlab.xxx.com.log;
+    error_log  /www/wwwlogs/gitlab.xxx.com.error.log;
+ }
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;4、内网服务器nginx配置&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;上面的举例，去掉ssl设置即是&lt;/p&gt;
+
+&lt;h2 id=&quot;宝塔证书申请&quot;&gt;宝塔证书申请&lt;/h2&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;1、到宝塔管理后台，申请ssl证书&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;1.1、申请域名，dns验证&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://img.zzhpeng.cn/FuAgURKSUppIzRm4OJOv4LPemWAN&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;1.2、如下图，点击&lt;strong&gt;详情&lt;/strong&gt;可以看到要在域名解析里加多条TXT解析,添加后点击&lt;strong&gt;验证域名&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://img.zzhpeng.cn/Fr-ZQCVz520OpUGgvNPhqVbCRWA9&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;1.3、阿里云域名解析&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://img.zzhpeng.cn/FtHdG_-WRGQ1GDd3HLgpsNIhvPos&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;迭代&quot;&gt;迭代&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;2020年02月11日 21:54:00 初稿&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+				<pubDate>Tue, 11 Feb 2020 00:00:00 +0800</pubDate>
+				<link>/frp-ssl.html</link>
+				<guid isPermaLink="true">/frp-ssl.html</guid>
+			</item>
+		
+			<item>
+				<title>mycat 数据库分库分表中间件学习</title>
+				<description>&lt;h2 id=&quot;安装与启动&quot;&gt;安装与启动&lt;/h2&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;安装&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;官网：http://www.mycat.io/，我下载的是mac版本http://dl.mycat.io/1.6.5/Mycat-server-1.6.5-release-20180122220033-mac.tar.gz&lt;/p&gt;
+
+&lt;p&gt;mycat是基于java的，需要环境依赖，我安装了openjdk1.8的&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;➜  mycat java -version
+java version &quot;1.8.0_221&quot;
+Java(TM) SE Runtime Environment (build 1.8.0_221-b11)
+Java HotSpot(TM) 64-Bit Server VM (build 25.221-b11, mixed mode)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;解压压缩包，tar -zxvf Mycat-server-1.6.5-release-20180122220033-mac.tar.gz&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;启动&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;进入文件夹内&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;cd mycat
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;启动&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;➜  mycat bin/mycat start
+Starting Mycat-server...
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;查看启动是否成功&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;➜  mycat more logs/wrapper.log
+STATUS | wrapper  | 2020/01/11 15:21:51 | --&amp;gt; Wrapper Started as Daemon
+STATUS | wrapper  | 2020/01/11 15:21:51 | Launching a JVM...
+INFO   | jvm 1    | 2020/01/11 15:21:51 | Java HotSpot(TM) 64-Bit Server VM warning: ignoring option MaxPermSize=64M; support was removed in 8.0
+INFO   | jvm 1    | 2020/01/11 15:21:53 | Wrapper (Version 3.2.3) http://wrapper.tanukisoftware.org
+INFO   | jvm 1    | 2020/01/11 15:21:53 |   Copyright 1999-2006 Tanuki Software, Inc.  All Rights Reserved.
+INFO   | jvm 1    | 2020/01/11 15:21:53 | 
+INFO   | jvm 1    | 2020/01/11 15:21:55 | MyCAT Server startup successfully. see logs in logs/mycat.log
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;配置说明&quot;&gt;配置说明&lt;/h2&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;server.xml&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;作用：&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;1、配置系统相关参数&lt;/p&gt;
+
+&lt;p&gt;2、配置用户访问权限&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;    &amp;lt;user name=&quot;root&quot; defaultAccount=&quot;true&quot;&amp;gt;
+            &amp;lt;property name=&quot;password&quot;&amp;gt;123456&amp;lt;/property&amp;gt;
+            &amp;lt;property name=&quot;schemas&quot;&amp;gt;TESTDB&amp;lt;/property&amp;gt;
+
+            &amp;lt;!-- 表级 DML 权限设置 --&amp;gt;
+            &amp;lt;!--            
+            &amp;lt;privileges check=&quot;false&quot;&amp;gt;
+                    &amp;lt;schema name=&quot;TESTDB&quot; dml=&quot;0110&quot; &amp;gt;
+                            &amp;lt;table name=&quot;tb01&quot; dml=&quot;0000&quot;&amp;gt;&amp;lt;/table&amp;gt;
+                            &amp;lt;table name=&quot;tb02&quot; dml=&quot;1111&quot;&amp;gt;&amp;lt;/table&amp;gt;  //dml 四位数依次insert,update,select,delete
+                    &amp;lt;/schema&amp;gt;
+            &amp;lt;/privileges&amp;gt;           
+             --&amp;gt;
+    &amp;lt;/user&amp;gt;
+
+    &amp;lt;user name=&quot;user&quot;&amp;gt;
+            &amp;lt;property name=&quot;password&quot;&amp;gt;user&amp;lt;/property&amp;gt;
+            &amp;lt;property name=&quot;schemas&quot;&amp;gt;TESTDB&amp;lt;/property&amp;gt;
+            &amp;lt;property name=&quot;readOnly&quot;&amp;gt;true&amp;lt;/property&amp;gt;
+    &amp;lt;/user&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;3、配置SQL防火墙及SQL拦截功能&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;log4j2.xml&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;作用：&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;1、配置输出日志的格式&lt;/p&gt;
+
+&lt;p&gt;2、配置输出日志的级别&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;rule.xml&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;作用：&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;1、配置水平分片的分片规则&lt;/p&gt;
+
+&lt;p&gt;2、配置分片规则所对应的分片函数&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;简单取模partitionByMod&lt;/li&gt;
+  &lt;li&gt;hash取模partitionByHashMod&lt;/li&gt;
+  &lt;li&gt;枚举分片partitionByFileMap&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;schema.xml&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;定义逻辑库具体配置&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; &amp;lt;table name=&quot;company&quot; primaryKey=&quot;ID&quot; type=&quot;global&quot; dataNode=&quot;dn1,dn2,dn3&quot; /&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;primaryKey如果分片的分片规则不是定义的值，会另外建立主键索引。&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&amp;lt;dataHost name=&quot;localhost1&quot; maxCon=&quot;1000&quot; minCon=&quot;10&quot; balance=&quot;0&quot;
+                  writeType=&quot;0&quot; dbType=&quot;mysql&quot; dbDriver=&quot;native&quot; switchType=&quot;1&quot;  slaveThreshold=&quot;100&quot;&amp;gt;
+        &amp;lt;heartbeat&amp;gt;select user()&amp;lt;/heartbeat&amp;gt;
+        &amp;lt;!-- can have multi write hosts --&amp;gt;
+        &amp;lt;writeHost host=&quot;hostM1&quot; url=&quot;localhost:3306&quot; user=&quot;root&quot;
+                           password=&quot;123456&quot;&amp;gt;
+                &amp;lt;!-- can have multi read hosts --&amp;gt;
+                &amp;lt;readHost host=&quot;hostS2&quot; url=&quot;192.168.1.200:3306&quot; user=&quot;root&quot; password=&quot;xxx&quot; /&amp;gt;
+        &amp;lt;/writeHost&amp;gt;
+        &amp;lt;writeHost host=&quot;hostS1&quot; url=&quot;localhost:3316&quot; user=&quot;root&quot;
+                           password=&quot;123456&quot; /&amp;gt;
+        &amp;lt;!-- &amp;lt;writeHost host=&quot;hostM2&quot; url=&quot;localhost:3316&quot; user=&quot;root&quot; password=&quot;123456&quot;/&amp;gt; --&amp;gt;
+&amp;lt;/dataHost&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;balance=”0”&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;0 不开启读写分离机制&lt;/li&gt;
+  &lt;li&gt;1 全部的readHost 与 stand by writeHost参与select语句的负载均衡&lt;/li&gt;
+  &lt;li&gt;2 所有的readHost与writeHost都参与select语句的负载均衡&lt;/li&gt;
+  &lt;li&gt;3 所有readHost参与select语句的负载均衡&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;writeType=”0”&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;0：默认一台写，高可用，down了之后切换到指定&lt;/li&gt;
+  &lt;li&gt;1：随机&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;垂直分库&quot;&gt;垂直分库&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;1、收集分析业务模块间的关系&lt;/li&gt;
+  &lt;li&gt;2、复制数据库到其他实例&lt;/li&gt;
+  &lt;li&gt;3、配置mycat垂直分库&lt;/li&gt;
+  &lt;li&gt;4、通过mycat访问DB&lt;/li&gt;
+  &lt;li&gt;5、删除原库中已迁移表&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;水平分库&quot;&gt;水平分库&lt;/h2&gt;
+
+&lt;h2 id=&quot;迭代&quot;&gt;迭代&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;2020年02月11日 21:54:00 初稿&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;参考&quot;&gt;参考&lt;/h2&gt;
+</description>
+				<pubDate>Sat, 11 Jan 2020 00:00:00 +0800</pubDate>
+				<link>/mycat-introduction.html</link>
+				<guid isPermaLink="true">/mycat-introduction.html</guid>
+			</item>
+		
+			<item>
 				<title>iptables和nginx配置防御cc学习</title>
 				<description>&lt;h2 id=&quot;问题概述&quot;&gt;问题概述&lt;/h2&gt;
 &lt;p&gt;上一篇文章配置了iptables两条命令，就觉得没问题了，但是我太天真了，归咎原因还是没有好好
@@ -1584,426 +1892,6 @@ sudo gitlab-ctl restart
 				<pubDate>Wed, 18 Sep 2019 00:00:00 +0800</pubDate>
 				<link>/jenkins-auto-down.html</link>
 				<guid isPermaLink="true">/jenkins-auto-down.html</guid>
-			</item>
-		
-			<item>
-				<title>elasticsearch业务问题</title>
-				<description>&lt;h2 id=&quot;场景&quot;&gt;场景&lt;/h2&gt;
-&lt;blockquote&gt;
-  &lt;p&gt;要搜索的内容&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;P92325 iphone 7s plus 4G 黑色 美版 无锁
-P92324 iphone 7 128g 金色 有锁 通用版
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;以为客户那边要求是，想的很简单&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;1、iphone7splus  搜索-&amp;gt;P92325 iphone 7s plus 4G 黑色 美版 无锁&lt;/li&gt;
-  &lt;li&gt;2、iphone 7s plus  搜索-&amp;gt;P92325 iphone 7s plus 4G 黑色 美版 无锁&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;实际输入情况,五花八门，还有这些情况&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;1、iphone7splus  搜索-&amp;gt;P92325 iphone 7s plus 4G 黑色 美版 无锁&lt;/li&gt;
-  &lt;li&gt;2、iphone 7s plus   搜索-&amp;gt;P92325 iphone 7s plus 4G 黑色 美版 无锁&lt;/li&gt;
-  &lt;li&gt;3、iphone7sp 美版   搜索-&amp;gt;P92325 iphone 7s plus 4G 黑色 美版 无锁&lt;/li&gt;
-  &lt;li&gt;4、iphone7 128g 美版   搜索-&amp;gt;P92324 iphone 7 128g 金色 有锁 通用版&lt;/li&gt;
-  &lt;li&gt;5、iphone7s plus 美版   搜索-&amp;gt;iphone 7s plus 4G 黑色 美版 无锁&lt;/li&gt;
-  &lt;li&gt;。。。&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&quot;解决路程&quot;&gt;解决路程&lt;/h2&gt;
-&lt;blockquote&gt;
-  &lt;p&gt;错误解决方案，将搜索内容去掉空格，然后DOC的文章分析用IK分词器ik_max_word，
-搜索用ik_smart,然后将搜索的词也去掉空格。&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;h3 id=&quot;1创建索引&quot;&gt;1、创建索引&lt;/h3&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;curl -XPUT http://localhost:9200/model
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h3 id=&quot;2设置索引属性map&quot;&gt;2、设置索引属性map&lt;/h3&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;curl -XPOST http://localhost:9200/model/_mapping -H 'Content-Type:application/json' -d'
-{
-        &quot;properties&quot;: {
-            &quot;name&quot;: {
-                &quot;type&quot;: &quot;text&quot;,
-                &quot;analyzer&quot;: &quot;ik_max_word&quot;,
-                &quot;search_analyzer&quot;: &quot;ik_smart&quot;
-            }
-        }
-
-}'
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h3 id=&quot;3写入doc数据&quot;&gt;3、写入doc数据&lt;/h3&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;curl -XPOST http://localhost:9200/model/_create/1 -H 'Content-Type:application/json' -d'
-{&quot;content&quot;:&quot;P92325 iphone7splus4G黑色美版无锁&quot;}
-'
-curl -XPOST http://localhost:9200/model/_create/2 -H 'Content-Type:application/json' -d'
-{&quot;content&quot;:&quot;P92324 iphone7128g金色有锁通用版&quot;}
-'
-
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;h3 id=&quot;4查看doc状态&quot;&gt;4、查看doc状态&lt;/h3&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;curl -X GET &quot;http://localhost:9200/_cat/indices?v&quot;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h3 id=&quot;5搜索数据&quot;&gt;5、搜索数据&lt;/h3&gt;
-
-&lt;p&gt;iphone7splus 或 iphone 7s plus 查找搜索出 P92325 iphone 7s plus 4G 黑色 美版 无锁&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;curl -XPOST http://localhost:9200/model/_search  -H 'Content-Type:application/json' -d'
-{
-    &quot;size&quot; : 100,
-    &quot;query&quot; : { &quot;match&quot; : { &quot;content&quot; : &quot;iphone7splus&quot; }}
-  
-}
-'
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p&gt;结果，啥都没：&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;{
-	&quot;took&quot;: 249,
-	&quot;timed_out&quot;: false,
-	&quot;_shards&quot;: {
-		&quot;total&quot;: 1,
-		&quot;successful&quot;: 1,
-		&quot;skipped&quot;: 0,
-		&quot;failed&quot;: 0
-	},
-	&quot;hits&quot;: {
-		&quot;total&quot;: {
-			&quot;value&quot;: 0,
-			&quot;relation&quot;: &quot;eq&quot;
-		},
-		&quot;max_score&quot;: null,
-		&quot;hits&quot;: []
-	}
-}
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;为什么搜不出（一），因为P92325 iphone7splus4G黑色美版无锁 的文章分析不会出现iphone7splus。&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;搜索词ik_smart分析&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;curl -XGET &quot;http://localhost:9200/model/_analyze&quot; -H 'Content-Type: application/json' -d'
-{
-   &quot;text&quot;:&quot;iphone7splus&quot;,&quot;tokenizer&quot;: &quot;ik_smart&quot;
-}'
-
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;结果出现&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;{
-	&quot;tokens&quot;: [{
-		&quot;token&quot;: &quot;iphone7splus&quot;,
-		&quot;start_offset&quot;: 0,
-		&quot;end_offset&quot;: 12,
-		&quot;type&quot;: &quot;LETTER&quot;,
-		&quot;position&quot;: 0
-	}]
-}
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;查找文ik_max_word分析&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;curl -XGET &quot;http://localhost:9200/model/_analyze&quot; -H 'Content-Type: application/json' -d'
-{
-   &quot;text&quot;:&quot;iphone7splus4G黑色美版无锁&quot;,&quot;tokenizer&quot;: &quot;ik_max_word&quot;
-}'
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;结果，不会出现iphone7splus&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;
-{
-    &quot;tokens&quot;: [
-        {
-            &quot;token&quot;: &quot;iphone7splus4g&quot;,
-            &quot;start_offset&quot;: 0,
-            &quot;end_offset&quot;: 14,
-            &quot;type&quot;: &quot;LETTER&quot;,
-            &quot;position&quot;: 0
-        },
-        {
-            &quot;token&quot;: &quot;iphone&quot;,
-            &quot;start_offset&quot;: 0,
-            &quot;end_offset&quot;: 6,
-            &quot;type&quot;: &quot;ENGLISH&quot;,
-            &quot;position&quot;: 1
-        },
-        {
-            &quot;token&quot;: &quot;7&quot;,
-            &quot;start_offset&quot;: 6,
-            &quot;end_offset&quot;: 7,
-            &quot;type&quot;: &quot;ARABIC&quot;,
-            &quot;position&quot;: 2
-        },
-        {
-            &quot;token&quot;: &quot;splus&quot;,
-            &quot;start_offset&quot;: 7,
-            &quot;end_offset&quot;: 12,
-            &quot;type&quot;: &quot;ENGLISH&quot;,
-            &quot;position&quot;: 3
-        },
-        {
-            &quot;token&quot;: &quot;4&quot;,
-            &quot;start_offset&quot;: 12,
-            &quot;end_offset&quot;: 13,
-            &quot;type&quot;: &quot;ARABIC&quot;,
-            &quot;position&quot;: 4
-        },
-        {
-            &quot;token&quot;: &quot;g&quot;,
-            &quot;start_offset&quot;: 13,
-            &quot;end_offset&quot;: 14,
-            &quot;type&quot;: &quot;ENGLISH&quot;,
-            &quot;position&quot;: 5
-        },
-        {
-            &quot;token&quot;: &quot;黑色&quot;,
-            &quot;start_offset&quot;: 14,
-            &quot;end_offset&quot;: 16,
-            &quot;type&quot;: &quot;CN_WORD&quot;,
-            &quot;position&quot;: 6
-        },
-        {
-            &quot;token&quot;: &quot;美版&quot;,
-            &quot;start_offset&quot;: 16,
-            &quot;end_offset&quot;: 18,
-            &quot;type&quot;: &quot;CN_WORD&quot;,
-            &quot;position&quot;: 7
-        },
-        {
-            &quot;token&quot;: &quot;无&quot;,
-            &quot;start_offset&quot;: 18,
-            &quot;end_offset&quot;: 19,
-            &quot;type&quot;: &quot;CN_CHAR&quot;,
-            &quot;position&quot;: 8
-        },
-        {
-            &quot;token&quot;: &quot;锁&quot;,
-            &quot;start_offset&quot;: 19,
-            &quot;end_offset&quot;: 20,
-            &quot;type&quot;: &quot;CN_CHAR&quot;,
-            &quot;position&quot;: 9
-        }
-    ]
-}
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;所以说，去掉空格方案是不行的，那就不去掉咯&lt;/p&gt;
-
-&lt;p&gt;分析语句&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;curl -XGET &quot;http://localhost:9200/model/_analyze&quot; -H 'Content-Type: application/json' -d'
-{
-   &quot;text&quot;:&quot;iphone 7s plus 4G 黑色 美版 无锁&quot;,&quot;tokenizer&quot;: &quot;ik_max_word&quot;
-}'
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;结果，还是没有iphone7splus组合，那么搜索哪里也不去掉空格吧。这样就可以搜索到了。&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;{
-    &quot;tokens&quot;: [
-        {
-            &quot;token&quot;: &quot;iphone&quot;,
-            &quot;start_offset&quot;: 0,
-            &quot;end_offset&quot;: 6,
-            &quot;type&quot;: &quot;ENGLISH&quot;,
-            &quot;position&quot;: 0
-        },
-        {
-            &quot;token&quot;: &quot;7s&quot;,
-            &quot;start_offset&quot;: 7,
-            &quot;end_offset&quot;: 9,
-            &quot;type&quot;: &quot;LETTER&quot;,
-            &quot;position&quot;: 1
-        },
-        {
-            &quot;token&quot;: &quot;7&quot;,
-            &quot;start_offset&quot;: 7,
-            &quot;end_offset&quot;: 8,
-            &quot;type&quot;: &quot;ARABIC&quot;,
-            &quot;position&quot;: 2
-        },
-        {
-            &quot;token&quot;: &quot;s&quot;,
-            &quot;start_offset&quot;: 8,
-            &quot;end_offset&quot;: 9,
-            &quot;type&quot;: &quot;ENGLISH&quot;,
-            &quot;position&quot;: 3
-        },
-        {
-            &quot;token&quot;: &quot;plus&quot;,
-            &quot;start_offset&quot;: 10,
-            &quot;end_offset&quot;: 14,
-            &quot;type&quot;: &quot;ENGLISH&quot;,
-            &quot;position&quot;: 4
-        },
-        {
-            &quot;token&quot;: &quot;4g&quot;,
-            &quot;start_offset&quot;: 15,
-            &quot;end_offset&quot;: 17,
-            &quot;type&quot;: &quot;LETTER&quot;,
-            &quot;position&quot;: 5
-        },
-        {
-            &quot;token&quot;: &quot;4&quot;,
-            &quot;start_offset&quot;: 15,
-            &quot;end_offset&quot;: 16,
-            &quot;type&quot;: &quot;ARABIC&quot;,
-            &quot;position&quot;: 6
-        },
-        {
-            &quot;token&quot;: &quot;g&quot;,
-            &quot;start_offset&quot;: 16,
-            &quot;end_offset&quot;: 17,
-            &quot;type&quot;: &quot;ENGLISH&quot;,
-            &quot;position&quot;: 7
-        },
-        {
-            &quot;token&quot;: &quot;黑色&quot;,
-            &quot;start_offset&quot;: 18,
-            &quot;end_offset&quot;: 20,
-            &quot;type&quot;: &quot;CN_WORD&quot;,
-            &quot;position&quot;: 8
-        },
-        {
-            &quot;token&quot;: &quot;美版&quot;,
-            &quot;start_offset&quot;: 21,
-            &quot;end_offset&quot;: 23,
-            &quot;type&quot;: &quot;CN_WORD&quot;,
-            &quot;position&quot;: 9
-        },
-        {
-            &quot;token&quot;: &quot;无&quot;,
-            &quot;start_offset&quot;: 24,
-            &quot;end_offset&quot;: 25,
-            &quot;type&quot;: &quot;CN_CHAR&quot;,
-            &quot;position&quot;: 10
-        },
-        {
-            &quot;token&quot;: &quot;锁&quot;,
-            &quot;start_offset&quot;: 25,
-            &quot;end_offset&quot;: 26,
-            &quot;type&quot;: &quot;CN_CHAR&quot;,
-            &quot;position&quot;: 11
-        }
-    ]
-}
-
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;但是问题是，这只是解决了我的简单设想客户是这么简单的输入搜索。但是实际却不是，复杂的多。&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;解决方案是将搜索分析都改为ik_max_word，这样搜索词和文章的颗粒度都分的很细。&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;curl -XPOST http://localhost:9200/model/_mapping -H 'Content-Type:application/json' -d'
-{
-        &quot;properties&quot;: {
-            &quot;name&quot;: {
-                &quot;type&quot;: &quot;text&quot;,
-                &quot;analyzer&quot;: &quot;ik_max_word&quot;,
-                &quot;search_analyzer&quot;: &quot;ik_max_word&quot;
-            }
-        }
-
-}'
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;注意的是，已经写入doc数据是不能修改的哦！&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&quot;后记&quot;&gt;后记&lt;/h2&gt;
-&lt;p&gt;1、去掉空格这种方案是听老大说的，太过信任和自己的懒惰，没实际去测试，导致进坑多时。&lt;/p&gt;
-
-&lt;p&gt;2、探究技术要优先多看官方手册，其他来源资料只会让自己乱上加乱。&lt;/p&gt;
-
-&lt;p&gt;3、功能流程要测一遍，很重要，处处都可能留下bug。错了之后数据乱，就更难调了。&lt;/p&gt;
-
-&lt;p&gt;4、实际业务场景要多了解，多询问一线人员。&lt;/p&gt;
-
-&lt;h2 id=&quot;参考&quot;&gt;参考&lt;/h2&gt;
-&lt;ul&gt;
-  &lt;li&gt;1、&lt;a href=&quot;https://github.com/medcl/elasticsearch-analysis-ik&quot;&gt;GitHub - medcl/elasticsearch-analysis-ik: The IK Analysis plugin integrates Lucene IK analyzer into elasticsearch, support customized dictionary.&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-</description>
-				<pubDate>Thu, 12 Sep 2019 00:00:00 +0800</pubDate>
-				<link>/elasticsearch-actual_problem.html</link>
-				<guid isPermaLink="true">/elasticsearch-actual_problem.html</guid>
-			</item>
-		
-			<item>
-				<title>云服务器磁盘扩容</title>
-				<description>&lt;h1 id=&quot;操作前记得保存数据镜像&quot;&gt;操作前记得保存数据，镜像&lt;/h1&gt;
-&lt;p&gt;数据丢失，概不负责！！&lt;/p&gt;
-
-&lt;h1 id=&quot;数据盘扩容&quot;&gt;数据盘扩容&lt;/h1&gt;
-&lt;h2 id=&quot;查看磁盘情况&quot;&gt;查看磁盘情况&lt;/h2&gt;
-&lt;blockquote&gt;
-  &lt;p&gt;查看已分区磁盘情况&lt;/p&gt;
-  &lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;df -h
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;  &lt;/div&gt;
-&lt;/blockquote&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;查看磁盘情况&lt;/p&gt;
-  &lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo fdisk -lu
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;  &lt;/div&gt;
-&lt;/blockquote&gt;
-
-&lt;h2 id=&quot;格式化&quot;&gt;格式化&lt;/h2&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo mkfs.ext3 /dev/vdb5  //扩展分区，然后分逻辑分区
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h2 id=&quot;挂载&quot;&gt;挂载&lt;/h2&gt;
-&lt;p&gt;创建目录&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo mkdir data
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p&gt;挂载&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo mount /dev/vdb5 /data
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h1 id=&quot;系统盘扩容&quot;&gt;系统盘扩容&lt;/h1&gt;
-
-&lt;h2 id=&quot;阿里云扩容&quot;&gt;阿里云扩容&lt;/h2&gt;
-&lt;p&gt;阿里云可以直接加大当前磁盘容量，然后用工具直接命令扩容，很容易。详细查看下面url
-https://help.aliyun.com/document_detail/111738.html?spm=a2c4g.11186623.4.1.74dc7f67KyKnUd#section-gxq-3tw-dhb&lt;/p&gt;
-
-&lt;h2 id=&quot;腾讯云&quot;&gt;腾讯云&lt;/h2&gt;
-
-&lt;p&gt;重装系统扩容
-&lt;img src=&quot;http://img.zzhpeng.cn/FtGTBTeftcin55OCyU8g-J2p_Q4J&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;内容地址：https://cloud.tencent.com/document/product/362/32539&lt;/p&gt;
-
-&lt;h1 id=&quot;知其然&quot;&gt;知其然&lt;/h1&gt;
-&lt;p&gt;fdisk [选项] –l &lt;disk&gt;  列出所有分区表&lt;/disk&gt;&lt;/p&gt;
-
-&lt;p&gt;(1).选项&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;-b &amp;lt;size&amp;gt;  指定扇区大小（512，1024，2048或4096 B）
--c  关闭DOS兼容模式
--u &amp;lt;size&amp;gt;  以扇区编号取代柱面编号来表示每个分区的起始地址，一般与-l选项联合使用
--C &amp;lt;number&amp;gt;  指定柱面编号
--H &amp;lt;number&amp;gt;  指定磁头编号
--S &amp;lt;number&amp;gt;  指定磁道扇区编号
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h1 id=&quot;参考&quot;&gt;参考&lt;/h1&gt;
-&lt;ul&gt;
-  &lt;li&gt;1、&lt;a href=&quot;https://www.cnblogs.com/diantong/p/8820779.html&quot;&gt;Linux命令之fdisk - 苦逼运维 - 博客园&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-</description>
-				<pubDate>Tue, 10 Sep 2019 00:00:00 +0800</pubDate>
-				<link>/disk-extend.html</link>
-				<guid isPermaLink="true">/disk-extend.html</guid>
 			</item>
 		
 	</channel>
