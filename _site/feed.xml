@@ -300,11 +300,106 @@ INFO   | jvm 1    | 2020/01/11 15:21:55 | MyCAT Server startup successfully. see
   &lt;li&gt;5、删除原库中已迁移表&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&quot;水平分库&quot;&gt;水平分库&lt;/h2&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;优点&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;1、数据库的拆分简单明了，拆分规则明确&lt;/li&gt;
+  &lt;li&gt;2、应用程序模块清晰明确，整合容易&lt;/li&gt;
+  &lt;li&gt;3、数据维护方便易行，容易定位&lt;/li&gt;
+  &lt;li&gt;4、读写压力分担&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;缺点&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;1、无法跨分片做关联查询（解决方式1、MyCat全局表。2、冗余字段。3、API获取数据）&lt;/li&gt;
+  &lt;li&gt;2、对于访问极其频繁且数据量超大的表仍然存在性能瓶颈&lt;/li&gt;
+  &lt;li&gt;3、切分达到一定程度之后，扩展性会遇到瓶颈&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;mycat管理垂直切分的优点&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;1、跨分片做关联查询，可以通过mycat设置全局表，即是多分片都有这张表。（只建议小表进行改操作）&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;水平分片&quot;&gt;水平分片&lt;/h2&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;分片规则&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;通过表字段作为分片建简单取模分片&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;步骤&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;1、根据业务状态确定要分片的表。&lt;/li&gt;
+  &lt;li&gt;2、根据业务选择分片建以及算法&lt;/li&gt;
+  &lt;li&gt;3、使用MyCat部署分片集群&lt;/li&gt;
+  &lt;li&gt;4、测试分片集群&lt;/li&gt;
+  &lt;li&gt;5、业务及数据迁移&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;分片后问题&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h3 id=&quot;1分片需要考虑主键的全局唯一性&quot;&gt;1、分片需要考虑主键的全局唯一性&lt;/h3&gt;
+
+&lt;p&gt;MyCat有提供全局自增ID&lt;/p&gt;
+
+&lt;h3 id=&quot;2分片后关联&quot;&gt;2、分片后关联&lt;/h3&gt;
+
+&lt;p&gt;MyCat的E-R分片，将关联的数据分在一个分片，即是都要做分片。&lt;/p&gt;
+
+&lt;h2 id=&quot;mycat其他&quot;&gt;MyCat其他&lt;/h2&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;1、SQL拦截，功能监控写入sql审计&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;2、SQL防火墙，功能：设置白名单黑名单，黑名单可以编写限制没where的delete语句&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;3、通过Zookeeper做启动和同步&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;4、通过HAProxy做负载均衡&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;1、安装&lt;/li&gt;
+  &lt;li&gt;2、Keepalived监控HAProxy&lt;/li&gt;
+  &lt;li&gt;3、配置HAProxy监控MyCat&lt;/li&gt;
+  &lt;li&gt;4、配置vip访问HAProxy&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;mycat读写分离&quot;&gt;MyCat读写分离&lt;/h2&gt;
+
+&lt;h2 id=&quot;mycat管理和监控&quot;&gt;MyCat管理和监控&lt;/h2&gt;
+
+&lt;p&gt;MyCat-Web工具：https://www.cnblogs.com/cuishuai/p/7570597.html&lt;/p&gt;
+
+&lt;h2 id=&quot;mycat只做到了弱分布式事务&quot;&gt;MyCat只做到了弱分布式事务&lt;/h2&gt;
 
 &lt;h2 id=&quot;迭代&quot;&gt;迭代&lt;/h2&gt;
 &lt;ul&gt;
   &lt;li&gt;2020年02月11日 21:54:00 初稿&lt;/li&gt;
+  &lt;li&gt;2020年02月24日 00:17:00 修改&lt;/li&gt;
 &lt;/ul&gt;
 
 &lt;h2 id=&quot;参考&quot;&gt;参考&lt;/h2&gt;

@@ -263,11 +263,106 @@ INFO   | jvm 1    | 2020/01/11 15:21:55 | MyCAT Server startup successfully. see
   <li>5、删除原库中已迁移表</li>
 </ul>
 
-<h2 id="水平分库">水平分库</h2>
+<blockquote>
+  <p>优点</p>
+</blockquote>
+
+<ul>
+  <li>1、数据库的拆分简单明了，拆分规则明确</li>
+  <li>2、应用程序模块清晰明确，整合容易</li>
+  <li>3、数据维护方便易行，容易定位</li>
+  <li>4、读写压力分担</li>
+</ul>
+
+<blockquote>
+  <p>缺点</p>
+</blockquote>
+
+<ul>
+  <li>1、无法跨分片做关联查询（解决方式1、MyCat全局表。2、冗余字段。3、API获取数据）</li>
+  <li>2、对于访问极其频繁且数据量超大的表仍然存在性能瓶颈</li>
+  <li>3、切分达到一定程度之后，扩展性会遇到瓶颈</li>
+</ul>
+
+<blockquote>
+  <p>mycat管理垂直切分的优点</p>
+</blockquote>
+
+<ul>
+  <li>1、跨分片做关联查询，可以通过mycat设置全局表，即是多分片都有这张表。（只建议小表进行改操作）</li>
+</ul>
+
+<h2 id="水平分片">水平分片</h2>
+
+<blockquote>
+  <p>分片规则</p>
+</blockquote>
+
+<ul>
+  <li>通过表字段作为分片建简单取模分片</li>
+</ul>
+
+<blockquote>
+  <p>步骤</p>
+</blockquote>
+
+<ul>
+  <li>1、根据业务状态确定要分片的表。</li>
+  <li>2、根据业务选择分片建以及算法</li>
+  <li>3、使用MyCat部署分片集群</li>
+  <li>4、测试分片集群</li>
+  <li>5、业务及数据迁移</li>
+</ul>
+
+<blockquote>
+  <p>分片后问题</p>
+</blockquote>
+
+<h3 id="1分片需要考虑主键的全局唯一性">1、分片需要考虑主键的全局唯一性</h3>
+
+<p>MyCat有提供全局自增ID</p>
+
+<h3 id="2分片后关联">2、分片后关联</h3>
+
+<p>MyCat的E-R分片，将关联的数据分在一个分片，即是都要做分片。</p>
+
+<h2 id="mycat其他">MyCat其他</h2>
+
+<blockquote>
+  <p>1、SQL拦截，功能监控写入sql审计</p>
+</blockquote>
+
+<blockquote>
+  <p>2、SQL防火墙，功能：设置白名单黑名单，黑名单可以编写限制没where的delete语句</p>
+</blockquote>
+
+<blockquote>
+  <p>3、通过Zookeeper做启动和同步</p>
+</blockquote>
+
+<blockquote>
+  <p>4、通过HAProxy做负载均衡</p>
+</blockquote>
+
+<ul>
+  <li>1、安装</li>
+  <li>2、Keepalived监控HAProxy</li>
+  <li>3、配置HAProxy监控MyCat</li>
+  <li>4、配置vip访问HAProxy</li>
+</ul>
+
+<h2 id="mycat读写分离">MyCat读写分离</h2>
+
+<h2 id="mycat管理和监控">MyCat管理和监控</h2>
+
+<p>MyCat-Web工具：https://www.cnblogs.com/cuishuai/p/7570597.html</p>
+
+<h2 id="mycat只做到了弱分布式事务">MyCat只做到了弱分布式事务</h2>
 
 <h2 id="迭代">迭代</h2>
 <ul>
   <li>2020年02月11日 21:54:00 初稿</li>
+  <li>2020年02月24日 00:17:00 修改</li>
 </ul>
 
 <h2 id="参考">参考</h2>
