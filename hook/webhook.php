@@ -72,7 +72,6 @@ function pull()
 //    if (preg_match($reg, $modifyFilesStr)) {
 ////            $shell .= " && npm run {$script} 2>&1";
 //    }
-
     $pullPath = getcwd() . '/../';
     $logFile = getcwd() . '/git-hook.log';
     $shell = sprintf($shell, $pullPath);
