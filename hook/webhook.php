@@ -41,7 +41,6 @@ function pull()
             echo 'not master branch push';
             exit;
         }
-
         error_reporting(7);
         date_default_timezone_set('UTC');
     }
