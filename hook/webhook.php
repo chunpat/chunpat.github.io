@@ -6,27 +6,39 @@
  * Time: 2:59 PM
  */
 
+/**
+ * 将字符串参数变为数组
+ * @param $query
+ * @return array
+ */
+function convertUrlQuery($query)
+{
+    $queryParts = $query ? explode('&', $query):[];
+    $params = array();
+    foreach ($queryParts as $param) {
+        $item = explode('=', $param);
+        $params[$item[0]] = $item[1];
+    }
+    return $params;
+}
 
+//拉取
 function pull()
 {
-
-
-    $script = $request->param('script', 'prod-test');
-    if (!in_array($script, ['prod-test', 'prod-cool'])) {
+    //脚本验证
+    $queryString = $_SERVER['QUERY_STRING'] ?? '';
+    if (!in_array(convertUrlQuery($queryString)['go'] ?? '', ['1'])) {
         echo "unknow script";
         exit;
     }
-    $branch = $request->param('branch');
+
+    //验证简单验证
     $body = file_get_contents('php://input');
     $body = json_decode($body, true);
-    if (empty($branch)) {
-        $branch = str_replace('refs/heads/', "", $body['ref']);
-    }
-    if ($branch != 'dev') {
-        echo 'not dev branch push';
+    if ($body['ref'] != 'refs/heads/master') {
+        echo 'not master branch push';
         exit;
     }
-
 
     error_reporting(7);
     date_default_timezone_set('UTC');
@@ -45,7 +57,7 @@ function pull()
 //    //配置nvm环境
 //    $shell .= 'export PATH=$PATH:$HOME/.nvm/versions/node/v8.11.3/bin';
     //git拉去更新
-    $shell .= ' && cd %s && /usr/bin/git pull origin master:dev 2>&1';
+    $shell .= 'cd %s && /usr/bin/git pull origin master:dev 2>&1';
 //    //composer update判断
 //    if (in_array('composer.json', $modifyFiles)) {
 //        $shell .= ' && composer update 2>&1';
