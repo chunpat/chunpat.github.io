@@ -27,22 +27,24 @@ function pull()
 {
     //脚本验证
     $queryString = $_SERVER['QUERY_STRING'] ?? '';
-    if (!in_array(convertUrlQuery($queryString)['go'] ?? '', ['1'])) {
+    $args = convertUrlQuery($queryString);
+    if (($args['go'] ?? '') !='1') {
         echo "unknow script";
         exit;
     }
 
-    //验证简单验证
-    $body = file_get_contents('php://input');
-    $body = json_decode($body, true);
-    if ($body['ref'] != 'refs/heads/master') {
-        echo 'not master branch push';
-        exit;
+    if(($args['test'] ?? '') != 1){
+        //验证简单验证
+        $body = file_get_contents('php://input');
+        $body = json_decode($body, true);
+        if ($body['ref'] != 'refs/heads/master') {
+            echo 'not master branch push';
+            exit;
+        }
+
+        error_reporting(7);
+        date_default_timezone_set('UTC');
     }
-
-    error_reporting(7);
-    date_default_timezone_set('UTC');
-
     //获取所有修改的文件
 //    $modifies = array_column($body['commits'], 'modified');
 //    $modifyFiles = [];
