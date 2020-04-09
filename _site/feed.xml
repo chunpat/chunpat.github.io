@@ -7,6 +7,84 @@
 		<atom:link href="/" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>使用Linux的cpu挖xmr币</title>
+				<description>&lt;p&gt;系统版本：CentOS Linux release 7.6.1810 (Core)&lt;/p&gt;
+
+&lt;h2 id=&quot;1创建一个专门的用户&quot;&gt;1、创建一个专门的用户&lt;/h2&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;useradd coin
+passwd coin
+visudo //给sudo权限，你懂得
+su coin
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;2编译和安装xmr-stakcmake3命令后面的参数声明只使用cpu进行挖矿&quot;&gt;2、编译和安装xmr-stak，cmake3命令后面的参数声明只使用CPU进行挖矿&lt;/h2&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;安装依赖&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo yum install -y centos-release-scl epel-release
+sudo yum install -y cmake3 devtoolset-4-gcc* hwloc-devel libmicrohttpd-devel openssl-devel make git
+//临时使用devtoolset-4
+scl enable devtoolset-4 bash
+//下载源
+git clone https://github.com/fireice-uk/xmr-stak.git
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;切换git仓库分支版本&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;因为master分支去掉了Monero币，而且剩下的都是些无名币。&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;cd xmr-stak
+git fetch origin xmr-stak-rx
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;编译安装，只使用CPU进行挖矿&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;mkdir build
+cd build
+sudo cmake3 -DCUDA_ENABLE=OFF -DOpenCL_ENABLE=OFF ..
+sudo make install
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;3启动程序填写币钱包地址矿池ip等&quot;&gt;3、启动程序，填写币钱包地址、矿池ip等&lt;/h2&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;./bin/xmr-stak-rx //之后有提示填写钱包地址和矿池ip地址，其他信息都是次要的
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;&lt;strong&gt;./bin/xmr-stak-rx 可以先看看配置是否正确，然后在nohup ./bin/xmr-stak-rx &amp;amp; 挂载在后台&lt;/strong&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;4钱包的创建和矿池ip查找&quot;&gt;4、钱包的创建、和矿池ip查找&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;4.1、下载钱包链接，可生成钱包地址，支持多种OS，点击&lt;a href=&quot;https://web.getmonero.org/downloads/&quot;&gt;Downloads&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;4.2、官网可以找到矿池ip，点击&lt;a href=&quot;https://monerohash.com/#&quot;&gt;MoneroHash - Monero Mining Pool&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;5后话&quot;&gt;5、后话&lt;/h2&gt;
+&lt;p&gt;2台四核服务器收益图，跑了9个小时左右，收益有点低，当时xmr市场价格为57.84USD。
+&lt;img src=&quot;http://img.zzhpeng.cn/Fr9Zq23WuchKUcBHAZB7gwhCIZvR&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;迭代&quot;&gt;迭代&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;2020年04月09日 09:00:00 初稿&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;参看&quot;&gt;参看：&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;1、&lt;a href=&quot;https://monerohash.com/#getting_started&quot;&gt;MoneroHash - Monero Mining Pool&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+				<pubDate>Thu, 09 Apr 2020 00:00:00 +0800</pubDate>
+				<link>/xmr-mining.html</link>
+				<guid isPermaLink="true">/xmr-mining.html</guid>
+			</item>
+		
+			<item>
 				<title>局域网Web服务配置frp穿透与SSL证书</title>
 				<description>&lt;h2 id=&quot;搭建frp穿透结构图与ssl思路&quot;&gt;搭建frp穿透结构图与ssl思路&lt;/h2&gt;
 &lt;blockquote&gt;
@@ -1933,60 +2011,6 @@ sudo gitlab-ctl restart
 				<pubDate>Sun, 22 Sep 2019 00:00:00 +0800</pubDate>
 				<link>/linux-user-group-permission.html</link>
 				<guid isPermaLink="true">/linux-user-group-permission.html</guid>
-			</item>
-		
-			<item>
-				<title>jenkins启动一段时间后掉线</title>
-				<description>&lt;h2 id=&quot;问题&quot;&gt;问题&lt;/h2&gt;
-&lt;blockquote&gt;
-  &lt;p&gt;和gitlab使用的端口8080冲突，修改为了8088。然后每次jenkins启动过一段时间后会自动的down服务，
-启动命令是service jenkins start。&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;使用lsof -i:8080查看端口使用情况：
-&lt;img src=&quot;http://img.zzhpeng.cn/FhgyPfOl3dr5UBcyGy0iMjavJ_3c&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;h2 id=&quot;解决路程&quot;&gt;解决路程&lt;/h2&gt;
-&lt;blockquote&gt;
-  &lt;p&gt;尝试用另外一种方法启动,但还是使用旧的端口问题。&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://img.zzhpeng.cn/Fiy7cWxbK29pDZZdUnqaosW5BDfC&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;搜索了下，找到了可以直接在启动后面加参数，改使用端口。&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;java -jar jenkins.war --ajp13Port=-1 --httpPort=8088
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;挂在后台&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;nohup java -jar jenkins.war --ajp13Port=-1 --httpPort=8088 &amp;amp;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h2 id=&quot;再次出现问题&quot;&gt;再次出现问题&lt;/h2&gt;
-&lt;blockquote&gt;
-  &lt;p&gt;两种启动的数据文件不是用同一个的，用挂在后台的是新的数据库，需要重新注册admin，重新配置。&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;解决~~待。。。。&lt;/p&gt;
-
-&lt;h2 id=&quot;后续&quot;&gt;后续&lt;/h2&gt;
-&lt;p&gt;这个问题，最终是用加大linux物理内存,机器是8G的内存。默认是没有设置swap的，我设置了8G的，最终java相关的应用，观察了几个月，如Eleasticsearch、Jenkis都稳定了。&lt;/p&gt;
-
-&lt;h2 id=&quot;迭代&quot;&gt;迭代&lt;/h2&gt;
-&lt;ul&gt;
-  &lt;li&gt;2019年09月18日 00:00:00 初稿&lt;/li&gt;
-  &lt;li&gt;2019年12月27日 15:29:00 修改&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&quot;参考&quot;&gt;参考&lt;/h2&gt;
-&lt;ul&gt;
-  &lt;li&gt;1、&lt;a href=&quot;https://blog.csdn.net/panruifang/article/details/14223323&quot;&gt;Jenkins 安装Address already in use问题&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;2、&lt;a href=&quot;https://blog.csdn.net/sirchenhua/article/details/87861709&quot;&gt;Linux SWAP交换分区应该设置多大？&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-</description>
-				<pubDate>Wed, 18 Sep 2019 00:00:00 +0800</pubDate>
-				<link>/jenkins-auto-down.html</link>
-				<guid isPermaLink="true">/jenkins-auto-down.html</guid>
 			</item>
 		
 	</channel>

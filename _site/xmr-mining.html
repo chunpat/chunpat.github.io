@@ -8,9 +8,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="fromChinaBoy">
 
-    <title>Blog</title>
+    <title>使用Linux的cpu挖xmr币 - Blog</title>
 
-    <link rel="canonical" href="http://localhost:4000/page3/">
+    <link rel="canonical" href="http://localhost:4000/xmr-mining.html">
 
     <!-- Icons -->
   <link rel="shortcut icon" href="img/favicon.ico">
@@ -83,252 +83,178 @@
 </nav>
 
 
-    <!-- Page Header -->
-<header class="intro-header" style="background-image: url('/img/autumn2.jpg')">
+    <!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/fantasy.jpg')
+    }
+</style>
+<header class="intro-header" >
     <div class="container">
         <div class="row">
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-                <div class="site-heading">
-                    <h1>Blog</h1>
-                    <hr class="small">
-                    <span class="subheading">在遙遠的地方 一切虔誠終必相遇</span>
+                <div class="post-heading">
+                    <div class="Tags">
+                        
+                        <a class="tag" href="/Tags/#xmr" title="xmr">xmr</a>
+                        
+                        <a class="tag" href="/Tags/#挖矿" title="挖矿">挖矿</a>
+                        
+                    </div>
+                    <h1>使用Linux的cpu挖xmr币</h1>
+                    
+                    <span class="meta">Posted by zzhpeng on April 9, 2020</span>
                 </div>
             </div>
         </div>
     </div>
 </header>
 
-<!-- Main Content -->
-<div class="container">
-	<div class="row">
-		<div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-			
-<div class="post-preview">
-    <a href="/elasticsearch-learning.html">
-        <h2 class="post-title">            
-            elasticsearch学习
-        </h2>
-        
-        <div class="post-content-preview">
-            安装
-下载相应版本 https://www.elastic.co/cn/downloads/elasticsearch
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 post-container">
 
-配置
-1、修改配置，其他主机可以访问，单节点部署
-vim config/elasticsearch.yml
+                <p>系统版本：CentOS Linux release 7.6.1810 (Core)</p>
 
+<h2 id="1创建一个专门的用户">1、创建一个专门的用户</h2>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>useradd coin
+passwd coin
+visudo //给sudo权限，你懂得
+su coin
+</code></pre></div></div>
 
+<h2 id="2编译和安装xmr-stakcmake3命令后面的参数声明只使用cpu进行挖矿">2、编译和安装xmr-stak，cmake3命令后面的参数声明只使用CPU进行挖矿</h2>
 
+<blockquote>
+  <p>安装依赖</p>
+</blockquote>
 
-其他配置：https://www.cnblogs.com...
-        </div>
-    </a>
-    <p class="post-meta">Posted by zzhpeng on September 2, 2019</p>
-</div>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo yum install -y centos-release-scl epel-release
+sudo yum install -y cmake3 devtoolset-4-gcc* hwloc-devel libmicrohttpd-devel openssl-devel make git
+//临时使用devtoolset-4
+scl enable devtoolset-4 bash
+//下载源
+git clone https://github.com/fireice-uk/xmr-stak.git
+</code></pre></div></div>
+<blockquote>
+  <p>切换git仓库分支版本</p>
+</blockquote>
 
-<hr>
+<p>因为master分支去掉了Monero币，而且剩下的都是些无名币。</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cd xmr-stak
+git fetch origin xmr-stak-rx
+</code></pre></div></div>
 
-<div class="post-preview">
-    <a href="/location-gitlab-outside-visit.html">
-        <h2 class="post-title">            
-            基于frp,gitlab的docker镜像实现本地gitlab外网访问(一)
-        </h2>
-        
-        <div class="post-content-preview">
-            基础
+<blockquote>
+  <p>编译安装，只使用CPU进行挖矿</p>
+</blockquote>
 
-  
-    会git的基本操作
-  
-  
-    会docker和docker-compose的基本操作
-  
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mkdir build
+cd build
+sudo cmake3 -DCUDA_ENABLE=OFF -DOpenCL_ENABLE=OFF ..
+sudo make install
+</code></pre></div></div>
 
+<h2 id="3启动程序填写币钱包地址矿池ip等">3、启动程序，填写币钱包地址、矿池ip等</h2>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>./bin/xmr-stak-rx //之后有提示填写钱包地址和矿池ip地址，其他信息都是次要的
+</code></pre></div></div>
+<p><strong>./bin/xmr-stak-rx 可以先看看配置是否正确，然后在nohup ./bin/xmr-stak-rx &amp; 挂载在后台</strong></p>
 
-基于gitlab的docker镜像安装内网git仓库
+<h2 id="4钱包的创建和矿池ip查找">4、钱包的创建、和矿池ip查找</h2>
 
-  1、这里docker-compose管理安装
+<ul>
+  <li>
+    <p>4.1、下载钱包链接，可生成钱包地址，支持多种OS，点击<a href="https://web.getmonero.org/downloads/">Downloads</a></p>
+  </li>
+  <li>
+    <p>4.2、官网可以找到矿池ip，点击<a href="https://monerohash.com/#">MoneroHash - Monero Mining Pool</a></p>
+  </li>
+</ul>
 
+<h2 id="5后话">5、后话</h2>
+<p>2台四核服务器收益图，跑了9个小时左右，收益有点低，当时xmr市场价格为57.84USD。
+<img src="http://img.zzhpeng.cn/Fr9Zq23WuchKUcBHAZB7gwhCIZvR" alt="" /></p>
 
+<h2 id="迭代">迭代</h2>
+<ul>
+  <li>2020年04月09日 09:00:00 初稿</li>
+</ul>
 
-然后在当前目录运行docker-compose up,...
-        </div>
-    </a>
-    <p class="post-meta">Posted by zzhpeng on July 15, 2019</p>
-</div>
-
-<hr>
-
-<div class="post-preview">
-    <a href="/oauth2-slim.html">
-        <h2 class="post-title">            
-            基于slim框架搭建Oauth2
-        </h2>
-        
-        <div class="post-content-preview">
-            官方文档和官方源
-Oauth2源：https://github.com/thephpleague/oauth2-server
-
-Slim源：https://github.com/slimphp/Slim
-
-待更新
-
-
-        </div>
-    </a>
-    <p class="post-meta">Posted by zzhpeng on June 3, 2019</p>
-</div>
-
-<hr>
-
-<div class="post-preview">
-    <a href="/private-composer-packagist.html">
-        <h2 class="post-title">            
-            搭建私有的Composer Packagist
-        </h2>
-        
-        <div class="post-content-preview">
-            官方文档和官方源
-官方文档：https://getcomposer.org/doc/articles/handling-private-packages-with-satis.md
-
-github地址：https://github.com/composer/satis
-
-下载源
-
-
-  方法一...
-        </div>
-    </a>
-    <p class="post-meta">Posted by zzhpeng on May 24, 2019</p>
-</div>
-
-<hr>
-
-<div class="post-preview">
-    <a href="/linux-quick-button.html">
-        <h2 class="post-title">            
-            unix bash快捷键
-        </h2>
-        
-        <div class="post-content-preview">
-            Linux/Unix下Shell快捷键操作集合
-
-快速搜索
-
-  1) ctrl + r 组合键来进入历史搜索模式在history表中查询某条过往指令，找到需要重复执行的命令后，按回车键即可。
-  2) !!：重复执行上一条指令
-  3) !a：重复执行上一条以a为首的指令
-  4) !num...
-        </div>
-    </a>
-    <p class="post-meta">Posted by zzhpeng on May 17, 2019</p>
-</div>
-
-<hr>
-
-<div class="post-preview">
-    <a href="/gitlab-migration.html">
-        <h2 class="post-title">            
-            gitlab搭建和数据迁移
-        </h2>
-        
-        <div class="post-content-preview">
-            Ubuntu 搭建 gitlab
-官网安装介绍： https://about.gitlab.com/install/
-github： https://github.com/gitlabhq/gitlabhq
-
-1.首先是安装一些依赖服务
-sudo apt-get install curl op...
-        </div>
-    </a>
-    <p class="post-meta">Posted by zzhpeng on May 17, 2019</p>
-</div>
-
-<hr>
-
-<div class="post-preview">
-    <a href="/mysql_union_index.html">
-        <h2 class="post-title">            
-            mysql联合索引
-        </h2>
-        
-        <div class="post-content-preview">
-            mysql联合索引中
-
-  1、select * from table where a=1, b=2
-  2、select * from table where b=1, a=2
-  3、select * from table where b=1
-
-
-以上哪一句不会触发索引？为什么？
-
-答曰：...
-        </div>
-    </a>
-    <p class="post-meta">Posted by zzhpeng on April 23, 2019</p>
-</div>
-
-<hr>
-
-<div class="post-preview">
-    <a href="/docker_introduction.html">
-        <h2 class="post-title">            
-            docker 入门
-        </h2>
-        
-        <div class="post-content-preview">
-            简介
-官网 Enterprise Container Platform | Docker
-手册 Docker Documentation | Docker Documentation
-
-虚拟机与docker对比
-What is a Container | Docker
-
-
-docker-ce ...
-        </div>
-    </a>
-    <p class="post-meta">Posted by zzhpeng on March 6, 2019</p>
-</div>
-
-<hr>
-
-
-<!-- Pager -->
-
-<ul class="pager">
-    
-    <li class="previous">
-        <a href="/page2">&larr; Newer Posts</a>
-    </li>
-    
-    
-    <li class="next">
-        <a href="/page4">Older Posts &rarr;</a>
-    </li>
-    
+<h2 id="参看">参看：</h2>
+<ul>
+  <li>1、<a href="https://monerohash.com/#getting_started">MoneroHash - Monero Mining Pool</a></li>
 </ul>
 
 
-<script>
-  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+                <hr>
 
-  ga('create', 'UA-66863061-1', 'auto');
-  ga('send', 'pageview');
+                <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/4.0/80x15.png" /></a><br />本作品采用<a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/">CC BY-NC-ND 4.0</a>进行许可。转载，请注明原作者 Zzhpeng 及本文源链接。
 
+                <hr>
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/frp-ssl.html" data-toggle="tooltip" data-placement="top" title="局域网Web服务配置frp穿透与SSL证书">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                </ul>
+
+                <!-- Utteranc -->
+
+                <script src="https://utteranc.es/client.js"
+                        repo="fromChinaBoy/fromChinaBoy.github.io"
+                        issue-term="pathname"
+                        theme="github-light"
+                        crossorigin="anonymous"
+                        async>
+                </script>
+                <!-- Share botton -->
+                <!-- Go to www.addthis.com/dashboard to customize your tools --> <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-5caaedc5f9567124"></script>
+
+            </div>
+        </div>
+     </div>
+  </article>
 </script>
 
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
 
-
-
-		</div>
-	</div>
-</div>
-
-<hr>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
 
   
     <!-- Footer -->
