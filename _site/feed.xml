@@ -217,7 +217,7 @@
 
 &lt;h2 id=&quot;注意&quot;&gt;注意&lt;/h2&gt;
 
-&lt;p&gt;Mysql5.7版本限制使用GROUP BY 的select 筛选元素，报错大概如下&lt;/p&gt;
+&lt;p&gt;Mysql5.7+版本限制使用GROUP BY 的select 筛选元素，报错大概如下&lt;/p&gt;
 &lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;SELECT list is not in GROUP BY clause and contains nonaggregated column 'userinfo.t_long.user_name' which is not functionally dependent on columns in GROUP BY clause; this is incompatible with sql_mode=only_full_group_by
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 

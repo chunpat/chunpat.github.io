@@ -160,7 +160,7 @@ FOR each row lt in LT {   // 遍历左表的每一行
 
 ## 注意
 
-Mysql5.7版本限制使用GROUP BY 的select 筛选元素，报错大概如下
+Mysql5.7+版本限制使用GROUP BY 的select 筛选元素，报错大概如下
 ```
 SELECT list is not in GROUP BY clause and contains nonaggregated column 'userinfo.t_long.user_name' which is not functionally dependent on columns in GROUP BY clause; this is incompatible with sql_mode=only_full_group_by
 ```
