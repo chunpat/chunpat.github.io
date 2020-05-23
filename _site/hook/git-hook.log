@@ -1,4 +1,0 @@
-cd /Volumes/work/www/fromChinaBoy.github.io/hook/../ && /usr/bin/git pull origin master:dev 2>&1[2020-02-28 18:16:15] From https://github.com/chunpat/chunpat.github.io
-   937bf64..af09bd8  master     -> dev
-Already up to date.
- 

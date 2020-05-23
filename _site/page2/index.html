@@ -104,6 +104,26 @@
 		<div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
 			
 <div class="post-preview">
+    <a href="/mysql-in.html">
+        <h2 class="post-title">            
+            Mysql使用IN功能相关与性能对比
+        </h2>
+        
+        <div class="post-content-preview">
+            问题概述
+平时Mysql喜欢先sql语句找出id字符串，然后用in后面接（id，id，……）去查找数据。查阅相关文章，说sql语句长度有限制，随着数据增长就不能执行，但是
+这个长度却很大，一般可以不用考虑。
+
+查看方法。
+mysql&gt;show variables like '%max_a...
+        </div>
+    </a>
+    <p class="post-meta">Posted by zzhpeng on October 7, 2019</p>
+</div>
+
+<hr>
+
+<div class="post-preview">
     <a href="/zsh.html">
         <h2 class="post-title">            
             更换mac默认bash shell为zsh
@@ -277,24 +297,6 @@ outp...
         </div>
     </a>
     <p class="post-meta">Posted by zzhpeng on September 7, 2019</p>
-</div>
-
-<hr>
-
-<div class="post-preview">
-    <a href="/timed-out.html">
-        <h2 class="post-title">            
-            web服务超时处理
-        </h2>
-        
-        <div class="post-content-preview">
-            事由
-执行285675条mysql数据操作的时候，页面出现nginx异常An error occurred.报错。查看日志，详情如下：
-
-2019/09/06 14:32:46 [error] 9#9: *7 upstream timed out (110: Connection timed ...
-        </div>
-    </a>
-    <p class="post-meta">Posted by zzhpeng on September 6, 2019</p>
 </div>
 
 <hr>
