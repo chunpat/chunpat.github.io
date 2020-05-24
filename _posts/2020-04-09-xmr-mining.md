@@ -62,5 +62,5 @@ sudo make install
 ## 迭代
 * 2020年04月09日 09:00:00 初稿
 
-## 参看：
+## 参考：
 * 1、[MoneroHash - Monero Mining Pool](https://monerohash.com/#getting_started)

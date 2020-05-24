@@ -185,5 +185,5 @@ set session sql_mode='STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR
 ## 迭代
 * 2020年05月24日 00:17:00 初稿
 
-## 参看：
+## 参考：
 * 1、[MySQL：left join 避坑指南 - 知乎](https://zhuanlan.zhihu.com/p/93445040)

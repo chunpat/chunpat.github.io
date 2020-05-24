@@ -8,9 +8,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="fromChinaBoy">
 
-    <title>使用Linux的cpu挖xmr币 - Blog</title>
+    <title>SPU & SKU - Blog</title>
 
-    <link rel="canonical" href="http://localhost:4000/xmr-mining.html">
+    <link rel="canonical" href="http://localhost:4000/spu-sku.html">
 
     <!-- Icons -->
   <link rel="shortcut icon" href="img/favicon.ico">
@@ -96,14 +96,14 @@
                 <div class="post-heading">
                     <div class="Tags">
                         
-                        <a class="tag" href="/Tags/#xmr" title="xmr">xmr</a>
+                        <a class="tag" href="/Tags/#spu" title="spu">spu</a>
                         
-                        <a class="tag" href="/Tags/#挖矿" title="挖矿">挖矿</a>
+                        <a class="tag" href="/Tags/#sku" title="sku">sku</a>
                         
                     </div>
-                    <h1>使用Linux的cpu挖xmr币</h1>
+                    <h1>SPU & SKU</h1>
                     
-                    <span class="meta">Posted by zzhpeng on April 9, 2020</span>
+                    <span class="meta">Posted by zzhpeng on May 24, 2020</span>
                 </div>
             </div>
         </div>
@@ -116,75 +116,130 @@
         <div class="row">
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 post-container">
 
-                <p>系统版本：CentOS Linux release 7.6.1810 (Core)</p>
+                <h2 id="概念">概念</h2>
 
-<h2 id="1创建一个专门的用户">1、创建一个专门的用户</h2>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>useradd coin
-passwd coin
-visudo //给sudo权限，你懂得
-su coin
-</code></pre></div></div>
+<table>
+  <thead>
+    <tr>
+      <th>名词</th>
+      <th>全称</th>
+      <th>描述</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>SPU</td>
+      <td>Standard Product Unit  标准化产品单元</td>
+      <td>是商品信息聚合的最小单位，是一组可复用、易检索的标准化信息的集合，该集合描述了一个产品的特性。通俗点讲，属性值、特性相同的商品就可以称为一个SPU。</td>
+    </tr>
+    <tr>
+      <td>SKU</td>
+      <td>Stock Keeping Unit 库存量单位</td>
+      <td>即库存进出计量的单位， 可以是以件、盒、托盘等为单位。SKU是物理上不可分割的最小存货单元。在使用时要根据不同业态，不同管理模式来处理。</td>
+    </tr>
+  </tbody>
+</table>
 
-<h2 id="2编译和安装xmr-stakcmake3命令后面的参数声明只使用cpu进行挖矿">2、编译和安装xmr-stak，cmake3命令后面的参数声明只使用CPU进行挖矿</h2>
+<h2 id="大白话">大白话</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>产品名</th>
+      <th>分类</th>
+      <th>SPU</th>
+      <th>SKU</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Apple iPhone 11 (A2223) 128GB 黑色 移动联通电信4G手机 双卡双待</td>
+      <td>手机</td>
+      <td>iPhone 11 (A2223)</td>
+      <td>128GB 黑色 移动联通电信4G手机 双卡双待</td>
+    </tr>
+    <tr>
+      <td>外星人Alienware m15 2020版 15.6英寸轻薄游戏本(十代i7-10750H 16G 1TBSSD RTX2070 8G独显)白</td>
+      <td>电脑</td>
+      <td>外星人Alienware m15</td>
+      <td>15.6英寸轻薄游戏本(十代i7-10750H 16G 1TBSSD RTX2070 8G独显)白</td>
+    </tr>
+    <tr>
+      <td>安德玛官方UA Spawn 2男子篮球鞋Under Armour3022626 灰色106 46</td>
+      <td>篮球鞋</td>
+      <td>安德玛官方UA Spawn 2男子篮球鞋Under Armour3022626</td>
+      <td>灰色106 46</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="数据模型设计">数据模型设计</h3>
+
+<p><strong>SPU表</strong>一般会有两个上级相关属性表<strong>brands表</strong>和<strong>category表</strong>。为了方便创建<strong>SKU表</strong>数据，会有延伸出可复用的<strong>销售属性表</strong>和<strong>销售属性值表</strong>。
+除此之外我们应该还有<strong>SKU库存表</strong></p>
+
+<table>
+  <thead>
+    <tr>
+      <th>表名称</th>
+      <th>表名</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>品牌表</td>
+      <td>product_brands</td>
+    </tr>
+    <tr>
+      <td>类别表</td>
+      <td>product_category</td>
+    </tr>
+    <tr>
+      <td>spu表</td>
+      <td>product_spu</td>
+    </tr>
+    <tr>
+      <td>sku表</td>
+      <td>product_sku</td>
+    </tr>
+    <tr>
+      <td>销售属性表</td>
+      <td>product_attr</td>
+    </tr>
+    <tr>
+      <td>销售属性值</td>
+      <td>product_attr_value</td>
+    </tr>
+    <tr>
+      <td>sku库存表</td>
+      <td>product_sku_stock</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>除了上面的表之外，我又加了另一张表 <code class="highlighter-rouge">关联关系冗余表 product_spu_sku_attr_map</code>，为什么呢？顾名思义，冗余用的，有了这张表，我们可以很高效的得到：</p>
+
+<ol>
+  <li>spu下 有哪些sku</li>
+  <li>spu下 有那些销售属性</li>
+  <li>spu下 每个销售属性对应的销售属性值(一对多)</li>
+  <li>spu下 每个销售属性值对应的sku(一对多)</li>
+</ol>
 
 <blockquote>
-  <p>安装依赖</p>
+  <p>简易E-R关系图</p>
 </blockquote>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo yum install -y centos-release-scl epel-release
-sudo yum install -y cmake3 devtoolset-4-gcc* hwloc-devel libmicrohttpd-devel openssl-devel make git
-//临时使用devtoolset-4
-scl enable devtoolset-4 bash
-//下载源
-git clone https://github.com/fireice-uk/xmr-stak.git
-</code></pre></div></div>
-<blockquote>
-  <p>切换git仓库分支版本</p>
-</blockquote>
-
-<p>因为master分支去掉了Monero币，而且剩下的都是些无名币。</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cd xmr-stak
-git fetch origin xmr-stak-rx
-</code></pre></div></div>
-
-<blockquote>
-  <p>编译安装，只使用CPU进行挖矿</p>
-</blockquote>
-
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mkdir build
-cd build
-sudo cmake3 -DCUDA_ENABLE=OFF -DOpenCL_ENABLE=OFF ..
-sudo make install
-</code></pre></div></div>
-
-<h2 id="3启动程序填写币钱包地址矿池ip等">3、启动程序，填写币钱包地址、矿池ip等</h2>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>./bin/xmr-stak-rx //之后有提示填写钱包地址和矿池ip地址，其他信息都是次要的
-</code></pre></div></div>
-<p><strong>./bin/xmr-stak-rx 可以先看看配置是否正确，然后在nohup ./bin/xmr-stak-rx &amp; 挂载在后台</strong></p>
-
-<h2 id="4钱包的创建和矿池ip查找">4、钱包的创建、和矿池ip查找</h2>
-
-<ul>
-  <li>
-    <p>4.1、下载钱包链接，可生成钱包地址，支持多种OS，点击<a href="https://web.getmonero.org/downloads/">Downloads</a></p>
-  </li>
-  <li>
-    <p>4.2、官网可以找到矿池ip，点击<a href="https://monerohash.com/#">MoneroHash - Monero Mining Pool</a></p>
-  </li>
-</ul>
-
-<h2 id="5后话">5、后话</h2>
-<p>2台四核服务器收益图，跑了9个小时左右，收益有点低，当时xmr市场价格为57.84USD。
-<img src="http://img.zzhpeng.cn/Fr9Zq23WuchKUcBHAZB7gwhCIZvR" alt="" /></p>
+<p><img src="http://img.zzhpeng.cn/FoUZKUxivUTVSLV4bF8YK293hrsM" alt="FoUZKUxivUTVSLV4bF8YK293hrsM" /></p>
 
 <h2 id="迭代">迭代</h2>
 <ul>
-  <li>2020年04月09日 09:00:00 初稿</li>
+  <li>2020年05月24日 13:39:44 初稿</li>
 </ul>
 
 <h2 id="参考">参考：</h2>
 <ul>
-  <li>1、<a href="https://monerohash.com/#getting_started">MoneroHash - Monero Mining Pool</a></li>
+  <li>1、<a href="https://github.com/skr-shop/manuals">GitHub - skr-shop/manuals: Do design No code 💻📱🛒📚</a></li>
 </ul>
 
 
@@ -197,13 +252,9 @@ sudo make install
                 <ul class="pager">
                     
                     <li class="previous">
-                        <a href="/frp-ssl.html" data-toggle="tooltip" data-placement="top" title="局域网Web服务配置frp穿透与SSL证书">&larr; Previous Post</a>
+                        <a href="/mysql-join.html" data-toggle="tooltip" data-placement="top" title="重学 MySQL 的Left Join操作">&larr; Previous Post</a>
                     </li>
                     
-                    
-                    <li class="next">
-                        <a href="/mysql-join.html" data-toggle="tooltip" data-placement="top" title="重学 MySQL 的Left Join操作">Next Post &rarr;</a>
-                    </li>
                     
                 </ul>
 

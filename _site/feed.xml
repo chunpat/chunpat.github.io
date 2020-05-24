@@ -7,6 +7,139 @@
 		<atom:link href="/" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>SPU & SKU</title>
+				<description>&lt;h2 id=&quot;概念&quot;&gt;概念&lt;/h2&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;名词&lt;/th&gt;
+      &lt;th&gt;全称&lt;/th&gt;
+      &lt;th&gt;描述&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;SPU&lt;/td&gt;
+      &lt;td&gt;Standard Product Unit  标准化产品单元&lt;/td&gt;
+      &lt;td&gt;是商品信息聚合的最小单位，是一组可复用、易检索的标准化信息的集合，该集合描述了一个产品的特性。通俗点讲，属性值、特性相同的商品就可以称为一个SPU。&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;SKU&lt;/td&gt;
+      &lt;td&gt;Stock Keeping Unit 库存量单位&lt;/td&gt;
+      &lt;td&gt;即库存进出计量的单位， 可以是以件、盒、托盘等为单位。SKU是物理上不可分割的最小存货单元。在使用时要根据不同业态，不同管理模式来处理。&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;h2 id=&quot;大白话&quot;&gt;大白话&lt;/h2&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;产品名&lt;/th&gt;
+      &lt;th&gt;分类&lt;/th&gt;
+      &lt;th&gt;SPU&lt;/th&gt;
+      &lt;th&gt;SKU&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Apple iPhone 11 (A2223) 128GB 黑色 移动联通电信4G手机 双卡双待&lt;/td&gt;
+      &lt;td&gt;手机&lt;/td&gt;
+      &lt;td&gt;iPhone 11 (A2223)&lt;/td&gt;
+      &lt;td&gt;128GB 黑色 移动联通电信4G手机 双卡双待&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;外星人Alienware m15 2020版 15.6英寸轻薄游戏本(十代i7-10750H 16G 1TBSSD RTX2070 8G独显)白&lt;/td&gt;
+      &lt;td&gt;电脑&lt;/td&gt;
+      &lt;td&gt;外星人Alienware m15&lt;/td&gt;
+      &lt;td&gt;15.6英寸轻薄游戏本(十代i7-10750H 16G 1TBSSD RTX2070 8G独显)白&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;安德玛官方UA Spawn 2男子篮球鞋Under Armour3022626 灰色106 46&lt;/td&gt;
+      &lt;td&gt;篮球鞋&lt;/td&gt;
+      &lt;td&gt;安德玛官方UA Spawn 2男子篮球鞋Under Armour3022626&lt;/td&gt;
+      &lt;td&gt;灰色106 46&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;h3 id=&quot;数据模型设计&quot;&gt;数据模型设计&lt;/h3&gt;
+
+&lt;p&gt;&lt;strong&gt;SPU表&lt;/strong&gt;一般会有两个上级相关属性表&lt;strong&gt;brands表&lt;/strong&gt;和&lt;strong&gt;category表&lt;/strong&gt;。为了方便创建&lt;strong&gt;SKU表&lt;/strong&gt;数据，会有延伸出可复用的&lt;strong&gt;销售属性表&lt;/strong&gt;和&lt;strong&gt;销售属性值表&lt;/strong&gt;。
+除此之外我们应该还有&lt;strong&gt;SKU库存表&lt;/strong&gt;&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;表名称&lt;/th&gt;
+      &lt;th&gt;表名&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;品牌表&lt;/td&gt;
+      &lt;td&gt;product_brands&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;类别表&lt;/td&gt;
+      &lt;td&gt;product_category&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;spu表&lt;/td&gt;
+      &lt;td&gt;product_spu&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;sku表&lt;/td&gt;
+      &lt;td&gt;product_sku&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;销售属性表&lt;/td&gt;
+      &lt;td&gt;product_attr&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;销售属性值&lt;/td&gt;
+      &lt;td&gt;product_attr_value&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;sku库存表&lt;/td&gt;
+      &lt;td&gt;product_sku_stock&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;除了上面的表之外，我又加了另一张表 &lt;code class=&quot;highlighter-rouge&quot;&gt;关联关系冗余表 product_spu_sku_attr_map&lt;/code&gt;，为什么呢？顾名思义，冗余用的，有了这张表，我们可以很高效的得到：&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;spu下 有哪些sku&lt;/li&gt;
+  &lt;li&gt;spu下 有那些销售属性&lt;/li&gt;
+  &lt;li&gt;spu下 每个销售属性对应的销售属性值(一对多)&lt;/li&gt;
+  &lt;li&gt;spu下 每个销售属性值对应的sku(一对多)&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;简易E-R关系图&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://img.zzhpeng.cn/FoUZKUxivUTVSLV4bF8YK293hrsM&quot; alt=&quot;FoUZKUxivUTVSLV4bF8YK293hrsM&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;迭代&quot;&gt;迭代&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;2020年05月24日 13:39:44 初稿&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;参考&quot;&gt;参考：&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;1、&lt;a href=&quot;https://github.com/skr-shop/manuals&quot;&gt;GitHub - skr-shop/manuals: Do design No code 💻📱🛒📚&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+				<pubDate>Sun, 24 May 2020 00:00:00 +0800</pubDate>
+				<link>/spu-sku.html</link>
+				<guid isPermaLink="true">/spu-sku.html</guid>
+			</item>
+		
+			<item>
 				<title>重学 MySQL 的Left Join操作</title>
 				<description>&lt;p&gt;软件版本：mysql8.0.18&lt;/p&gt;
 
@@ -244,7 +377,7 @@ set session sql_mode='STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR
   &lt;li&gt;2020年05月24日 00:17:00 初稿&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&quot;参看&quot;&gt;参看：&lt;/h2&gt;
+&lt;h2 id=&quot;参考&quot;&gt;参考：&lt;/h2&gt;
 &lt;ul&gt;
   &lt;li&gt;1、&lt;a href=&quot;https://zhuanlan.zhihu.com/p/93445040&quot;&gt;MySQL：left join 避坑指南 - 知乎&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
@@ -322,7 +455,7 @@ sudo make install
   &lt;li&gt;2020年04月09日 09:00:00 初稿&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&quot;参看&quot;&gt;参看：&lt;/h2&gt;
+&lt;h2 id=&quot;参考&quot;&gt;参考：&lt;/h2&gt;
 &lt;ul&gt;
   &lt;li&gt;1、&lt;a href=&quot;https://monerohash.com/#getting_started&quot;&gt;MoneroHash - Monero Mining Pool&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
@@ -2066,80 +2199,6 @@ WHERE
 				<pubDate>Mon, 07 Oct 2019 00:00:00 +0800</pubDate>
 				<link>/mysql-in.html</link>
 				<guid isPermaLink="true">/mysql-in.html</guid>
-			</item>
-		
-			<item>
-				<title>更换mac默认bash shell为zsh</title>
-				<description>&lt;h3 id=&quot;问题概述&quot;&gt;问题概述&lt;/h3&gt;
-&lt;p&gt;原本的bash shell用起来也挺快捷，但是在git操作切换分支之类的没有提醒用起来没那么爽。很久前老大推荐我用，
-之前回复是勤奋点，多打几个字母也有好处。今天再次看到相关的blog，决定换起来，结果就是，真香！&lt;/p&gt;
-
-&lt;h3 id=&quot;更换brew源&quot;&gt;更换brew源&lt;/h3&gt;
-&lt;p&gt;原本的源是github的，由于墙的问题可能会有点慢，所以换成国内的源。&lt;/p&gt;
-
-&lt;p&gt;替换brew.git&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;cd &quot;$(brew --repo)&quot;
-git remote set-url origin https://mirrors.ustc.edu.cn/brew.git
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;替换homebrew-core.git:&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;cd &quot;$(brew --repo)/Library/Taps/homebrew/homebrew-core&quot;
-git remote set-url origin https://mirrors.ustc.edu.cn/homebrew-core.git
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;更新Homebrew&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;brew update
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h3 id=&quot;安装&quot;&gt;安装&lt;/h3&gt;
-
-&lt;p&gt;安装zsh&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;brew install zsh
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;安装oh-my-zsh&lt;/p&gt;
-
-&lt;p&gt;到home目录。&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;cd ~
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;从github下载oh-my-zsh。&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;git clone git://github.com/robbyrussell/oh-my-zsh.git ~/.oh-my-zsh
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;生成zsh配置文件zshrc。&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;cp ~/.oh-my-zsh/templates/zshrc.zsh-template ~/.zshrc
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;兼容bash设置的参数，将原来设置在bash的参数copy到zsh的~/.zshrc文件下。&lt;/p&gt;
-
-&lt;p&gt;修改默认shell为zsh&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;chsh -s /bin/zsh
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h3 id=&quot;问题&quot;&gt;问题&lt;/h3&gt;
-
-&lt;p&gt;chsh -s /bin/zsh 后出现 chsh: no changes made&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;dscl . -read /Users/$USER/ UserShell
-exec su - $USER
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h3 id=&quot;参考&quot;&gt;参考&lt;/h3&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;
-    &lt;p&gt;1、&lt;a href=&quot;https://www.jianshu.com/p/677a9bb1ac29&quot;&gt;Mac 下使用zsh - 简书&lt;/a&gt;&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;2、&lt;a href=&quot;https://www.howie6879.cn/post/2019/06_oh_my_zsh/&quot;&gt;oh-my-zsh：让终端飞 - 老胡的储物柜&lt;/a&gt;&lt;/p&gt;
-  &lt;/li&gt;
-&lt;/ul&gt;
-
-</description>
-				<pubDate>Mon, 30 Sep 2019 00:00:00 +0800</pubDate>
-				<link>/zsh.html</link>
-				<guid isPermaLink="true">/zsh.html</guid>
 			</item>
 		
 	</channel>
