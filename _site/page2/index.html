@@ -104,6 +104,25 @@
 		<div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
 			
 <div class="post-preview">
+    <a href="/nginx502_1.html">
+        <h2 class="post-title">            
+            生产环境出现nginx502,导致十来分钟系统奔溃（Tp5.1的session bug）
+        </h2>
+        
+        <div class="post-content-preview">
+            问题概述
+使用PHP的ThinkPHP5.1开发框架，生产环境使用宝塔管理，其中nginx直接报错502，继续时间10来分钟。而且通过观察，一段时间又会出现，特别是复杂频繁的操作。
+
+排查数据
+nginx抛出502,证明是它的反向代理出错，这个代理php-cgi挂掉了，我用的是php-fpm，...
+        </div>
+    </a>
+    <p class="post-meta">Posted by zzhpeng on November 25, 2019</p>
+</div>
+
+<hr>
+
+<div class="post-preview">
     <a href="/redis-set.html">
         <h2 class="post-title">            
             Redis的原子性解决并发问题
@@ -270,28 +289,6 @@ sudo mkfs.ext3 /dev/vdb5  //扩展分区，然后分逻辑分区
         </div>
     </a>
     <p class="post-meta">Posted by zzhpeng on September 10, 2019</p>
-</div>
-
-<hr>
-
-<div class="post-preview">
-    <a href="/elasticsearch-production.html">
-        <h2 class="post-title">            
-            elasticsearch生产部署
-        </h2>
-        
-        <div class="post-content-preview">
-            Ubuntu 系统下直接安装
-1、安装OpenSdk
-sudo apt-get install openjdk-8-jdk
-
-配置Java环境变量
-sudo vim /etc/profile
-在profile末尾添加以下内容:
-export JAVA_HOME=/usr/lib/jvm/jav...
-        </div>
-    </a>
-    <p class="post-meta">Posted by zzhpeng on September 9, 2019</p>
 </div>
 
 <hr>

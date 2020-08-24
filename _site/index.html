@@ -104,6 +104,23 @@
 		<div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
 			
 <div class="post-preview">
+    <a href="/mysql-indexes.html">
+        <h2 class="post-title">            
+            Mysql 索引问题
+        </h2>
+        
+        <div class="post-content-preview">
+            问题
+数据库慢日志突然爆炸，导致服务异常。排查了后语句没有什么异常，然后根据阿里云的rds性能监控可以看出流量突然激增。之后的几天也观察了下慢日志，慢日志时常
+有出现。那只能改语句，删错误的索引和加正确的索引。然后就是限流这一块没做好，系统工作台前端这一块竟然可以无限F5。后端限流用的是ngi...
+        </div>
+    </a>
+    <p class="post-meta">Posted by zzhpeng on August 6, 2020</p>
+</div>
+
+<hr>
+
+<div class="post-preview">
     <a href="/spu-sku.html">
         <h2 class="post-title">            
             SPU & SKU
@@ -262,25 +279,6 @@ nginx抛出502，证明是它的反向代理出错，这个代理php-cgi出了�
         </div>
     </a>
     <p class="post-meta">Posted by zzhpeng on December 26, 2019</p>
-</div>
-
-<hr>
-
-<div class="post-preview">
-    <a href="/nginx502_1.html">
-        <h2 class="post-title">            
-            生产环境出现nginx502,导致十来分钟系统奔溃（Tp5.1的session bug）
-        </h2>
-        
-        <div class="post-content-preview">
-            问题概述
-使用PHP的ThinkPHP5.1开发框架，生产环境使用宝塔管理，其中nginx直接报错502，继续时间10来分钟。而且通过观察，一段时间又会出现，特别是复杂频繁的操作。
-
-排查数据
-nginx抛出502,证明是它的反向代理出错，这个代理php-cgi挂掉了，我用的是php-fpm，...
-        </div>
-    </a>
-    <p class="post-meta">Posted by zzhpeng on November 25, 2019</p>
 </div>
 
 <hr>
