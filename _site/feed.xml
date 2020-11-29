@@ -7,6 +7,239 @@
 		<atom:link href="/" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>关于TCP</title>
+				<description>&lt;h2 id=&quot;tcp-简介&quot;&gt;TCP 简介&lt;/h2&gt;
+
+&lt;p&gt;传输控制协议（TCP，Transmission Control Protocol）,是一种面向连接的，可靠的，基于字节流的传输层通讯协议。&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://img.zzhpeng.cn/FpwQJ6gLG0ZnS8oh83PpPVDyEPxN&quot; alt=&quot;FpwQJ6gLG0ZnS8oh83PpPVDyEPxN&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;tcp-三次握手常见的问题&quot;&gt;TCP 三次握手常见的问题&lt;/h2&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;1、连接拒绝 Operation now in progress （前提tcp_abort_on_overflow=0）&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;丢包: 路由器丢包&lt;/li&gt;
+  &lt;li&gt;错误ip：ip错误、port服务端应用没用&lt;/li&gt;
+  &lt;li&gt;backlog满了：  第三次握手的时候把建立好的连接放到全连接backlog队列里面，backlog长度有限,此参数将决定最多同时有多少个等待 &lt;strong&gt;accept&lt;/strong&gt; 的连接。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;2、连接被重置 Connection reset by peer （前提tcp_abort_on_overflow=1）&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;backlog满了：客户端发送SYN，服务端返回Rst让客户端重连&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;3、SYN FLOOD&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;客户端第三次ACK不发送，半连接backlog满了&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;查看backlog满，服务端阻塞&lt;/strong&gt;&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;netstat -s |grep ‘times the listen queue of a socket overflowed’
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;tcp-四次挥手常见的问题&quot;&gt;TCP 四次挥手常见的问题&lt;/h2&gt;
+
+&lt;p&gt;主要是客户端的TIME WAIT和服务端的CLOSE WAIT引起&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;四元组&lt;/strong&gt;，(客户端ip + 客户端port + 服务端ip + 服务端port) 确认一个链接&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;1、持续一分钟，包的存活时间&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;挥手第四个步骤，服务端没有收到客户端的ACK，过一段时间会重传FIN，客户端的TIME WAIT阶段会存留一分钟。&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;2、Cannot assign requested address&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;客户端端口用光了，主要是客户端一分钟TIME WAIT占用端口&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;php-fpm经常会遇到，因为是用完即释放&lt;/strong&gt;&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;3、Address already in use&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;重启服务，客户端TIME WAIT占用端口。解决：设置so REUSEADDR （swoole 默认开启）&lt;/p&gt;
+
+&lt;p&gt;其他解决办法&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;net.ipv4.tcp_timestamps=1
+net.ipv4.tcp_tw_reuse=1
+net.ipv4.ip_local_port_range调大
+不要开启net.ipv4.tcp_tw_recycle=1
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;4、大量 CLOSE WAIT 链接占用服务端资源&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;服务端应用close方法出现异常，没有调用close方法。&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;扩展&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;swoole server SWOOLE_PROCESS模式close方法决定是否释放close
+swoole server SWOOLE_BASE模式 会自动调用底层FIN close释放，不会存在大量close wait&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$serv = new Swoole\Server(&quot;0.0.0.0&quot;, 9501, SWOOLE_BASE); //SWOOLE_PROCESS
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;tcp-短连接问题&quot;&gt;TCP 短连接问题&lt;/h2&gt;
+
+&lt;p&gt;短连接顾名思义：用完即释放&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;1、多余传输&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;需要握手，挥手&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;2、TCP慢启动&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;TCP建立连接需要网络评估&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;3、握手阶段丢包&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;网络抖动，如发生在握手阶段重传耗秒级别，而在连接阶段重传在毫秒级别。&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;4、对连接的占用约等于长连接&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;占用资源和长连接差不多&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;优点&lt;/strong&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;1、简单&lt;/li&gt;
+  &lt;li&gt;2、理论上连接数相对少&lt;/li&gt;
+  &lt;li&gt;3、无状态对LB负载均衡友好，效果好（长连接不释放连接一直占用，分发负载不了）&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;tcp-长连接的常见问题&quot;&gt;TCP 长连接的常见问题&lt;/h2&gt;
+
+&lt;p&gt;举例图：&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://img.zzhpeng.cn/FunbR-4EnUkQ12hoYtV2KXFfgxbF&quot; alt=&quot;FunbR-4EnUkQ12hoYtV2KXFfgxbF&quot; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;1链接失效&quot;&gt;1、链接失效&lt;/h3&gt;
+
+&lt;p&gt;长连接应用层表现：&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Redis ：timeout(Error while reading line from the server)&lt;/li&gt;
+  &lt;li&gt;Mysql: wait timeout &amp;amp; interactive_timeout(has gone away)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;strong&gt;解决办法：&lt;/strong&gt;&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;1、用的时候重试，但是存在以下问题&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;1、server 断开后占用连接资源（内存、端口、句柄），被动断开close_wait永远不会消失&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;举例：以上图为例，服务端超时没收到东西，发送FIN到php客户端，php 底层tcp回ACK确认收到。但是长连接处于被动状态不发FIN到服务端主动关闭链接。
+这样服务端就处于在FIN_WAIT2、客户端在CLOSE_WAIT状态。
+客户端就一直处于CLOSE_WAIT，相反服务端由于有系统设置服务端自动断开连接（os系统超时时间）&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;net.ipv4.tcp_fin_timesout = 30
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;所以服务端不会保持在FIN_WAIT2状态。&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;2、面临短连接的问题&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;3、优点简单&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;2、定时发心跳维持连接 tcp_keepalive&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;需要解决的问题&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;1、心跳检测时间不够灵活&lt;/li&gt;
+  &lt;li&gt;2、设置定时时间段检测 (早上八点检测)&lt;/li&gt;
+  &lt;li&gt;3、无法检测假死，两个连接，依赖第三方redis服务&lt;/li&gt;
+  &lt;li&gt;4、依赖网络环境，需要稳定&lt;/li&gt;
+  &lt;li&gt;5、不是直连，通过代理链接，如socks5只转发应用层的包，不转发探测包&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;1、tcp_keepalive&lt;/p&gt;
+
+&lt;p&gt;2、swoole tcp_keepalive&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$serv = new Swoole\Server(&quot;192.168.2.194&quot;, 6666, SWOOLE_PROCESS);
+$serv-&amp;gt;set(array(
+    'worker_num' =&amp;gt; 1,
+    'open_tcp_keepalive' =&amp;gt; true,
+    'tcp_keepidle' =&amp;gt; 4, //4s没有数据传输就进行检测
+    'tcp_keepinterval' =&amp;gt; 1, //1s探测一次
+    'tcp_keepcount' =&amp;gt; 5, //探测的次数，超过5次后还没回包close此连接
+));
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;3、swoole heartbeat_idle_time(连接最大允许空闲的时间)&lt;/p&gt;
+
+&lt;p&gt;上面两个keepalive的缺点就是无法检测死链接，死链接会自动回ping检测。&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;array(
+    'heartbeat_idle_time'      =&amp;gt; 600, // 表示一个连接如果600秒内未向服务器发送任何数据，此连接将被强制关闭
+    'heartbeat_check_interval' =&amp;gt; 60,  // 表示每60秒遍历一次
+);
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;结合应用层设置定时心跳发送&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;1、指定ping/pong协议（mysql等自带ping协议）&lt;/li&gt;
+  &lt;li&gt;2、客户端灵活的发送ping心跳包&lt;/li&gt;
+  &lt;li&gt;3、服务端OnRecive检测可用性回复Pong&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;和检测转发的长连接服务，这相应的可以处理问题3、4、5，对于1、2无法解决。&lt;/p&gt;
+
+&lt;h2 id=&quot;面试常问&quot;&gt;面试常问&lt;/h2&gt;
+
+&lt;p&gt;1、挥手一定是四次吗？&lt;/p&gt;
+
+&lt;p&gt;2、握手为什么是三次？&lt;/p&gt;
+
+&lt;p&gt;3、长连接有哪些问题？&lt;/p&gt;
+
+&lt;h2 id=&quot;迭代&quot;&gt;迭代&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;2020年11月29日 22:28:12 初稿&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;参考&quot;&gt;参考：&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;1、&lt;a href=&quot;https://my.oschina.net/costaxu/blog/127394&quot;&gt;几种TCP连接中出现RST的情况 - costaxu的个人页面 - OSCHINA - 中文开源技术交流社区&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;2、&lt;a href=&quot;https://www.cnblogs.com/Orgliny/p/5780796.html&quot;&gt;TCP/IP协议中backlog参数 - Orgliny - 博客园&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;3、&lt;a href=&quot;https://course.swoole-cloud.com/videos/1&quot;&gt;Swoole微课程&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+				<pubDate>Sun, 29 Nov 2020 00:00:00 +0800</pubDate>
+				<link>/tcp.html</link>
+				<guid isPermaLink="true">/tcp.html</guid>
+			</item>
+		
+			<item>
 				<title>Mysql 逻辑数据恢复</title>
 				<description>&lt;h2 id=&quot;起因&quot;&gt;起因&lt;/h2&gt;
 &lt;p&gt;有时候线上出了问题，而原本地数据不好操作，所以想把生产的数据弄一份到本地环境测试。操作步骤：1、阿里云RDS导出逻辑。2、导入本地mysql。&lt;/p&gt;
@@ -1487,232 +1720,6 @@ sudo iptables -I INPUT -p tcp --dport 80 -m connlimit --connlimit-above 30 -j RE
 				<pubDate>Thu, 26 Dec 2019 00:00:00 +0800</pubDate>
 				<link>/nginx502_2.html</link>
 				<guid isPermaLink="true">/nginx502_2.html</guid>
-			</item>
-		
-			<item>
-				<title>生产环境出现nginx502,导致十来分钟系统奔溃（Tp5.1的session bug）</title>
-				<description>&lt;h2 id=&quot;问题概述&quot;&gt;问题概述&lt;/h2&gt;
-&lt;p&gt;使用PHP的ThinkPHP5.1开发框架，生产环境使用宝塔管理，其中nginx直接报错502，继续时间10来分钟。而且通过观察，一段时间又会出现，特别是复杂频繁的操作。&lt;/p&gt;
-
-&lt;h2 id=&quot;排查数据&quot;&gt;排查数据&lt;/h2&gt;
-&lt;p&gt;nginx抛出502,证明是它的反向代理出错，这个代理php-cgi挂掉了，我用的是php-fpm，出了问题。在宝塔默认php-fpm配置有设置日志输出&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[global]
-error_log = /www/server/php/72/var/log/php-fpm.log
-[www]
-slowlog = var/log/slow.log
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h3 id=&quot;php-fpm-配置&quot;&gt;php-fpm 配置&lt;/h3&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[global]
-pid = /www/server/php/72/var/run/php-fpm.pid
-error_log = /www/server/php/72/var/log/php-fpm.log
-log_level = notice
-
-[www]
-listen = /tmp/php-cgi-72.sock
-listen.backlog = -1
-listen.allowed_clients = 127.0.0.1
-listen.owner = www
-listen.group = www
-listen.mode = 0666
-user = www
-group = www
-pm = dynamic
-pm.status_path = /phpfpm_72_status
-pm.max_children = 150
-pm.start_servers = 30
-pm.min_spare_servers = 30
-pm.max_spare_servers = 150
-request_terminate_timeout = 100
-request_slowlog_timeout = 30
-slowlog = var/log/slow.log
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;ul&gt;
-  &lt;li&gt;机器配置阿里云4 vCPU 8 GiB ( 共享计算型 n1, ecs.n1.large )，&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&quot;查看php-fpmlog-部分内容&quot;&gt;查看php-fpm.log 部分内容&lt;/h3&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://img.zzhpeng.cn/Fu0ZUUtbHNQ0b4nh7d2QN4_LJvtB&quot; alt=&quot;Fu0ZUUtbHNQ0b4nh7d2QN4_LJvtB&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;这张图显示，有两部分内容：&lt;/p&gt;
-
-&lt;p&gt;1、php-fpm worker进程由于处理的程序超过109s左右(环境request_terminate_timeout = 100)，进程发出的signal 15(SIGTERM)。
-对于signal 15(SIGTERM) 的 SIGTERM，查阅了下，是说：系统会发送一个SIGTERM的信号给对应的程序。
-当程序接收到该signal后，将会发生以下的事情：&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;1、程序立刻停止&lt;/li&gt;
-  &lt;li&gt;2、该程序释放相应资源后再停止&lt;/li&gt;
-  &lt;li&gt;3、程序可能仍然继续运行&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;大部分程序接收到SIGTERM信号后，会先释放自己的资源，然后在停止。但是也有程序可以在接受到信号量后，做一些其他的事情，
-并且这些事情是可以配置的。如果程序正在等待IO，可能就不会立马做出响应。也就是说，SIGTERM多半是会被阻塞的、忽略。&lt;/p&gt;
-
-&lt;p&gt;2、带有请求的具体链接，显示请求太慢，超过了39s(request_slowlog_timeout = 30),记录了log。&lt;/p&gt;
-
-&lt;h3 id=&quot;查看slowlog-部分内容&quot;&gt;查看slow.log 部分内容&lt;/h3&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://img.zzhpeng.cn/FnNWSnsLDg0mjBKt2x4ARGIBrlk6&quot; alt=&quot;Fu0ZUUtbHNQ0b4nh7d2QN4_LJvtB&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;这张图显示，请求处理只到了框架初始代码和权限验证那块，并没用实际到达业务代码程序。可排除sql慢查询或者
-业务代码问题。&lt;/p&gt;
-
-&lt;h3 id=&quot;查看框架的tp51-log-部分内容&quot;&gt;查看框架的TP5.1 log 部分内容&lt;/h3&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://img.zzhpeng.cn/FjPr7FPhs1lf91PR__DOZIN6ZRzO&quot; alt=&quot;Fu0ZUUtbHNQ0b4nh7d2QN4_LJvtB&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;这张图显示，请求处理还没到csrf验证层就阻塞了!!!&lt;/p&gt;
-
-&lt;h3 id=&quot;面板进程情况&quot;&gt;面板进程情况&lt;/h3&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://img.zzhpeng.cn/FnfJPvsSClmAGAbKGbCP2bhcVLI7&quot; alt=&quot;FnfJPvsSClmAGAbKGbCP2bhcVLI7&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;这张图显示是那个时间段抛出502宕机10来分钟php-fpm记录下来的status。数据显示，请求数量有53441,但是活跃进程数只有1个，
-并且产生了450个慢查询数量。&lt;/p&gt;
-
-&lt;h3 id=&quot;session-阻塞&quot;&gt;Session 阻塞&lt;/h3&gt;
-&lt;p&gt;既然不是慢SQL产生的问题，并且有大量请求没有达到crsf验证层，只到达了crsf层上面的权限验证层，权限又是基于cookies和session的，那就推断是session阻塞引起的。
-什么会引起session阻塞呢？查阅了资料，并写下面代码在本地测试。&lt;/p&gt;
-
-&lt;p&gt;前端js code（三个请求ajax1、ajax2、ajax3同时进行）&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&amp;lt;script src=&quot;https://cdn.bootcss.com/jquery/3.4.0/jquery.js&quot;&amp;gt;&amp;lt;/script&amp;gt;
-&amp;lt;script&amp;gt;
-    var a = 1;
-    var b = 1;
-    var c = 1;
-    function ajax1(){
-        $.get('/hello?from=a', function(){
-            console.log('a' , a);
-            a++;
-            ajax1();
-        });
-    }
-    function ajax2(){
-        $.get('/hello?from=b', function(){
-            console.log('b',b);
-            b++;
-            ajax2();
-        });
-    }
-    function ajax3(){
-        $.get('/hello?from=c', function(){
-            console.log('c',c);
-            c++;
-            ajax3();
-        });
-    }
-
-    function beginAjax(){
-        ajax1();
-        ajax2();
-        ajax3();
-    }
-    beginAjax();
-&amp;lt;/script&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;TP5.1后端code&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;cp&quot;&gt;&amp;lt;?php&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;namespace&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;app\index\controller&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-
-&lt;span class=&quot;k&quot;&gt;use&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;think\Controller&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-
-&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Index&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;extends&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Controller&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;index&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
-    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$this&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;fetch&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
-    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-
-    &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;hello&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$name&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'ThinkPHP5'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-        &lt;span class=&quot;nx&quot;&gt;session&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'qanda'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'1'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//session是tp5.1的定义的方法&lt;/span&gt;
-        &lt;span class=&quot;nb&quot;&gt;sleep&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;json&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;([&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'data'&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;session_id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()]);&lt;/span&gt;
-    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;php-fpm.conf配置&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;request_slowlog_timeout = 16
-request_terminate_timeout = 20
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h3 id=&quot;火狐浏览器&quot;&gt;火狐浏览器&lt;/h3&gt;
-&lt;p&gt;&lt;img src=&quot;http://img.zzhpeng.cn/Fi30BAxREfNBpYLRLMXJrS_vCzop&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;火狐浏览器测试，偶尔会出现刚开始返回的session_id不一致问题同时响应的时间a,b,c三个不一样参数请求响应都在5s多一点，
-不过后面返回的session_id就一致了，同时响应的时间也变为了15s+了。&lt;/p&gt;
-
-&lt;h3 id=&quot;chrome浏览器&quot;&gt;chrome浏览器&lt;/h3&gt;
-&lt;p&gt;&lt;img src=&quot;http://img.zzhpeng.cn/FvVEgokNtB95OjJRUcH21E2BCvCY&quot; alt=&quot;&quot; /&gt;
-chrome浏览器刚开始返回的session_id就一致，但是耗时较长，后面趋于稳定的15s+。&lt;/p&gt;
-
-&lt;h3 id=&quot;将测试code放到laravel62测试&quot;&gt;将测试code放到Laravel6.2测试。&lt;/h3&gt;
-&lt;p&gt;&lt;img src=&quot;http://img.zzhpeng.cn/Fn6BmTtjJNXJgOyGdGe74yt10cpd&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;稳定输出5s+，那就是TP5.1的session出现bug了！！！&lt;/p&gt;
-
-&lt;h3 id=&quot;tp51的session为什么会出现问题&quot;&gt;TP5.1的Session为什么会出现问题&lt;/h3&gt;
-&lt;p&gt;Session阻塞的原因网上大部分说是session_start(),使用完记得session_write_close()。难道TP5.1使用了后没close???
-查看TP5.1源码：&lt;/p&gt;
-
-&lt;p&gt;1、
-&lt;img src=&quot;http://img.zzhpeng.cn/FqC_5ivD1cFKjx2A06w6gALb4pzo&quot; alt=&quot;&quot; /&gt;
-2、
-&lt;img src=&quot;http://img.zzhpeng.cn/FsD9JQa5VlMSAhK-ijYmwEMx0t01&quot; alt=&quot;&quot; /&gt;
-3、
-&lt;img src=&quot;http://img.zzhpeng.cn/FjgcLLdJglPrpHiWnnbjfIyQMit2&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;还真是TP5.1没close，这bug就很容易让系统处于502状态，竟然没人遇到过并且修复吗？反映并且提交issue修复！看了下最新的TP6,借鉴Laravel的Session、Cookies组件化了
-TP的这个bug也就不存在了。&lt;/p&gt;
-
-&lt;h2 id=&quot;解决&quot;&gt;解决&lt;/h2&gt;
-&lt;p&gt;系统还是要用，修改配置文件，用TP5.1 session锁，code 如下：&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;return [
-    'id'             =&amp;gt; '',
-    // SESSION_ID的提交变量,解决flash上传跨域
-    'var_session_id' =&amp;gt; '',
-    // SESSION 前缀
-    'prefix'         =&amp;gt; 'think',
-    // 驱动方式 支持redis memcache memcached
-    'type'           =&amp;gt; '',
-    // 是否自动开启 SESSION
-    'auto_start'     =&amp;gt; true,
-    'use_lock'     =&amp;gt; true,
-];
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;修改后，响应时间正常了
-&lt;img src=&quot;http://img.zzhpeng.cn/FiRwyQzfDp9ZYp8EzPCH6GCWXEb7&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;h2 id=&quot;注意与疑惑&quot;&gt;注意与疑惑&lt;/h2&gt;
-&lt;h3 id=&quot;注意&quot;&gt;注意&lt;/h3&gt;
-&lt;p&gt;1、查到资料看到不是代码的引起的502，而是环境配置。
-https://www.cnblogs.com/zenghansen/p/4647004.html&lt;/p&gt;
-
-&lt;h3 id=&quot;疑惑&quot;&gt;疑惑&lt;/h3&gt;
-&lt;p&gt;1、为什么执行时间session_write_close不执行，返回时间会累加呢？&lt;/p&gt;
-
-&lt;h2 id=&quot;参考&quot;&gt;参考&lt;/h2&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;1、&lt;a href=&quot;https://www.cnblogs.com/skillCoding/archive/2012/04/09/2439296.html&quot;&gt;PHP的Session阻塞问题探讨&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;2、&lt;a href=&quot;https://www.cnblogs.com/yufeng218/p/9911368.html&quot;&gt;session 和 cookie&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;3、&lt;a href=&quot;https://blog.csdn.net/qq_26836575/article/details/82147558&quot;&gt;SIGKILL和SIGTERM、SIGINT&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;4、&lt;a href=&quot;https://www.cnblogs.com/pheye/p/7890065.html&quot;&gt;如何管理Session(防止恶意共享账号)——理论篇&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;5、&lt;a href=&quot;https://www.cnblogs.com/zenghansen/p/4647004.html&quot;&gt;nginx下php频繁卡死502&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-</description>
-				<pubDate>Mon, 25 Nov 2019 00:00:00 +0800</pubDate>
-				<link>/nginx502_1.html</link>
-				<guid isPermaLink="true">/nginx502_1.html</guid>
 			</item>
 		
 	</channel>

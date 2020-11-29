@@ -8,9 +8,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="fromChinaBoy">
 
-    <title>Mysql 逻辑数据恢复 - Blog</title>
+    <title>关于TCP - Blog</title>
 
-    <link rel="canonical" href="http://localhost:4000/mysql-recovery.html">
+    <link rel="canonical" href="http://localhost:4000/tcp.html">
 
     <!-- Icons -->
   <link rel="shortcut icon" href="img/favicon.ico">
@@ -96,14 +96,14 @@
                 <div class="post-heading">
                     <div class="Tags">
                         
-                        <a class="tag" href="/Tags/#mysql" title="mysql">mysql</a>
+                        <a class="tag" href="/Tags/#tcp" title="tcp">tcp</a>
                         
-                        <a class="tag" href="/Tags/#mysql-logic-recovery" title="mysql-logic-recovery">mysql-logic-recovery</a>
+                        <a class="tag" href="/Tags/#swoole" title="swoole">swoole</a>
                         
                     </div>
-                    <h1>Mysql 逻辑数据恢复</h1>
+                    <h1>关于TCP</h1>
                     
-                    <span class="meta">Posted by zzhpeng on October 10, 2020</span>
+                    <span class="meta">Posted by zzhpeng on November 29, 2020</span>
                 </div>
             </div>
         </div>
@@ -116,39 +116,230 @@
         <div class="row">
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 post-container">
 
-                <h2 id="起因">起因</h2>
-<p>有时候线上出了问题，而原本地数据不好操作，所以想把生产的数据弄一份到本地环境测试。操作步骤：1、阿里云RDS导出逻辑。2、导入本地mysql。</p>
+                <h2 id="tcp-简介">TCP 简介</h2>
 
-<h2 id="阿里云rds生成逻辑">阿里云RDS生成逻辑</h2>
-<p><img src="http://img.zzhpeng.cn/Fh3k1F_AOs_QW_1tbIFDs3-f9R7M" alt="Fh3k1F_AOs_QW_1tbIFDs3-f9R7M" /></p>
+<p>传输控制协议（TCP，Transmission Control Protocol）,是一种面向连接的，可靠的，基于字节流的传输层通讯协议。</p>
 
-<p>点击确认后，就会生成，然后下载即可。</p>
+<p><img src="http://img.zzhpeng.cn/FpwQJ6gLG0ZnS8oh83PpPVDyEPxN" alt="FpwQJ6gLG0ZnS8oh83PpPVDyEPxN" /></p>
 
-<h2 id="数据库逻辑恢复">数据库逻辑恢复</h2>
+<h2 id="tcp-三次握手常见的问题">TCP 三次握手常见的问题</h2>
 
-<p>解压下载后压缩文件，然后选择对应要恢复的数据库。<code class="highlighter-rouge">注意：➜ source 是目录</code></p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>➜ source gunzip -c sima_datafull_202009291740_1601372414.sql.gz|mysql -uroot -p sima
-Enter password: 
-ERROR 1840 (HY000) at line 24: @@GLOBAL.GTID_PURGED can only be set when @@GLOBAL.GTID_EXECUTED is empty.
+<blockquote>
+  <p>1、连接拒绝 Operation now in progress （前提tcp_abort_on_overflow=0）</p>
+</blockquote>
+
+<ul>
+  <li>丢包: 路由器丢包</li>
+  <li>错误ip：ip错误、port服务端应用没用</li>
+  <li>backlog满了：  第三次握手的时候把建立好的连接放到全连接backlog队列里面，backlog长度有限,此参数将决定最多同时有多少个等待 <strong>accept</strong> 的连接。</li>
+</ul>
+
+<blockquote>
+  <p>2、连接被重置 Connection reset by peer （前提tcp_abort_on_overflow=1）</p>
+</blockquote>
+
+<ul>
+  <li>backlog满了：客户端发送SYN，服务端返回Rst让客户端重连</li>
+</ul>
+
+<blockquote>
+  <p>3、SYN FLOOD</p>
+</blockquote>
+
+<p>客户端第三次ACK不发送，半连接backlog满了</p>
+
+<p><strong>查看backlog满，服务端阻塞</strong></p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>netstat -s |grep ‘times the listen queue of a socket overflowed’
 </code></pre></div></div>
 
-<p><code class="highlighter-rouge">上面出现error</code>，度娘下，提示集群迁移到单实例的设置问题，操作：</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>➜  source mysql -uroot -p 
-Enter password: 
-mysql&gt; reset master;
-Query OK, 0 rows affected (0.01 sec)
+<h2 id="tcp-四次挥手常见的问题">TCP 四次挥手常见的问题</h2>
+
+<p>主要是客户端的TIME WAIT和服务端的CLOSE WAIT引起</p>
+
+<p><strong>四元组</strong>，(客户端ip + 客户端port + 服务端ip + 服务端port) 确认一个链接</p>
+
+<blockquote>
+  <p>1、持续一分钟，包的存活时间</p>
+</blockquote>
+
+<p>挥手第四个步骤，服务端没有收到客户端的ACK，过一段时间会重传FIN，客户端的TIME WAIT阶段会存留一分钟。</p>
+
+<blockquote>
+  <p>2、Cannot assign requested address</p>
+</blockquote>
+
+<p>客户端端口用光了，主要是客户端一分钟TIME WAIT占用端口</p>
+
+<p><strong>php-fpm经常会遇到，因为是用完即释放</strong></p>
+
+<blockquote>
+  <p>3、Address already in use</p>
+</blockquote>
+
+<p>重启服务，客户端TIME WAIT占用端口。解决：设置so REUSEADDR （swoole 默认开启）</p>
+
+<p>其他解决办法</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>net.ipv4.tcp_timestamps=1
+net.ipv4.tcp_tw_reuse=1
+net.ipv4.ip_local_port_range调大
+不要开启net.ipv4.tcp_tw_recycle=1
 </code></pre></div></div>
-<p>然后重复上面操作即可。</p>
+
+<blockquote>
+  <p>4、大量 CLOSE WAIT 链接占用服务端资源</p>
+</blockquote>
+
+<p>服务端应用close方法出现异常，没有调用close方法。</p>
+
+<p><strong>扩展</strong></p>
+
+<p>swoole server SWOOLE_PROCESS模式close方法决定是否释放close
+swoole server SWOOLE_BASE模式 会自动调用底层FIN close释放，不会存在大量close wait</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$serv = new Swoole\Server("0.0.0.0", 9501, SWOOLE_BASE); //SWOOLE_PROCESS
+</code></pre></div></div>
+
+<h2 id="tcp-短连接问题">TCP 短连接问题</h2>
+
+<p>短连接顾名思义：用完即释放</p>
+
+<blockquote>
+  <p>1、多余传输</p>
+</blockquote>
+
+<p>需要握手，挥手</p>
+
+<blockquote>
+  <p>2、TCP慢启动</p>
+</blockquote>
+
+<p>TCP建立连接需要网络评估</p>
+
+<blockquote>
+  <p>3、握手阶段丢包</p>
+</blockquote>
+
+<p>网络抖动，如发生在握手阶段重传耗秒级别，而在连接阶段重传在毫秒级别。</p>
+
+<blockquote>
+  <p>4、对连接的占用约等于长连接</p>
+</blockquote>
+
+<p>占用资源和长连接差不多</p>
+
+<p><strong>优点</strong></p>
+
+<ul>
+  <li>1、简单</li>
+  <li>2、理论上连接数相对少</li>
+  <li>3、无状态对LB负载均衡友好，效果好（长连接不释放连接一直占用，分发负载不了）</li>
+</ul>
+
+<h2 id="tcp-长连接的常见问题">TCP 长连接的常见问题</h2>
+
+<p>举例图：</p>
+
+<p><img src="http://img.zzhpeng.cn/FunbR-4EnUkQ12hoYtV2KXFfgxbF" alt="FunbR-4EnUkQ12hoYtV2KXFfgxbF" /></p>
+
+<h3 id="1链接失效">1、链接失效</h3>
+
+<p>长连接应用层表现：</p>
+<ul>
+  <li>Redis ：timeout(Error while reading line from the server)</li>
+  <li>Mysql: wait timeout &amp; interactive_timeout(has gone away)</li>
+</ul>
+
+<p><strong>解决办法：</strong></p>
+
+<blockquote>
+  <p>1、用的时候重试，但是存在以下问题</p>
+</blockquote>
+
+<ul>
+  <li>1、server 断开后占用连接资源（内存、端口、句柄），被动断开close_wait永远不会消失</li>
+</ul>
+
+<p>举例：以上图为例，服务端超时没收到东西，发送FIN到php客户端，php 底层tcp回ACK确认收到。但是长连接处于被动状态不发FIN到服务端主动关闭链接。
+这样服务端就处于在FIN_WAIT2、客户端在CLOSE_WAIT状态。
+客户端就一直处于CLOSE_WAIT，相反服务端由于有系统设置服务端自动断开连接（os系统超时时间）</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>net.ipv4.tcp_fin_timesout = 30
+</code></pre></div></div>
+<p>所以服务端不会保持在FIN_WAIT2状态。</p>
+
+<ul>
+  <li>
+    <p>2、面临短连接的问题</p>
+  </li>
+  <li>
+    <p>3、优点简单</p>
+  </li>
+</ul>
+
+<blockquote>
+  <p>2、定时发心跳维持连接 tcp_keepalive</p>
+</blockquote>
+
+<p>需要解决的问题</p>
+<ul>
+  <li>1、心跳检测时间不够灵活</li>
+  <li>2、设置定时时间段检测 (早上八点检测)</li>
+  <li>3、无法检测假死，两个连接，依赖第三方redis服务</li>
+  <li>4、依赖网络环境，需要稳定</li>
+  <li>5、不是直连，通过代理链接，如socks5只转发应用层的包，不转发探测包</li>
+</ul>
+
+<p>1、tcp_keepalive</p>
+
+<p>2、swoole tcp_keepalive</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$serv = new Swoole\Server("192.168.2.194", 6666, SWOOLE_PROCESS);
+$serv-&gt;set(array(
+    'worker_num' =&gt; 1,
+    'open_tcp_keepalive' =&gt; true,
+    'tcp_keepidle' =&gt; 4, //4s没有数据传输就进行检测
+    'tcp_keepinterval' =&gt; 1, //1s探测一次
+    'tcp_keepcount' =&gt; 5, //探测的次数，超过5次后还没回包close此连接
+));
+
+</code></pre></div></div>
+
+<p>3、swoole heartbeat_idle_time(连接最大允许空闲的时间)</p>
+
+<p>上面两个keepalive的缺点就是无法检测死链接，死链接会自动回ping检测。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>array(
+    'heartbeat_idle_time'      =&gt; 600, // 表示一个连接如果600秒内未向服务器发送任何数据，此连接将被强制关闭
+    'heartbeat_check_interval' =&gt; 60,  // 表示每60秒遍历一次
+);
+</code></pre></div></div>
+
+<p>结合应用层设置定时心跳发送</p>
+<ul>
+  <li>1、指定ping/pong协议（mysql等自带ping协议）</li>
+  <li>2、客户端灵活的发送ping心跳包</li>
+  <li>3、服务端OnRecive检测可用性回复Pong</li>
+</ul>
+
+<p>和检测转发的长连接服务，这相应的可以处理问题3、4、5，对于1、2无法解决。</p>
+
+<h2 id="面试常问">面试常问</h2>
+
+<p>1、挥手一定是四次吗？</p>
+
+<p>2、握手为什么是三次？</p>
+
+<p>3、长连接有哪些问题？</p>
 
 <h2 id="迭代">迭代</h2>
 <ul>
-  <li>2020年10月10日 14:14:40 初稿</li>
+  <li>2020年11月29日 22:28:12 初稿</li>
 </ul>
 
 <h2 id="参考">参考：</h2>
 <ul>
-  <li>1、<a href="https://book.douban.com/subject/23008813/">高性能mysql</a></li>
-  <li>2、<a href="https://www.cnblogs.com/tonnytangy/p/7779164.html">ERROR 1840 (HY000) at line 24: @@GLOBAL.GTID_PURGED can only be set when @@GLOBAL.GTID_EXECUTED is empty - tonnytangy - 博客园</a></li>
+  <li>1、<a href="https://my.oschina.net/costaxu/blog/127394">几种TCP连接中出现RST的情况 - costaxu的个人页面 - OSCHINA - 中文开源技术交流社区</a></li>
+  <li>2、<a href="https://www.cnblogs.com/Orgliny/p/5780796.html">TCP/IP协议中backlog参数 - Orgliny - 博客园</a></li>
+  <li>3、<a href="https://course.swoole-cloud.com/videos/1">Swoole微课程</a></li>
 </ul>
 
 
@@ -161,13 +352,9 @@ Query OK, 0 rows affected (0.01 sec)
                 <ul class="pager">
                     
                     <li class="previous">
-                        <a href="/mysql-indexes.html" data-toggle="tooltip" data-placement="top" title="Mysql 索引问题">&larr; Previous Post</a>
+                        <a href="/mysql-recovery.html" data-toggle="tooltip" data-placement="top" title="Mysql 逻辑数据恢复">&larr; Previous Post</a>
                     </li>
                     
-                    
-                    <li class="next">
-                        <a href="/tcp.html" data-toggle="tooltip" data-placement="top" title="关于TCP">Next Post &rarr;</a>
-                    </li>
                     
                 </ul>
 

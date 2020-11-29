@@ -10,7 +10,7 @@
 
     <title>Blog</title>
 
-    <link rel="canonical" href="http://localhost:4000/page2/">
+    <link rel="canonical" href="http://localhost:4000/page6/">
 
     <!-- Icons -->
   <link rel="shortcut icon" href="img/favicon.ico">
@@ -104,168 +104,23 @@
 		<div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
 			
 <div class="post-preview">
-    <a href="/iptables-nginx-cc.html">
+    <a href="/blog/Mac-OS-Apps.html">
         <h2 class="post-title">            
-            iptables和nginx配置防御cc学习
+            Mac OS：搭建一个简约好用的个人系统
         </h2>
         
         <div class="post-content-preview">
-            问题概述
-上一篇文章配置了iptables两条命令，就觉得没问题了，但是我太天真了，归咎原因还是没有好好
-学iptables的内在意思。
+            From App Store
 
-配置的iptables两条命令
-sudo iptables -I INPUT -p tcp --dport 443 -m connlimit --conn...
+The Unarchiver  压缩解压软件。
+
+PopClip $4.99 Mac 下的文本选定增强工具 通过诸多插件让复制、剪切、搜索各项操作更为容易。
+
+Evernote  / Alternote $4.99 印象笔记及轻量级的印象笔记（第三方笔记工具）
+...
         </div>
     </a>
-    <p class="post-meta">Posted by zzhpeng on January 6, 2020</p>
-</div>
-
-<hr>
-
-<div class="post-preview">
-    <a href="/nginx502_2.html">
-        <h2 class="post-title">            
-            生产环境又出现nginx502了！！
-        </h2>
-        
-        <div class="post-content-preview">
-            问题概述
-在某段时间段，网站出现nginx 502，通过宝塔查看，负载状态是100%，查看监控，磁盘IO飙高，如下为近7日IO磁盘图：
-
-
-
-排查数据
-
-nginx抛出502，证明是它的反向代理出错，这个代理php-cgi出了问题，我用的是php-fpm，出了问题。
-查看php-fpm 日志，...
-        </div>
-    </a>
-    <p class="post-meta">Posted by zzhpeng on December 26, 2019</p>
-</div>
-
-<hr>
-
-<div class="post-preview">
-    <a href="/nginx502_1.html">
-        <h2 class="post-title">            
-            生产环境出现nginx502,导致十来分钟系统奔溃（Tp5.1的session bug）
-        </h2>
-        
-        <div class="post-content-preview">
-            问题概述
-使用PHP的ThinkPHP5.1开发框架，生产环境使用宝塔管理，其中nginx直接报错502，继续时间10来分钟。而且通过观察，一段时间又会出现，特别是复杂频繁的操作。
-
-排查数据
-nginx抛出502,证明是它的反向代理出错，这个代理php-cgi挂掉了，我用的是php-fpm，...
-        </div>
-    </a>
-    <p class="post-meta">Posted by zzhpeng on November 25, 2019</p>
-</div>
-
-<hr>
-
-<div class="post-preview">
-    <a href="/redis-set.html">
-        <h2 class="post-title">            
-            Redis的原子性解决并发问题
-        </h2>
-        
-        <div class="post-content-preview">
-            问题概述
-
-最近根据运营那边提供BUG反馈信息提示，出现了仓库商品冻结数量少了，导致出库异常现象。仓库商品库存信息
-表设计是库存num，冻结数frozen_num。当下订单的时候，frozen_num + 1。订单结束，商品库存num - 
-出库数量，冻结数frozen_num - 出库数量。...
-        </div>
-    </a>
-    <p class="post-meta">Posted by zzhpeng on November 2, 2019</p>
-</div>
-
-<hr>
-
-<div class="post-preview">
-    <a href="/mysql-in.html">
-        <h2 class="post-title">            
-            Mysql使用IN功能相关与性能对比
-        </h2>
-        
-        <div class="post-content-preview">
-            问题概述
-平时Mysql喜欢先sql语句找出id字符串，然后用in后面接（id，id，……）去查找数据。查阅相关文章，说sql语句长度有限制，随着数据增长就不能执行，但是
-这个长度却很大，一般可以不用考虑。
-
-查看方法。
-mysql&gt;show variables like '%max_a...
-        </div>
-    </a>
-    <p class="post-meta">Posted by zzhpeng on October 7, 2019</p>
-</div>
-
-<hr>
-
-<div class="post-preview">
-    <a href="/zsh.html">
-        <h2 class="post-title">            
-            更换mac默认bash shell为zsh
-        </h2>
-        
-        <div class="post-content-preview">
-            问题概述
-原本的bash shell用起来也挺快捷，但是在git操作切换分支之类的没有提醒用起来没那么爽。很久前老大推荐我用，
-之前回复是勤奋点，多打几个字母也有好处。今天再次看到相关的blog，决定换起来，结果就是，真香！
-
-更换brew源
-原本的源是github的，由于墙的问题可能会有点慢...
-        </div>
-    </a>
-    <p class="post-meta">Posted by zzhpeng on September 30, 2019</p>
-</div>
-
-<hr>
-
-<div class="post-preview">
-    <a href="/linux-user-group-permission.html">
-        <h2 class="post-title">            
-            gitlab出现502问题
-        </h2>
-        
-        <div class="post-content-preview">
-            问题概述
-上周，公司内部服务器重启，自搭建的gitlab仓库返回502。在这里先说明gitlab的搭建情况，用了宝塔管理，已经有了
-nginx，所以不用gitlab自带的nginx服务，修改过程如下。
-
-1、修改配置文件，禁用内嵌 nginx
-sudo vim /etc/gitlab/gitl...
-        </div>
-    </a>
-    <p class="post-meta">Posted by zzhpeng on September 22, 2019</p>
-</div>
-
-<hr>
-
-<div class="post-preview">
-    <a href="/jenkins-auto-down.html">
-        <h2 class="post-title">            
-            jenkins启动一段时间后掉线
-        </h2>
-        
-        <div class="post-content-preview">
-            问题
-
-  和gitlab使用的端口8080冲突，修改为了8088。然后每次jenkins启动过一段时间后会自动的down服务，
-启动命令是service jenkins start。
-
-
-使用lsof -i:8080查看端口使用情况：
-
-
-解决路程
-
-  尝试用另外一种方法启动,但还是使用旧...
-        </div>
-    </a>
-    <p class="post-meta">Posted by zzhpeng on September 18, 2019</p>
+    <p class="post-meta">Posted by zzhpeng on May 31, 2015</p>
 </div>
 
 <hr>
@@ -276,13 +131,9 @@ sudo vim /etc/gitlab/gitl...
 <ul class="pager">
     
     <li class="previous">
-        <a href="/">&larr; Newer Posts</a>
+        <a href="/page5">&larr; Newer Posts</a>
     </li>
     
-    
-    <li class="next">
-        <a href="/page3">Older Posts &rarr;</a>
-    </li>
     
 </ul>
 
