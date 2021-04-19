@@ -104,6 +104,30 @@
 		<div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
 			
 <div class="post-preview">
+    <a href="/mysql-replace.html">
+        <h2 class="post-title">            
+            MySQL的Replace操作
+        </h2>
+        
+        <div class="post-content-preview">
+            缘由
+
+想复现两条重复的数据，但是一直被替换，死死不出来。查看sql日志，发现出现了Replace操作，之前没见过，词义为替换。
+第一时间想的是和索引有关，看了下还真是，去掉索引之后就复现了数据。
+
+日志
+
+tp5.1日志，出现了REPLACE
+
+[ sql ] [ SQL ] REPLACE...
+        </div>
+    </a>
+    <p class="post-meta">Posted by zzhpeng on November 29, 2020</p>
+</div>
+
+<hr>
+
+<div class="post-preview">
     <a href="/tcp.html">
         <h2 class="post-title">            
             关于TCP
@@ -267,28 +291,6 @@ Frp(https://github.com/fatedier/frp)有提供ssl设置。但是为了方便管�
 
 <hr>
 
-<div class="post-preview">
-    <a href="/mycat-introduction.html">
-        <h2 class="post-title">            
-            mycat 数据库分库分表中间件学习
-        </h2>
-        
-        <div class="post-content-preview">
-            安装与启动
-
-  安装
-
-
-官网：http://www.mycat.io/，我下载的是mac版本http://dl.mycat.io/1.6.5/Mycat-server-1.6.5-release-20180122220033-mac.tar.gz
-
-mycat是基于java的，需要环境依赖...
-        </div>
-    </a>
-    <p class="post-meta">Posted by zzhpeng on January 11, 2020</p>
-</div>
-
-<hr>
-
 
 <!-- Pager -->
 
@@ -414,7 +416,7 @@ mycat是基于java的，需要环境依赖...
 
                 </ul>
                 <p class="copyright text-muted">
-                &copy; 2011~2020 zzhpeng ♪ Powered by Jekyll.
+                &copy; 2011~2021 zzhpeng ♪ Powered by Jekyll.
                 </p>
             </div>
         </div>

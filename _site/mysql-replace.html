@@ -8,9 +8,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="fromChinaBoy">
 
-    <title>gitlab出现502问题 - Blog</title>
+    <title>MySQL的Replace操作 - Blog</title>
 
-    <link rel="canonical" href="http://localhost:4000/linux-user-group-permission.html">
+    <link rel="canonical" href="http://localhost:4000/mysql-replace.html">
 
     <!-- Icons -->
   <link rel="shortcut icon" href="img/favicon.ico">
@@ -96,18 +96,14 @@
                 <div class="post-heading">
                     <div class="Tags">
                         
-                        <a class="tag" href="/Tags/#gitlab" title="gitlab">gitlab</a>
+                        <a class="tag" href="/Tags/#thinkphp5.1" title="thinkphp5.1">thinkphp5.1</a>
                         
-                        <a class="tag" href="/Tags/#宝塔" title="宝塔">宝塔</a>
-                        
-                        <a class="tag" href="/Tags/#nginx" title="nginx">nginx</a>
-                        
-                        <a class="tag" href="/Tags/#linux" title="linux">linux</a>
+                        <a class="tag" href="/Tags/#mysql" title="mysql">mysql</a>
                         
                     </div>
-                    <h1>gitlab出现502问题</h1>
+                    <h1>MySQL的Replace操作</h1>
                     
-                    <span class="meta">Posted by zzhpeng on September 22, 2019</span>
+                    <span class="meta">Posted by zzhpeng on November 29, 2020</span>
                 </div>
             </div>
         </div>
@@ -120,117 +116,97 @@
         <div class="row">
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 post-container">
 
-                <h3 id="问题概述">问题概述</h3>
-<p>上周，公司内部服务器重启，自搭建的gitlab仓库返回502。在这里先说明gitlab的搭建情况，用了宝塔管理，已经有了
-nginx，所以不用gitlab自带的nginx服务，修改过程如下。</p>
+                <h2 id="缘由">缘由</h2>
 
-<p>1、修改配置文件，禁用内嵌 nginx</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo vim /etc/gitlab/gitlab.rb
+<p>想复现两条重复的数据，但是一直被替换，死死不出来。查看sql日志，发现出现了Replace操作，之前没见过，词义为替换。
+第一时间想的是和索引有关，看了下还真是，去掉索引之后就复现了数据。</p>
+
+<h2 id="日志">日志</h2>
+
+<p>tp5.1日志，出现了REPLACE</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[ sql ] [ SQL ] REPLACE INTO `store_system_depot_goods_detail` 
+(`goods_name` , `classify_type_id` , `skus_json` , `store_id` , 
+`account_id` , `goods_sn` , `classify_id` , `goods_id` , `create_time` ,
+ `update_time`) VALUES ('定义商品编码' , 1 , '{\"\\u5c0f\\u7c73\\u673a\\u578b\":\"HM-\\u7ea2\\u7c73NOTE5\"}' , 
+ 0 , 2269 , '6931755509057' , 1 , 426741 , '2021-04-19 10:23:45' , 
+ '2021-04-19 10:23:45') [ RunTime:0.008989s ]
 </code></pre></div></div>
 
-<p>修改一下配置</p>
+<h2 id="怎么实现">怎么实现</h2>
+<p>tp5.1，php代码,路径thinkphp/library/think/model/relation/HasMany.php，一对多关联的时候使用</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    /**
+     * 保存（新增）当前关联数据对象
+     * @access public
+     * @param  mixed    $data       数据 可以使用数组 关联模型对象 和 关联对象的主键
+     * @param  boolean  $replace    是否自动识别更新和写入
+     * @return Model|false
+     */
+    public function save($data, $replace = true)
+    {
+        if ($data instanceof Model) {
+            $data = $data-&gt;getData();
+        }
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code># 关闭nginx服务
-nginx['enable'] = false
-</code></pre></div></div>
+        // 保存关联表数据
+        $data[$this-&gt;foreignKey] = $this-&gt;parent-&gt;{$this-&gt;localKey};
 
-<p>应用修改的配置</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code># 重新加载配置
-sudo gitlab-ctl reconfigure
-# 重新启动
-sudo gitlab-ctl restart
-</code></pre></div></div>
+        $model = new $this-&gt;model;
 
-<p>2、设置宝塔的nginx代理转发,如下</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code># 添加upstream指向gitlab
-upstream gitlab-workhorse {
-  server unix:/var/opt/gitlab/gitlab-workhorse/socket  fail_timeout=0;
-}
-
-
-# 在server中添加
-server
-{
-
-    ......
-
-    location / {
-            # serve static files from defined root folder;.
-            # @gitlab-workhorse is a named location for the upstream fallback, see below
-            try_files $uri $uri/index.html $uri.html @gitlab-workhorse;
+        return $model-&gt;replace($replace)-&gt;save($data) ? $model : false;
     }
-
-    location @gitlab-workhorse {
-            # If you use https make sure you disable gzip compression 
-            # to be safe against BREACH attack
-
-            proxy_read_timeout 300; # Some requests take more than 30 seconds.
-            proxy_connect_timeout 300; # Some requests take more than 30 seconds.
-            proxy_redirect     off;
-
-            proxy_set_header   X-Forwarded-Proto $scheme;
-            proxy_set_header   Host              $http_host;
-            proxy_set_header   X-Real-IP         $remote_addr;
-            proxy_set_header   X-Forwarded-For   $proxy_add_x_forwarded_for;
-            proxy_set_header   X-Frame-Options   SAMEORIGIN;
-
-            proxy_pass http://gitlab-workhorse;
-    }
-
-    location ~ ^/(assets)/  {
-            root /opt/gitlab/embedded/service/gitlab-rails/public;
-            # gzip_static on; # to serve pre-gzipped version
-            expires max;
-            add_header Cache-Control public;
-    }
-
-    .....
-}
 </code></pre></div></div>
 
-<p>然后报出了502，查看nginx的error日志，提示权限问题。
-<img src="http://img.zzhpeng.cn/Fkn0XGjtnpSN-0bTrMNeFeWo3wxr" alt="" /></p>
-
-<h3 id="解决过程">解决过程</h3>
-<p>看到/etc/gitlab/gitlab.rb文件有个说明，当不开启内部的nginx的时候，需要加一个外部的用户。这里的外部用户
-即是指宝塔的nginx开启的用户www。</p>
-
-<p>1、查看nginx的开启用户
-<img src="http://img.zzhpeng.cn/FiqxjiPd1NGzUVLRyb9XmszwI9TE" alt="" /></p>
-
-<p>2、修改/etc/gitlab/gitlab.rb
-<img src="http://img.zzhpeng.cn/Fp5IQkW4PcGC4O_-kF_oelDWhQJF" alt="" /></p>
-
-<p>应用修改的配置</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code># 重新加载配置
-sudo gitlab-ctl reconfigure
-# 重新启动
-sudo gitlab-ctl restart
+<p>tp5.1 最终Sql转换code，thinkphp/library/think/db/Builder.php</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>     /**
+      * 生成Insert SQL
+      * @access public
+      * @param  Query     $query   查询对象
+      * @param  bool      $replace 是否replace
+      * @return string
+      */
+     public function insert(Query $query, $replace = false)
+     {
+         $options = $query-&gt;getOptions();
+ 
+         // 分析并处理数据
+         $data = $this-&gt;parseData($query, $options['data']);
+         if (empty($data)) {
+             return '';
+         }
+ 
+         $fields = array_keys($data);
+         $values = array_values($data);
+ 
+         return str_replace(
+             ['%INSERT%', '%TABLE%', '%FIELD%', '%DATA%', '%COMMENT%'],
+             [
+                 $replace ? 'REPLACE' : 'INSERT',
+                 $this-&gt;parseTable($query, $options['table']),
+                 implode(' , ', $fields),
+                 implode(' , ', $values),
+                 $this-&gt;parseComment($query, $options['comment']),
+             ],
+             $this-&gt;insertSql);
+     }
 </code></pre></div></div>
 
-<p><strong>！！！但是，还是不行，还是502问题。你看，理论上没问题啊！</strong></p>
+<p>结论：Replace是由Mysql自己做处理的</p>
 
-<p>这里涉及到了socket文件通讯的问题，一旦建立连接就会一直连接，原权限之类的还是原来的。</p>
+<h2 id="总结">总结</h2>
 
-<p>nginx代理流，文件socket服务转发</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>upstream gitlab-workhorse {
-  server unix:/var/opt/gitlab/gitlab-workhorse/socket  fail_timeout=0;
-}
-</code></pre></div></div>
+<p><strong>慎用MySQL Replace语句</strong>，存在PRIMARY KEY或者UNIQUE索引，有利有弊。利：可以做去重处理。
+弊：删除旧数据新增新数据。</p>
 
-<p>所以，需要重启nginx,让它重新加载conf配置文件，重新建立连接</p>
+<h2 id="迭代">迭代</h2>
+<ul>
+  <li>2021年04月19日 11:26:40 初稿</li>
+</ul>
 
-<blockquote>
-  <p>额外</p>
-</blockquote>
-
-<p>如何查看系统组情况和修改</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cat /etc/group
-</code></pre></div></div>
-
-<p>查看socket文件权限</p>
-
-<p><img src="http://img.zzhpeng.cn/FgyLa8Dd6ArOr3F--bvO2qDsoInw" alt="" /></p>
+<h2 id="参考">参考：</h2>
+<ul>
+  <li>1、<a href="https://www.cnblogs.com/sunss/p/4493803.html">慎用MySQL replace语句 - sunss - 博客园</a></li>
+</ul>
 
 
                 <hr>
@@ -242,13 +218,9 @@ sudo gitlab-ctl restart
                 <ul class="pager">
                     
                     <li class="previous">
-                        <a href="/jenkins-auto-down.html" data-toggle="tooltip" data-placement="top" title="jenkins启动一段时间后掉线">&larr; Previous Post</a>
+                        <a href="/tcp.html" data-toggle="tooltip" data-placement="top" title="关于TCP">&larr; Previous Post</a>
                     </li>
                     
-                    
-                    <li class="next">
-                        <a href="/zsh.html" data-toggle="tooltip" data-placement="top" title="更换mac默认bash shell为zsh">Next Post &rarr;</a>
-                    </li>
                     
                 </ul>
 

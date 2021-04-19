@@ -7,6 +7,105 @@
 		<atom:link href="/" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>MySQL的Replace操作</title>
+				<description>&lt;h2 id=&quot;缘由&quot;&gt;缘由&lt;/h2&gt;
+
+&lt;p&gt;想复现两条重复的数据，但是一直被替换，死死不出来。查看sql日志，发现出现了Replace操作，之前没见过，词义为替换。
+第一时间想的是和索引有关，看了下还真是，去掉索引之后就复现了数据。&lt;/p&gt;
+
+&lt;h2 id=&quot;日志&quot;&gt;日志&lt;/h2&gt;
+
+&lt;p&gt;tp5.1日志，出现了REPLACE&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[ sql ] [ SQL ] REPLACE INTO `store_system_depot_goods_detail` 
+(`goods_name` , `classify_type_id` , `skus_json` , `store_id` , 
+`account_id` , `goods_sn` , `classify_id` , `goods_id` , `create_time` ,
+ `update_time`) VALUES ('定义商品编码' , 1 , '{\&quot;\\u5c0f\\u7c73\\u673a\\u578b\&quot;:\&quot;HM-\\u7ea2\\u7c73NOTE5\&quot;}' , 
+ 0 , 2269 , '6931755509057' , 1 , 426741 , '2021-04-19 10:23:45' , 
+ '2021-04-19 10:23:45') [ RunTime:0.008989s ]
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;怎么实现&quot;&gt;怎么实现&lt;/h2&gt;
+&lt;p&gt;tp5.1，php代码,路径thinkphp/library/think/model/relation/HasMany.php，一对多关联的时候使用&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;    /**
+     * 保存（新增）当前关联数据对象
+     * @access public
+     * @param  mixed    $data       数据 可以使用数组 关联模型对象 和 关联对象的主键
+     * @param  boolean  $replace    是否自动识别更新和写入
+     * @return Model|false
+     */
+    public function save($data, $replace = true)
+    {
+        if ($data instanceof Model) {
+            $data = $data-&amp;gt;getData();
+        }
+
+        // 保存关联表数据
+        $data[$this-&amp;gt;foreignKey] = $this-&amp;gt;parent-&amp;gt;{$this-&amp;gt;localKey};
+
+        $model = new $this-&amp;gt;model;
+
+        return $model-&amp;gt;replace($replace)-&amp;gt;save($data) ? $model : false;
+    }
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;tp5.1 最终Sql转换code，thinkphp/library/think/db/Builder.php&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;     /**
+      * 生成Insert SQL
+      * @access public
+      * @param  Query     $query   查询对象
+      * @param  bool      $replace 是否replace
+      * @return string
+      */
+     public function insert(Query $query, $replace = false)
+     {
+         $options = $query-&amp;gt;getOptions();
+ 
+         // 分析并处理数据
+         $data = $this-&amp;gt;parseData($query, $options['data']);
+         if (empty($data)) {
+             return '';
+         }
+ 
+         $fields = array_keys($data);
+         $values = array_values($data);
+ 
+         return str_replace(
+             ['%INSERT%', '%TABLE%', '%FIELD%', '%DATA%', '%COMMENT%'],
+             [
+                 $replace ? 'REPLACE' : 'INSERT',
+                 $this-&amp;gt;parseTable($query, $options['table']),
+                 implode(' , ', $fields),
+                 implode(' , ', $values),
+                 $this-&amp;gt;parseComment($query, $options['comment']),
+             ],
+             $this-&amp;gt;insertSql);
+     }
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;结论：Replace是由Mysql自己做处理的&lt;/p&gt;
+
+&lt;h2 id=&quot;总结&quot;&gt;总结&lt;/h2&gt;
+
+&lt;p&gt;&lt;strong&gt;慎用MySQL Replace语句&lt;/strong&gt;，存在PRIMARY KEY或者UNIQUE索引，有利有弊。利：可以做去重处理。
+弊：删除旧数据新增新数据。&lt;/p&gt;
+
+&lt;h2 id=&quot;迭代&quot;&gt;迭代&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;2021年04月19日 11:26:40 初稿&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;参考&quot;&gt;参考：&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;1、&lt;a href=&quot;https://www.cnblogs.com/sunss/p/4493803.html&quot;&gt;慎用MySQL replace语句 - sunss - 博客园&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+				<pubDate>Sun, 29 Nov 2020 00:00:00 +0800</pubDate>
+				<link>/mysql-replace.html</link>
+				<guid isPermaLink="true">/mysql-replace.html</guid>
+			</item>
+		
+			<item>
 				<title>关于TCP</title>
 				<description>&lt;h2 id=&quot;tcp-简介&quot;&gt;TCP 简介&lt;/h2&gt;
 
@@ -1587,139 +1686,6 @@ tcp        0      0 172.18.245.246:443      113.67.9.211:14564      TIME_WAIT
 				<pubDate>Mon, 06 Jan 2020 00:00:00 +0800</pubDate>
 				<link>/iptables-nginx-cc.html</link>
 				<guid isPermaLink="true">/iptables-nginx-cc.html</guid>
-			</item>
-		
-			<item>
-				<title>生产环境又出现nginx502了！！</title>
-				<description>&lt;h2 id=&quot;问题概述&quot;&gt;问题概述&lt;/h2&gt;
-&lt;p&gt;在某段时间段，网站出现nginx 502，通过宝塔查看，负载状态是100%，查看监控，磁盘IO飙高，如下为近7日IO磁盘图：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://img.zzhpeng.cn/FilqyanVhrxGwgOxksnDlyWAnw-W&quot; alt=&quot;FilqyanVhrxGwgOxksnDlyWAnw-W&quot; /&gt;&lt;/p&gt;
-
-&lt;h2 id=&quot;排查数据&quot;&gt;排查数据&lt;/h2&gt;
-
-&lt;p&gt;nginx抛出502，证明是它的反向代理出错，这个代理php-cgi出了问题，我用的是php-fpm，出了问题。
-查看php-fpm 日志，发现并没有什么异常，提示需要提升start_servers是因为在这个时候我reload了php-fpm，
-但是reload后并没作用。然后重启了nginx，才恢复了正常。&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://img.zzhpeng.cn/FvPOyQL4h5T7VN73ltMSw5TyGP9L&quot; alt=&quot;FilqyanVhrxGwgOxksnDlyWAnw-W&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;查看nginx 日志，出现了很多*12359859 connect() to unix:/tmp/php-cgi-72.sock failed
- (11: Resource temporarily unavailable) while connecting to upstream&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://img.zzhpeng.cn/FqX_zzcPU42pDzGR9dXbL9m-DG3p&quot; alt=&quot;FilqyanVhrxGwgOxksnDlyWAnw-W&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;根据nginx这个提示查了相关资料，得到了3个解决方案&lt;/p&gt;
-&lt;h3 id=&quot;1php-fpm的sock通讯方式-改为-tcp&quot;&gt;1、php-fpm的sock通讯方式 改为 tcp&lt;/h3&gt;
-&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;结论：不考虑，查了相关的blog，出现了相同问题，还从tcp改为sock模式呢！！&lt;/code&gt;&lt;/p&gt;
-
-&lt;h3 id=&quot;2用两个php-fpm-socknginx负载均衡&quot;&gt;2、用两个php-fpm sock，nginx负载均衡&lt;/h3&gt;
-&lt;p&gt;2.1、复制一份配置文件，修改里边的pid sock
-cp /usr/local/php/etc/php-fpm.conf cp /usr/local/php/etc/php-fpm2.conf&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[global]
-pid = /usr/local/php/var/run/php-fpm2.pid
-error_log = /usr/local/php/var/log/php-fpm2.log
-log_level = notice
-
-[www]
-listen = /tmp/php-cgi2.sock
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;2.2、复制一个启动文件，也修改相关的信息&lt;/p&gt;
-
-&lt;p&gt;cp /etc/init.d/php-fpm /etc/init.d/php-fpm2&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;php_fpm_BIN=${exec_prefix}/sbin/php-fpm
-php_fpm_CONF=${prefix}/etc/php-fpm2.conf
-php_fpm_PID=${prefix}/var/run/php-fpm2.pid
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;2.3、启动
-/etc/init.d/php-fpm2 start&lt;/p&gt;
-
-&lt;p&gt;2.4、nginx 配置文件，增加 upstream模块&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;upstream backend{
-    server unix:/tmp/php-cgi.sock;
-    server unix:/tmp/php-cgi2.sock;
-}
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;2.5、把fastcgi_pass unix:/tmp/php-cgi.sock;改成 fastcgi_pass  backend;
-重新加载
-/etc/init.d/nginx reload&lt;/p&gt;
-
-&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;结论：这个方法，和我直接调大php-fpm max_children差不多，不考虑。&lt;/code&gt;&lt;/p&gt;
-
-&lt;h3 id=&quot;3php-fpm的listenbacklog默认-1改为1024或者4096即是调大&quot;&gt;3、php-fpm的listen.backlog默认-1改为1024或者4096，即是调大&lt;/h3&gt;
-&lt;p&gt;V友:onepunch回复，整理如下&lt;/p&gt;
-
-&lt;h4 id=&quot;调查&quot;&gt;调查&lt;/h4&gt;
-&lt;p&gt;nginx (客户端) 和 php-fpm （服务端） 通过 unix socket 通信，在 connet() 时，会进行类似 tcp 的三次握手,
-如果 accpet queue 队列满了，server 将发送一个 ECONNREFUSED 错误信息 Connection refused 到 client。
-这样 nginx 就会报这个错了，连接不上。php-fpm 的 backlog 是 accpet queue 的最大长度&lt;/p&gt;
-
-&lt;p&gt;查看系统内核的最大长度&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;cat /proc/sys/net/core/somaxconn 128
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;查看 php-fpm 里的配置 listen.backlog 是 4096，由于会取这 2 个的最小值， 所以是 128。&lt;/p&gt;
-
-&lt;p&gt;验证当时的请求：&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;grep '2019-12-06T16:48' bi_svc.access.log.1 | wc -l //9903
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;计算9903/60等于每秒请求数165，165&amp;gt;128 了, 请求太多了，应该是 accpet queue 满了&lt;/p&gt;
-
-&lt;h4 id=&quot;解决办法&quot;&gt;解决办法&lt;/h4&gt;
-&lt;p&gt;vi /etc/sysctl.conf&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;net.core.somaxconn = 1024
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p&gt;将 /proc/sys/net/core/somaxconn 改成 1024 就不会出问题了&lt;/p&gt;
-
-&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;结论：这个方法是稳定PV提升、IO提升的解决方案，不过我这边遇到的是突然的提升，所以我这边不会这样子做&lt;/code&gt;&lt;/p&gt;
-
-&lt;h2 id=&quot;更多服务器信息&quot;&gt;更多服务器信息&lt;/h2&gt;
-&lt;h3 id=&quot;1云服务器ecs&quot;&gt;1、云服务器ECS&lt;/h3&gt;
-&lt;p&gt;1.1、系统磁盘BPS，其他监控内容无太大的异常
-&lt;img src=&quot;http://img.zzhpeng.cn/Fuk7Hg7v9LETTlt6lJIe7EcKeLoD&quot; alt=&quot;FilqyanVhrxGwgOxksnDlyWAnw-W&quot; /&gt;&lt;/p&gt;
-
-&lt;h3 id=&quot;2rds数据库&quot;&gt;2、RDS数据库&lt;/h3&gt;
-&lt;p&gt;2.1、-网络流量
-&lt;img src=&quot;http://img.zzhpeng.cn/Fo5pktGwx-j4lERPURRBcVnQekPA&quot; alt=&quot;FilqyanVhrxGwgOxksnDlyWAnw-W&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;2.2、RDS数据库-CPU使用率
-&lt;img src=&quot;http://img.zzhpeng.cn/Fs_A1vSJ9M5MrVF9dLMktQ6vq5u5&quot; alt=&quot;FilqyanVhrxGwgOxksnDlyWAnw-W&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;2.3、RDS数据库-TPS/QPS
-&lt;img src=&quot;http://img.zzhpeng.cn/FuCeHHk2YnWJkzsfGBEHQGp2MhAc&quot; alt=&quot;FilqyanVhrxGwgOxksnDlyWAnw-W&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;2.4、RDS数据库-慢日志
-&lt;img src=&quot;http://img.zzhpeng.cn/FsSPL2M079cfnmeqN7LmX7-wE3lo&quot; alt=&quot;FilqyanVhrxGwgOxksnDlyWAnw-W&quot; /&gt;&lt;/p&gt;
-
-&lt;h2 id=&quot;最后选择&quot;&gt;最后选择&lt;/h2&gt;
-&lt;p&gt;用户请求飙升，平台又没有做什么活动，查看了nginx access log，分析同一个ip，同一时间段上百个请求同
-一个访问链接，所以决定iptable限制下，控制单个IP的最大30并发连接数。&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo iptables -I INPUT -p tcp --dport 443 -m connlimit --connlimit-above 30 -j REJECT
-sudo iptables -I INPUT -p tcp --dport 80 -m connlimit --connlimit-above 30 -j REJECT
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h2 id=&quot;后续&quot;&gt;后续&lt;/h2&gt;
-&lt;p&gt;问题还是出现了，查看下一篇post&lt;/p&gt;
-
-&lt;h2 id=&quot;迭代&quot;&gt;迭代&lt;/h2&gt;
-&lt;ul&gt;
-  &lt;li&gt;2019年12月27日 15:29:00 初稿&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&quot;参考&quot;&gt;参考&lt;/h2&gt;
-&lt;ul&gt;
-  &lt;li&gt;&lt;a href=&quot;https://www.v2ex.com/t/632647&quot;&gt;nginx+ PHP -fpm 出现 502&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://blog.csdn.net/chengxuyuanyonghu/article/details/54409523&quot;&gt;iptables限制同一IP连接数&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://www.cnblogs.com/lilidun/p/5801437.html&quot;&gt;centos 7 iptables基本配置&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-</description>
-				<pubDate>Thu, 26 Dec 2019 00:00:00 +0800</pubDate>
-				<link>/nginx502_2.html</link>
-				<guid isPermaLink="true">/nginx502_2.html</guid>
 			</item>
 		
 	</channel>
