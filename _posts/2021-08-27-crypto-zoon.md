@@ -2,7 +2,7 @@
 layout: post
 title: 区块链游戏 crypto-zoon，从入门到入坑
 date: 2021-08-27
-tags: thinkphp5.1 mysql
+tags: 区块链 crypto-zoon
 ---
 
 ## 1、出国
