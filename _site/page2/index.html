@@ -104,6 +104,32 @@
 		<div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
 			
 <div class="post-preview">
+    <a href="/frp-ssl.html">
+        <h2 class="post-title">            
+            局域网Web服务配置frp穿透与SSL证书
+        </h2>
+        
+        <div class="post-content-preview">
+            搭建frp穿透结构图与ssl思路
+
+  结构图
+
+
+
+
+
+  SSL思路
+
+
+Frp(https://github.com/fatedier/frp)有提供ssl设置。但是为了方便管理，把证书设置都放在nginx中。然后外网frp server到局域网都是用的是http type服务而不是ht...
+        </div>
+    </a>
+    <p class="post-meta">Posted by zzhpeng on February 11, 2020</p>
+</div>
+
+<hr>
+
+<div class="post-preview">
     <a href="/mycat-introduction.html">
         <h2 class="post-title">            
             mycat 数据库分库分表中间件学习
@@ -242,26 +268,6 @@ mysql&gt;show variables like '%max_a...
         </div>
     </a>
     <p class="post-meta">Posted by zzhpeng on September 30, 2019</p>
-</div>
-
-<hr>
-
-<div class="post-preview">
-    <a href="/linux-user-group-permission.html">
-        <h2 class="post-title">            
-            gitlab出现502问题
-        </h2>
-        
-        <div class="post-content-preview">
-            问题概述
-上周，公司内部服务器重启，自搭建的gitlab仓库返回502。在这里先说明gitlab的搭建情况，用了宝塔管理，已经有了
-nginx，所以不用gitlab自带的nginx服务，修改过程如下。
-
-1、修改配置文件，禁用内嵌 nginx
-sudo vim /etc/gitlab/gitl...
-        </div>
-    </a>
-    <p class="post-meta">Posted by zzhpeng on September 22, 2019</p>
 </div>
 
 <hr>

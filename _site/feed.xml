@@ -7,6 +7,96 @@
 		<atom:link href="/" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>区块链游戏 crypto-zoon，从入门到入坑</title>
+				<description>&lt;h2 id=&quot;1出国&quot;&gt;1、出国&lt;/h2&gt;
+
+&lt;p&gt;国内有些线路访问对区块链相关的不太友好，所有要先出国。这里介绍两个工具，佛跳墙和panda。
+佛跳墙有免费线路，不建议充值，我年初的时候充的一年费用，但是最近他家东西线路没怎么维护。
+佛跳墙不行，所以今天刚充Panda 1年送1年，2年59刀，很划算，线路多，延迟低，主要是同事推荐用了很长时间，在google shop 应用
+排前头。&lt;/p&gt;
+
+&lt;p&gt;佛跳墙：https://github.com/getfotiaoqiang/download&lt;/p&gt;
+
+&lt;p&gt;Panda: https://www.pantavv.xyz/i/46214283&lt;/p&gt;
+
+&lt;h2 id=&quot;2下载谷歌浏览器&quot;&gt;2、下载谷歌浏览器&lt;/h2&gt;
+
+&lt;p&gt;官网下载（需要fanq）：https://www.google.cn/chrome/&lt;/p&gt;
+
+&lt;p&gt;国内搜索资源站，不过绑定的流氓软件多&lt;/p&gt;
+
+&lt;h2 id=&quot;3安装谷歌浏览器metamask钱包插件&quot;&gt;3、安装谷歌浏览器Metamask钱包插件&lt;/h2&gt;
+
+&lt;p&gt;谷歌浏览器访问 https://chrome.google.com/webstore/category/extensions?hl=zh-CN 到应用商店。&lt;/p&gt;
+
+&lt;p&gt;搜索Metamask，看到狐狸，点击第一个进入，然后点击按钮 ‘添加到Chrome’。&lt;/p&gt;
+
+&lt;p&gt;安装成功后，如下图；
+&lt;img src=&quot;http://img.zzhpeng.cn/FlL0LgTjt2miSjMcqfVaFaSJAVOx&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;然后就是新建钱包或者导入其他钱包的&lt;strong&gt;私钥（私钥是命，要保管好）。&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;创建BSC（Binance Smart Chain）链钱包，具体操作看下面这个链接：
+https://academy.binance.com/zh/articles/connecting-metamask-to-binance-smart-chain&lt;/p&gt;
+
+&lt;p&gt;创建好后，基于bsc链加 zoon 合约地址 0x9d173e6c594f479b4d47001f8e6a95a7adda42bc&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://img.zzhpeng.cn/FhttIQe6deo38nATVqv-5H-JgxhM&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;4购买zoon代币买宠物&quot;&gt;4、购买zoon代币，买宠物&lt;/h2&gt;
+
+&lt;p&gt;查看代币的行情与购买：https://www.dextools.io/app/pancakeswap/pair-explorer/0xdf7646371fd995dfe3f9665e6382b40cd008e889&lt;/p&gt;
+
+&lt;p&gt;购买的话，可以用上面的网址，链接小狐狸，bnb购买（Binance网址：http://accounts.binancezh.cz/zh-CN/register?ref=91791353）, 如下图
+&lt;img src=&quot;http://img.zzhpeng.cn/FlcwLZQ4h8cQWmj2Ad3ZdeZ-O8Ig&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;进官网：https://app.cryptozoon.io/&lt;/p&gt;
+
+&lt;p&gt;用钱包连接登录，登录后，如下图：
+&lt;img src=&quot;http://img.zzhpeng.cn/Fla79qXsoq5-9J6QD_SMZTsPrs2D&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;购买宠物可以去市场买。&lt;/p&gt;
+
+&lt;h2 id=&quot;迭代&quot;&gt;迭代&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;2021年08月27日 01:11:40 初稿&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;相关资料&quot;&gt;相关资料：&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;1、游戏排名：http://dappradar.com/&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;2、PC 🦊加BSC 链： https://academy.binance.com/zh/articles/connecting-metamask-to-binance-smart-chain&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;3、视频介绍：https://www.bilibili.com/video/BV1R44y1C78H?from=search&amp;amp;seid=9001485312838677239&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;4、文章介绍：https://mp.weixin.qq.com/s/aoq0J15BTYJ84SB4RrjIRQ&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;5、zoon行情：https://www.dextools.io/app/pancakeswap/pair-explorer/0xdf7646371fd995dfe3f9665e6382b40cd008e889&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;6、官方文档：https://docs-cn.cryptozoon.io/zoan-you-xi/yu-zhong-he-sheng-chang&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;7、官方网址：https://app.cryptozoon.io/&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;8、zoon代币地址：0x9d173e6c594f479b4d47001f8e6a95a7adda42bc&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+</description>
+				<pubDate>Fri, 27 Aug 2021 00:00:00 +0800</pubDate>
+				<link>/crypto-zoon.html</link>
+				<guid isPermaLink="true">/crypto-zoon.html</guid>
+			</item>
+		
+			<item>
 				<title>MySQL的Replace操作</title>
 				<description>&lt;h2 id=&quot;缘由&quot;&gt;缘由&lt;/h2&gt;
 
@@ -100,7 +190,7 @@
   &lt;li&gt;1、&lt;a href=&quot;https://www.cnblogs.com/sunss/p/4493803.html&quot;&gt;慎用MySQL replace语句 - sunss - 博客园&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 </description>
-				<pubDate>Sun, 29 Nov 2020 00:00:00 +0800</pubDate>
+				<pubDate>Mon, 19 Apr 2021 00:00:00 +0800</pubDate>
 				<link>/mysql-replace.html</link>
 				<guid isPermaLink="true">/mysql-replace.html</guid>
 			</item>
@@ -1447,245 +1537,6 @@ INFO   | jvm 1    | 2020/01/11 15:21:55 | MyCAT Server startup successfully. see
 				<pubDate>Sat, 11 Jan 2020 00:00:00 +0800</pubDate>
 				<link>/mycat-introduction.html</link>
 				<guid isPermaLink="true">/mycat-introduction.html</guid>
-			</item>
-		
-			<item>
-				<title>iptables和nginx配置防御cc学习</title>
-				<description>&lt;h2 id=&quot;问题概述&quot;&gt;问题概述&lt;/h2&gt;
-&lt;p&gt;上一篇文章配置了iptables两条命令，就觉得没问题了，但是我太天真了，归咎原因还是没有好好
-学iptables的内在意思。&lt;/p&gt;
-
-&lt;p&gt;配置的iptables两条命令&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo iptables -I INPUT -p tcp --dport 443 -m connlimit --connlimit-above 30 -j REJECT
-sudo iptables -I INPUT -p tcp --dport 80 -m connlimit --connlimit-above 30 -j REJECT
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p&gt;解释下这两条命令，意思都是表示在同一时刻最大的tcp为30连接数限制，超过30连接数就会被reject拒绝。&lt;/p&gt;
-
-&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;记住是同一时刻！！!&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;同一时刻，即是tcp处于ESTABLISHED连接状态的。那这些怎么看呢？&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;案例&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;netstat -nat  | grep :443
-
-Proto Recv-Q Send-Q Local-Address           Foreign-Address         State
-tcp        0      0 0.0.0.0:443             0.0.0.0:*               LISTEN     
-tcp        0      0 172.18.245.246:443      113.67.9.211:14451      TIME_WAIT  
-tcp        0      1 172.18.245.246:42776    47.106.188.48:443       SYN_SENT   
-tcp        0      0 172.18.245.246:443      113.67.9.211:14442      TIME_WAIT  
-tcp        0      0 172.18.245.246:42388    47.106.188.48:443       ESTABLISHED
-tcp        0      1 172.18.245.246:42748    47.106.188.48:443       SYN_SENT   
-tcp        0      0 172.18.245.246:443      113.67.9.211:14540      TIME_WAIT  
-tcp        0      1 172.18.245.246:42690    47.106.188.48:443       SYN_SENT   
-tcp        0      1 172.18.245.246:42682    47.106.188.48:443       SYN_SENT   
-tcp        0      0 172.18.245.246:443      113.67.9.211:14559      TIME_WAIT  
-tcp        0      1 172.18.245.246:42694    47.106.188.48:443       SYN_SENT   
-tcp        0      1 172.18.245.246:42564    47.106.188.48:443       SYN_SENT   
-tcp        0      1 172.18.245.246:42706    47.106.188.48:443       SYN_SENT   
-tcp        0      0 172.18.245.246:42380    47.106.188.48:443       ESTABLISHED
-tcp        0      1 172.18.245.246:42396    47.106.188.48:443       SYN_SENT   
-tcp        0      1 172.18.245.246:42674    47.106.188.48:443       SYN_SENT   
-tcp        0      0 172.18.245.246:443      47.106.188.48:42236     ESTABLISHED
-tcp        0      1 172.18.245.246:42610    47.106.188.48:443       SYN_SENT   
-tcp        0      1 172.18.245.246:42606    47.106.188.48:443       SYN_SENT   
-tcp        0      1 172.18.245.246:42592    47.106.188.48:443       SYN_SENT   
-tcp        0      0 172.18.245.246:42294    47.106.188.48:443       ESTABLISHED
-tcp        0      1 172.18.245.246:42342    47.106.188.48:443       SYN_SENT   
-tcp        0      0 172.18.245.246:443      113.67.9.211:14498      TIME_WAIT  
-tcp        0      0 172.18.245.246:443      47.106.188.48:42278     ESTABLISHED
-tcp        0      1 172.18.245.246:42558    47.106.188.48:443       SYN_SENT   
-tcp        0      0 172.18.245.246:443      47.106.188.48:42272     ESTABLISHED
-tcp        0      0 172.18.245.246:443      47.106.188.48:42252     ESTABLISHED
-tcp        0      0 172.18.245.246:443      113.67.9.211:14543      TIME_WAIT  
-tcp        0      1 172.18.245.246:42746    47.106.188.48:443       SYN_SENT   
-tcp        0      1 172.18.245.246:42788    47.106.188.48:443       SYN_SENT   
-tcp        0      0 172.18.245.246:443      113.67.9.211:14570      TIME_WAIT  
-tcp        0      0 172.18.245.246:42270    47.106.188.48:443       ESTABLISHED
-tcp        0      1 172.18.245.246:42792    47.106.188.48:443       SYN_SENT   
-tcp        0      0 172.18.245.246:443      113.67.9.211:14493      TIME_WAIT  
-tcp        0      0 172.18.245.246:42370    47.106.188.48:443       ESTABLISHED
-tcp        0      0 172.18.245.246:443      113.67.9.211:14445      TIME_WAIT  
-tcp        0      1 172.18.245.246:42688    47.106.188.48:443       SYN_SENT   
-tcp        0      1 172.18.245.246:42570    47.106.188.48:443       SYN_SENT   
-tcp        0      1 172.18.245.246:42328    47.106.188.48:443       SYN_SENT   
-tcp        0      0 172.18.245.246:443      47.106.188.48:42292     ESTABLISHED
-tcp        0      0 172.18.245.246:42278    47.106.188.48:443       ESTABLISHED
-tcp        0      1 172.18.245.246:42216    47.106.188.48:443       SYN_SENT   
-tcp        0      0 172.18.245.246:443      113.67.9.211:14550      TIME_WAIT  
-tcp        0      0 172.18.245.246:443      113.67.9.211:14487      TIME_WAIT  
-tcp        0      1 172.18.245.246:42774    47.106.188.48:443       SYN_SENT   
-tcp        0      0 172.18.245.246:443      113.67.9.211:14425      TIME_WAIT  
-tcp        0      1 172.18.245.246:42726    47.106.188.48:443       SYN_SENT   
-tcp        0      1 172.18.245.246:42390    47.106.188.48:443       SYN_SENT   
-tcp        0      0 172.18.245.246:443      113.67.9.211:14578      TIME_WAIT  
-tcp        0      0 172.18.245.246:443      113.67.9.211:14564      TIME_WAIT 
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;blockquote&gt;
-  &lt;p&gt;统计对外443端口连接数&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;netstat -nat|grep &quot;47.106.188.48:443&quot;|wc -l
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;统计对外443已连接上的，状态为ESTABLISHED&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;netstat -nat | grep ESTABLISHED | grep 47.106.188.48:443 | wc -l  
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;统计对外443等待连接的，状态为SYN_SENT&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;netstat -nat | grep SYN_SENT | grep 47.106.188.48:443 | wc -l  
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;iptables配置完后，过几天又出现了nginx的502情况，在nginx error查看当时的那个时间段的该ip的请求失败数。&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;grep '2020/01/01 19:02:31' xxx.com.error.log|wc -l   //结果显示62个请求失败数
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;初步猜想&lt;/code&gt;：nginx error显示62个请求失败数! 保持30个连接数量，但是请求却是一直在请求，动态语言php-cgi处理不过来，nginx
-传过来的请求，就会直接返回错误。导致nginx直接将请求，记做错误写入error日志。&lt;/p&gt;
-
-&lt;p&gt;画个流程图：
-&lt;img src=&quot;http://img.zzhpeng.cn/Fk7-M-U3c-LFEmPmzOe_bmNwuRNx&quot; alt=&quot;图&quot; /&gt;&lt;/p&gt;
-
-&lt;h2 id=&quot;iptables学习与测试&quot;&gt;iptables学习与测试&lt;/h2&gt;
-&lt;p&gt;本测试在测试环境测试，环境参数为4g内存2个核心1M带宽，系统环境是ubuntu16.4，该发行版本的默认管理防火墙的工具是ufw。&lt;/p&gt;
-
-&lt;h3 id=&quot;无任何防御测试&quot;&gt;无任何防御测试&lt;/h3&gt;
-&lt;p&gt;压测服务器ab命令 ab -c 20 -n 1000 https://dev.xxx.com/，全部通过
-&lt;img src=&quot;http://img.zzhpeng.cn/FrN6NF5LYoD3J9BZL37rzHsm0OVK&quot; alt=&quot;ab命令&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;服务器tcp连接数变化
-&lt;img src=&quot;http://img.zzhpeng.cn/FsCP9OnEiddWnKI1bMMQtKdTSEV0&quot; alt=&quot;tcp连接数变化&quot; /&gt;&lt;/p&gt;
-
-&lt;h3 id=&quot;iptables防御&quot;&gt;iptables防御&lt;/h3&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;查看iptables状态&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo ufw status  //会显示 Status: active ，证明已经开启
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;iptables 命令&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;添加，防御同一时刻20连接数限制&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo iptables -I INPUT -p tcp --dport 443 -m connlimit --connlimit-above 20 -j REJECT
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;删除防御同一时刻20连接数限制&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo iptables -D INPUT -p tcp --dport 443 -m connlimit --connlimit-above 20 -j REJECT
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;查看是否生效&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo iptables -nL
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;开机生效&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;自查
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;iptables 测试&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;压测服务器ab命令 ab -c 20 -n 1000 https://dev.xxx.com/，少部分失败
-&lt;img src=&quot;http://img.zzhpeng.cn/FjGLx-JepP-Q4JvMxYOOnNIMMQEW&quot; alt=&quot;ab命令&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;服务器tcp连接数变化,压测中的建立连接数不超过20
-&lt;img src=&quot;http://img.zzhpeng.cn/FhjpjR9Px6Y4sbo1l6f_d3ek0XIk&quot; alt=&quot;tcp连接数变化&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;加强压测，压测服务器ab命令 ab -c 25 -n 1000 https://dev.xxx.com/ 
-&lt;img src=&quot;http://img.zzhpeng.cn/FoJbn_IqOilb6IX1SYq-npWaMxmA&quot; alt=&quot;ab命令&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;服务器tcp连接数变化，压测中的建立连接数不超过20
-&lt;img src=&quot;http://img.zzhpeng.cn/FgjeblbI2m_2fElE8MwK1cs-9Y5M&quot; alt=&quot;tcp连接数变化&quot; /&gt;&lt;/p&gt;
-
-&lt;h2 id=&quot;nginx-cc防御设置&quot;&gt;nginx cc防御设置&lt;/h2&gt;
-&lt;p&gt;即是是配置了iptables还是会出现502，查看大量请求的ip，这个ip是某个正常使用的门店，但是为什么会出现大量的请求呢？
-推测F5,模拟测试。&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;F5模拟测试&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;F5模拟测试,果然系统抛出502，我按出了浏览器显示差不多1200多个请求。
-&lt;img src=&quot;http://img.zzhpeng.cn/FkNU7r-CYTOdCTYzFylfeR4PCdFr&quot; alt=&quot;tcp连接数变化&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;然后，我在测试服务器，查看tcp变化数，限制到了20个连接数。自我推测：持续1200个请求下来，
-存在了很多等待连接的。数据库返回数据慢了或者奔溃了，php-fpm响应超时重启出现502。&lt;/p&gt;
-
-&lt;p&gt;如图下，为F5请求产生502后，查看服务器tcp情况，还保持着20个连接数，和80个准备连接数。
-&lt;img src=&quot;http://img.zzhpeng.cn/FmQH6dfFWvqmgHrcTF_EcpYUjQPW&quot; alt=&quot;tcp连接数变化&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;结论：iptable的限制20个连接数，能限制流量，但是F5攻击触及到数据库，就存在数据库那边的读的压力。
-如果是静态或者缓存资源的的响应是没问题的，所以这里找到了nginx的cc防御。遇到一个时间段过多的流量可以抛出
-个网络异常或503响应给浏览器，这样用户持续的F5就不会影响服务器了&lt;/code&gt;&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;nginx.conf主配置&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;    limit_conn_zone $binary_remote_addr zone=perip:10m;//远端ip 限制 
-    limit_conn_zone $server_name zone=perserver:10m;//服务器域名 限制
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;容器共使用10M的内存来对于IP传输开销&lt;/code&gt;&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;server.conf某个网站&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;    limit_conn perserver 300;//远端服务器域名 300个并发限制
-    limit_conn perip 25;//远端ip25个并发 限制
-    limit_rate 1024k;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;limit_rate 512k： 对每个连接限速512k. 注意，这里是对连接限速，而不是对IP限速。如果一个IP允许两个并发连接，那么这个IP就是限速limit_rate×2。&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;配置，这里我直接用了宝塔的UI配置，这里是在server外部配置的，全局。
-&lt;img src=&quot;http://img.zzhpeng.cn/Fp8s437_mKXOffD-bKDyTub_vxg4&quot; alt=&quot;宝塔设置&quot; /&gt;&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;F5再次模拟测试&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;再次显示f5 65次就网络出错了，f5防御成功。
-&lt;img src=&quot;http://img.zzhpeng.cn/Fubhh6oFbkaA5UBA9Et61YUcPFLp&quot; alt=&quot;F5再次模拟测试&quot; /&gt;&lt;/p&gt;
-
-&lt;h2 id=&quot;恍然大悟&quot;&gt;恍然大悟&lt;/h2&gt;
-&lt;p&gt;1、前几次出现的f5攻击，只有上千条单个ip的error就停了，并且出现nginx 502。而最近f5攻击达到了上万条单个ip的error，这个就是
-设置的iptables做了限制作用了，只允许30个连接数，数据库短暂压力没那么大，可以持续更长的时间。&lt;/p&gt;
-
-&lt;p&gt;2、iptables 设置了30个连接数限制，但是为什么单个ip会有上万个error错误呢？这里就牵着到了浏览器http2协议当中，一个tcp多路复用
-可以传输多个http请求。&lt;/p&gt;
-
-&lt;h2 id=&quot;迭代&quot;&gt;迭代&lt;/h2&gt;
-&lt;ul&gt;
-  &lt;li&gt;2020年01月06日 16:54:00 初稿&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&quot;参考&quot;&gt;参考&lt;/h2&gt;
-&lt;ul&gt;
-  &lt;li&gt;&lt;a href=&quot;https://help.ubuntu.com/community/UFW&quot;&gt;UFW - Community Help Wiki&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://help.ubuntu.com/community/IptablesHowTo&quot;&gt;IptablesHowTo - Community Help Wiki&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://www.cnblogs.com/MacoLee/p/6023201.html&quot;&gt;Nginx限速遇到的问题 - MacoLee - 博客园&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;http://www.httpclient.cn/archives/106.html&quot;&gt;服务器TIME_WAIT和CLOSE_WAIT分析和解决办法 - HttpClient 中文官网&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://www.cnblogs.com/williamjie/p/11075565.html&quot;&gt;一个 TCP 连接可以发多少个 HTTP 请求 - 割肉机 - 博客园&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://www.cnblogs.com/skynet/p/4173450.html&quot;&gt;Nginx + CGI/FastCGI + C/Cpp - 吴秦 - 博客园&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-</description>
-				<pubDate>Mon, 06 Jan 2020 00:00:00 +0800</pubDate>
-				<link>/iptables-nginx-cc.html</link>
-				<guid isPermaLink="true">/iptables-nginx-cc.html</guid>
 			</item>
 		
 	</channel>
