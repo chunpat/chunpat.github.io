@@ -7,6 +7,194 @@
 		<atom:link href="/" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>Self-host Gitlab的相关操作</title>
+				<description>&lt;h1 id=&quot;安装debian-系列系统为例&quot;&gt;安装（Debian 系列系统为例）&lt;/h1&gt;
+
+&lt;h2 id=&quot;apt-get-直接安装&quot;&gt;apt-get 直接安装&lt;/h2&gt;
+
+&lt;p&gt;更新gitlab源&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;curl -s https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.deb.sh | sudo bash
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;安装，默认最新版&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo apt-get install gitlab-ce
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h1 id=&quot;进阶debian-系列系统为例&quot;&gt;进阶（Debian 系列系统为例）&lt;/h1&gt;
+
+&lt;h2 id=&quot;已有nginx想用原来的服务&quot;&gt;已有Nginx，想用原来的服务&lt;/h2&gt;
+
+&lt;p&gt;停gitlab自带的nginx，并且修改外部web server权限用户。&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;language-$xslt&quot;&gt;sudo vim /etc/gitlab/gitlab.rb
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;修改地方，如下图：&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/2022-01-08-gitlab/advanced_1.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;修改完，重新加载配置&amp;amp;重启即可。&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;#重新加载配置
+sudo gitlab-ctl reconfigure
+
+#重启
+sudo gitlab-ctl restart
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;定期备份与清理&quot;&gt;定期备份与清理&lt;/h2&gt;
+
+&lt;h3 id=&quot;备份&quot;&gt;备份&lt;/h3&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;1、创建备份脚本，每天00自动备份&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;sudo vim /var/opt/gitlab/backups/remove.sh&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;#!/bin/bash&lt;/span&gt;
+0 0 &lt;span class=&quot;k&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;*&lt;/span&gt; sh /var/opt/gitlab/backups/backup.sh &lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt; /var/opt/gitlab/backups/backup.log
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;2、更改用户组(当前操作的是onehour用户)&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo chown -R git:git /var/opt/gitlab/backups/backup.sh
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;3、测试&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo sh /var/opt/gitlab/backups/backup.sh &amp;gt;&amp;gt; /var/opt/gitlab/backups/backup.log
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;4、设置contab&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;切换到root用户执行contab&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;contab -e
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;用nano操作&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;0 0 * * * sh /var/opt/gitlab/backups/backup.sh &amp;gt;&amp;gt; /var/opt/gitlab/backups/backup.log
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Ctrl+X，按Y保存&lt;/p&gt;
+
+&lt;h3 id=&quot;清理&quot;&gt;清理&lt;/h3&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;1、创建备份脚本，15天前的数据自动删除&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;sudo vim /var/opt/gitlab/backups/remove.sh&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;#!/bin/bash&lt;/span&gt;
+find &lt;span class=&quot;s2&quot;&gt;&quot;/var/opt/gitlab/backups/&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-name&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;*.tar&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-ctime&lt;/span&gt; +15  &lt;span class=&quot;nt&quot;&gt;-exec&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;rm&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-rf&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{}&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\;&lt;/span&gt;  
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;2、更改用户组(当前操作的是onehour用户)&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo chown -R git:git /var/opt/gitlab/backups/remove.sh
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;3、测试&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo sh /var/opt/gitlab/backups/remove.sh
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;4、设置contab&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;切换到root用户执行contab&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;contab -e
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;用nano操作&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;45 10 * * * sh /var/opt/gitlab/backups/remove.sh  &amp;gt;&amp;gt; /var/opt/gitlab/backups/remove.log
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Ctrl+X，按Y保存&lt;/p&gt;
+
+&lt;h2 id=&quot;升级gitlab&quot;&gt;升级gitlab&lt;/h2&gt;
+
+&lt;p&gt;升级前记得备份好数据，以防Error，官方介绍 &lt;a href=&quot;https://about.gitlab.com/install/#ubuntu&quot;&gt;https://about.gitlab.com/install/#ubuntu&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;注意，从低版本一次性升级到高版本可能会出问题，所以官方出了个逐步升级的路线图&lt;/strong&gt;
+8.11.Z -&amp;gt; 8.12.0 -&amp;gt; 8.17.7 -&amp;gt; 9.5.10 -&amp;gt; 10.8.7 -&amp;gt; 11.11.8 -&amp;gt; 12.0.12 -&amp;gt; 
+12.1.17 -&amp;gt; 12.10.14 -&amp;gt; 13.0.14 -&amp;gt; 13.1.11 -&amp;gt; 13.8.8 -&amp;gt; latest 13.12.Z -&amp;gt; latest 14.0.Z -&amp;gt; latest 14.1.Z -&amp;gt; latest 14.Y.Z&lt;/p&gt;
+
+&lt;p&gt;官方升级路径：&lt;a href=&quot;https://docs.gitlab.com/ee/update/index.html#upgrade-paths&quot;&gt;https://docs.gitlab.com/ee/update/index.html#upgrade-paths&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;查看版本&quot;&gt;查看版本&lt;/h3&gt;
+
+&lt;p&gt;查看详细的版本信息&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; sudo gitlab-rake gitlab:env:info
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;到官方包库寻找对应版本&quot;&gt;到官方包库寻找对应版本&lt;/h3&gt;
+
+&lt;p&gt;包地址
+&lt;a href=&quot;https://packages.gitlab.com/gitlab/gitlab-ce/&quot;&gt;https://packages.gitlab.com/gitlab/gitlab-ce/&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;操作前，先更新gitlab资源路径&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;curl -s https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.deb.sh | sudo bash
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;查找对应的包，点击进去能看到详情，可以看到apt怎么操作之类的，例如安装12.1.17版本&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo apt-get install gitlab-ce=12.1.17-ce.0
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;strong&gt;这里的安装即是安装也是更新，会把你的数据也一起迁移了&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;然后重启gitlab&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo gitlab-ctl restart
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;重启nginx，我这里用的是外部的nginx，而且用的TCP连接，所以需要重启，重新连接socket。&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;注意，升级到13.5.1-ce.0后，要修改nginx 转发代理的路劲&lt;/strong&gt;&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;#原来
+upstream gitlab-workhorse {
+  server unix:/var/opt/gitlab/gitlab-workhorse/socket  fail_timeout=0;
+}
+
+#修改
+upstream gitlab-workhorse {
+  server unix:/var/opt/gitlab/gitlab-workhorse/sockets/socket  fail_timeout=0;
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;迭代&quot;&gt;迭代&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;2022年01月08日 03:11:40 初稿&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;参考&quot;&gt;参考&lt;/h2&gt;
+&lt;p&gt;1、&lt;a href=&quot;https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5756&quot;&gt;Permission denied on sockets after update to “13.5.1-ce.0” (#5756) · Issues · GitLab.org / omnibus-gitlab · GitLab&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;2、&lt;a href=&quot;https://www.cnblogs.com/cheyunhua/p/14875506.html&quot;&gt;gitlab备份、还原及迁移 - 技术颜良 - 博客园&lt;/a&gt;&lt;/p&gt;
+</description>
+				<pubDate>Sat, 08 Jan 2022 00:00:00 +0800</pubDate>
+				<link>/gitlab.html</link>
+				<guid isPermaLink="true">/gitlab.html</guid>
+			</item>
+		
+			<item>
 				<title>区块链游戏 crypto-zoon，从入门到入坑</title>
 				<description>&lt;h2 id=&quot;1出国&quot;&gt;1、出国&lt;/h2&gt;
 
@@ -1277,266 +1465,6 @@ custom_domains = packagist.xxx.com
 				<pubDate>Tue, 11 Feb 2020 00:00:00 +0800</pubDate>
 				<link>/frp-ssl.html</link>
 				<guid isPermaLink="true">/frp-ssl.html</guid>
-			</item>
-		
-			<item>
-				<title>mycat 数据库分库分表中间件学习</title>
-				<description>&lt;h2 id=&quot;安装与启动&quot;&gt;安装与启动&lt;/h2&gt;
-&lt;blockquote&gt;
-  &lt;p&gt;安装&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;官网：http://www.mycat.io/，我下载的是mac版本http://dl.mycat.io/1.6.5/Mycat-server-1.6.5-release-20180122220033-mac.tar.gz&lt;/p&gt;
-
-&lt;p&gt;mycat是基于java的，需要环境依赖，我安装了openjdk1.8的&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;➜  mycat java -version
-java version &quot;1.8.0_221&quot;
-Java(TM) SE Runtime Environment (build 1.8.0_221-b11)
-Java HotSpot(TM) 64-Bit Server VM (build 25.221-b11, mixed mode)
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;解压压缩包，tar -zxvf Mycat-server-1.6.5-release-20180122220033-mac.tar.gz&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;启动&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;进入文件夹内&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;cd mycat
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;启动&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;➜  mycat bin/mycat start
-Starting Mycat-server...
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;查看启动是否成功&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;➜  mycat more logs/wrapper.log
-STATUS | wrapper  | 2020/01/11 15:21:51 | --&amp;gt; Wrapper Started as Daemon
-STATUS | wrapper  | 2020/01/11 15:21:51 | Launching a JVM...
-INFO   | jvm 1    | 2020/01/11 15:21:51 | Java HotSpot(TM) 64-Bit Server VM warning: ignoring option MaxPermSize=64M; support was removed in 8.0
-INFO   | jvm 1    | 2020/01/11 15:21:53 | Wrapper (Version 3.2.3) http://wrapper.tanukisoftware.org
-INFO   | jvm 1    | 2020/01/11 15:21:53 |   Copyright 1999-2006 Tanuki Software, Inc.  All Rights Reserved.
-INFO   | jvm 1    | 2020/01/11 15:21:53 | 
-INFO   | jvm 1    | 2020/01/11 15:21:55 | MyCAT Server startup successfully. see logs in logs/mycat.log
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h2 id=&quot;配置说明&quot;&gt;配置说明&lt;/h2&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;server.xml&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;作用：&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;1、配置系统相关参数&lt;/p&gt;
-
-&lt;p&gt;2、配置用户访问权限&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;    &amp;lt;user name=&quot;root&quot; defaultAccount=&quot;true&quot;&amp;gt;
-            &amp;lt;property name=&quot;password&quot;&amp;gt;123456&amp;lt;/property&amp;gt;
-            &amp;lt;property name=&quot;schemas&quot;&amp;gt;TESTDB&amp;lt;/property&amp;gt;
-
-            &amp;lt;!-- 表级 DML 权限设置 --&amp;gt;
-            &amp;lt;!--            
-            &amp;lt;privileges check=&quot;false&quot;&amp;gt;
-                    &amp;lt;schema name=&quot;TESTDB&quot; dml=&quot;0110&quot; &amp;gt;
-                            &amp;lt;table name=&quot;tb01&quot; dml=&quot;0000&quot;&amp;gt;&amp;lt;/table&amp;gt;
-                            &amp;lt;table name=&quot;tb02&quot; dml=&quot;1111&quot;&amp;gt;&amp;lt;/table&amp;gt;  //dml 四位数依次insert,update,select,delete
-                    &amp;lt;/schema&amp;gt;
-            &amp;lt;/privileges&amp;gt;           
-             --&amp;gt;
-    &amp;lt;/user&amp;gt;
-
-    &amp;lt;user name=&quot;user&quot;&amp;gt;
-            &amp;lt;property name=&quot;password&quot;&amp;gt;user&amp;lt;/property&amp;gt;
-            &amp;lt;property name=&quot;schemas&quot;&amp;gt;TESTDB&amp;lt;/property&amp;gt;
-            &amp;lt;property name=&quot;readOnly&quot;&amp;gt;true&amp;lt;/property&amp;gt;
-    &amp;lt;/user&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;3、配置SQL防火墙及SQL拦截功能&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;log4j2.xml&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;作用：&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;1、配置输出日志的格式&lt;/p&gt;
-
-&lt;p&gt;2、配置输出日志的级别&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;rule.xml&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;作用：&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;1、配置水平分片的分片规则&lt;/p&gt;
-
-&lt;p&gt;2、配置分片规则所对应的分片函数&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;简单取模partitionByMod&lt;/li&gt;
-  &lt;li&gt;hash取模partitionByHashMod&lt;/li&gt;
-  &lt;li&gt;枚举分片partitionByFileMap&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;schema.xml&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;定义逻辑库具体配置&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; &amp;lt;table name=&quot;company&quot; primaryKey=&quot;ID&quot; type=&quot;global&quot; dataNode=&quot;dn1,dn2,dn3&quot; /&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p&gt;primaryKey如果分片的分片规则不是定义的值，会另外建立主键索引。&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&amp;lt;dataHost name=&quot;localhost1&quot; maxCon=&quot;1000&quot; minCon=&quot;10&quot; balance=&quot;0&quot;
-                  writeType=&quot;0&quot; dbType=&quot;mysql&quot; dbDriver=&quot;native&quot; switchType=&quot;1&quot;  slaveThreshold=&quot;100&quot;&amp;gt;
-        &amp;lt;heartbeat&amp;gt;select user()&amp;lt;/heartbeat&amp;gt;
-        &amp;lt;!-- can have multi write hosts --&amp;gt;
-        &amp;lt;writeHost host=&quot;hostM1&quot; url=&quot;localhost:3306&quot; user=&quot;root&quot;
-                           password=&quot;123456&quot;&amp;gt;
-                &amp;lt;!-- can have multi read hosts --&amp;gt;
-                &amp;lt;readHost host=&quot;hostS2&quot; url=&quot;192.168.1.200:3306&quot; user=&quot;root&quot; password=&quot;xxx&quot; /&amp;gt;
-        &amp;lt;/writeHost&amp;gt;
-        &amp;lt;writeHost host=&quot;hostS1&quot; url=&quot;localhost:3316&quot; user=&quot;root&quot;
-                           password=&quot;123456&quot; /&amp;gt;
-        &amp;lt;!-- &amp;lt;writeHost host=&quot;hostM2&quot; url=&quot;localhost:3316&quot; user=&quot;root&quot; password=&quot;123456&quot;/&amp;gt; --&amp;gt;
-&amp;lt;/dataHost&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p&gt;balance=”0”&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;0 不开启读写分离机制&lt;/li&gt;
-  &lt;li&gt;1 全部的readHost 与 stand by writeHost参与select语句的负载均衡&lt;/li&gt;
-  &lt;li&gt;2 所有的readHost与writeHost都参与select语句的负载均衡&lt;/li&gt;
-  &lt;li&gt;3 所有readHost参与select语句的负载均衡&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;writeType=”0”&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;0：默认一台写，高可用，down了之后切换到指定&lt;/li&gt;
-  &lt;li&gt;1：随机&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&quot;垂直分库&quot;&gt;垂直分库&lt;/h2&gt;
-&lt;ul&gt;
-  &lt;li&gt;1、收集分析业务模块间的关系&lt;/li&gt;
-  &lt;li&gt;2、复制数据库到其他实例&lt;/li&gt;
-  &lt;li&gt;3、配置mycat垂直分库&lt;/li&gt;
-  &lt;li&gt;4、通过mycat访问DB&lt;/li&gt;
-  &lt;li&gt;5、删除原库中已迁移表&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;优点&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;1、数据库的拆分简单明了，拆分规则明确&lt;/li&gt;
-  &lt;li&gt;2、应用程序模块清晰明确，整合容易&lt;/li&gt;
-  &lt;li&gt;3、数据维护方便易行，容易定位&lt;/li&gt;
-  &lt;li&gt;4、读写压力分担&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;缺点&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;1、无法跨分片做关联查询（解决方式1、MyCat全局表。2、冗余字段。3、API获取数据）&lt;/li&gt;
-  &lt;li&gt;2、对于访问极其频繁且数据量超大的表仍然存在性能瓶颈&lt;/li&gt;
-  &lt;li&gt;3、切分达到一定程度之后，扩展性会遇到瓶颈&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;mycat管理垂直切分的优点&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;1、跨分片做关联查询，可以通过mycat设置全局表，即是多分片都有这张表。（只建议小表进行改操作）&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&quot;水平分片&quot;&gt;水平分片&lt;/h2&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;分片规则&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;通过表字段作为分片建简单取模分片&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;步骤&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;1、根据业务状态确定要分片的表。&lt;/li&gt;
-  &lt;li&gt;2、根据业务选择分片建以及算法&lt;/li&gt;
-  &lt;li&gt;3、使用MyCat部署分片集群&lt;/li&gt;
-  &lt;li&gt;4、测试分片集群&lt;/li&gt;
-  &lt;li&gt;5、业务及数据迁移&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;分片后问题&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;h3 id=&quot;1分片需要考虑主键的全局唯一性&quot;&gt;1、分片需要考虑主键的全局唯一性&lt;/h3&gt;
-
-&lt;p&gt;MyCat有提供全局自增ID&lt;/p&gt;
-
-&lt;h3 id=&quot;2分片后关联&quot;&gt;2、分片后关联&lt;/h3&gt;
-
-&lt;p&gt;MyCat的E-R分片，将关联的数据分在一个分片，即是都要做分片。&lt;/p&gt;
-
-&lt;h2 id=&quot;mycat其他&quot;&gt;MyCat其他&lt;/h2&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;1、SQL拦截，功能监控写入sql审计&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;2、SQL防火墙，功能：设置白名单黑名单，黑名单可以编写限制没where的delete语句&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;3、通过Zookeeper做启动和同步&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;4、通过HAProxy做负载均衡&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;1、安装&lt;/li&gt;
-  &lt;li&gt;2、Keepalived监控HAProxy&lt;/li&gt;
-  &lt;li&gt;3、配置HAProxy监控MyCat&lt;/li&gt;
-  &lt;li&gt;4、配置vip访问HAProxy&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&quot;mycat读写分离&quot;&gt;MyCat读写分离&lt;/h2&gt;
-
-&lt;h2 id=&quot;mycat管理和监控&quot;&gt;MyCat管理和监控&lt;/h2&gt;
-
-&lt;p&gt;MyCat-Web工具：https://www.cnblogs.com/cuishuai/p/7570597.html&lt;/p&gt;
-
-&lt;h2 id=&quot;mycat只做到了弱分布式事务&quot;&gt;MyCat只做到了弱分布式事务&lt;/h2&gt;
-
-&lt;h2 id=&quot;迭代&quot;&gt;迭代&lt;/h2&gt;
-&lt;ul&gt;
-  &lt;li&gt;2020年02月11日 21:54:00 初稿&lt;/li&gt;
-  &lt;li&gt;2020年02月24日 00:17:00 修改&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&quot;参考&quot;&gt;参考&lt;/h2&gt;
-</description>
-				<pubDate>Sat, 11 Jan 2020 00:00:00 +0800</pubDate>
-				<link>/mycat-introduction.html</link>
-				<guid isPermaLink="true">/mycat-introduction.html</guid>
 			</item>
 		
 	</channel>

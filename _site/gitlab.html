@@ -8,9 +8,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="fromChinaBoy">
 
-    <title>搭建私有的Composer Packagist - Blog</title>
+    <title>Self-host Gitlab的相关操作 - Blog</title>
 
-    <link rel="canonical" href="http://localhost:4000/private-composer-packagist.html">
+    <link rel="canonical" href="http://localhost:4000/gitlab.html">
 
     <!-- Icons -->
   <link rel="shortcut icon" href="img/favicon.ico">
@@ -96,14 +96,12 @@
                 <div class="post-heading">
                     <div class="Tags">
                         
-                        <a class="tag" href="/Tags/#PHP" title="PHP">PHP</a>
-                        
-                        <a class="tag" href="/Tags/#Composer" title="Composer">Composer</a>
+                        <a class="tag" href="/Tags/#Gitlab" title="Gitlab">Gitlab</a>
                         
                     </div>
-                    <h1>搭建私有的Composer Packagist</h1>
+                    <h1>Self-host Gitlab的相关操作</h1>
                     
-                    <span class="meta">Posted by zzhpeng on May 24, 2019</span>
+                    <span class="meta">Posted by zzhpeng on January 8, 2022</span>
                 </div>
             </div>
         </div>
@@ -116,96 +114,186 @@
         <div class="row">
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 post-container">
 
-                <h3 id="官方文档和官方源">官方文档和官方源</h3>
-<p>官方文档：https://getcomposer.org/doc/articles/handling-private-packages-with-satis.md</p>
+                <h1 id="安装debian-系列系统为例">安装（Debian 系列系统为例）</h1>
 
-<p>github地址：https://github.com/composer/satis</p>
+<h2 id="apt-get-直接安装">apt-get 直接安装</h2>
 
-<h3 id="下载源">下载源</h3>
-
-<ul>
-  <li>方法一</li>
-</ul>
-
-<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git clone https://github.com/composer/satis.git
-
-<span class="nb">cd </span>satis <span class="o">&amp;&amp;</span> composer update
+<p>更新gitlab源</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl -s https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.deb.sh | sudo bash
 </code></pre></div></div>
 
-<ul>
-  <li>方法二</li>
-</ul>
-
-<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>composer create-project composer/satis:dev-master
+<p>安装，默认最新版</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo apt-get install gitlab-ce
 </code></pre></div></div>
 
-<h3 id="写satisjson配置">写satis.json配置</h3>
-<ul>
-  <li>生成satis.json文件</li>
-</ul>
+<h1 id="进阶debian-系列系统为例">进阶（Debian 系列系统为例）</h1>
 
-<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">touch </span>satis.json
+<h2 id="已有nginx想用原来的服务">已有Nginx，想用原来的服务</h2>
+
+<p>停gitlab自带的nginx，并且修改外部web server权限用户。</p>
+<pre><code class="language-$xslt">sudo vim /etc/gitlab/gitlab.rb
+</code></pre>
+
+<p>修改地方，如下图：</p>
+
+<p><img src="../img/2022-01-08-gitlab/advanced_1.png" alt="" /></p>
+
+<p>修改完，重新加载配置&amp;重启即可。</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>#重新加载配置
+sudo gitlab-ctl reconfigure
+
+#重启
+sudo gitlab-ctl restart
+
 </code></pre></div></div>
 
-<ul>
-  <li>写入配置</li>
-</ul>
+<h2 id="定期备份与清理">定期备份与清理</h2>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
-{
-  "name": "zzhpeng packages",
-  
-  "homepage": "http://packages.example.org", 
-  
-  "repositories": [
-    {
-      "type": "git",
-      "url": "https://github.com/FromChinaBoy/Export.git"
-    },
-    {
-      "type": "composer",
-      "url": "https://packagist.laravel-china.org"
-    }
-  ],
-  "require": {
-    "zzhpeng/export": "dev-master",
-    "topthink/framework": "5.1.*"
-  }
+<h3 id="备份">备份</h3>
+
+<blockquote>
+  <p>1、创建备份脚本，每天00自动备份</p>
+</blockquote>
+
+<p>sudo vim /var/opt/gitlab/backups/remove.sh</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#!/bin/bash</span>
+0 0 <span class="k">*</span> <span class="k">*</span> <span class="k">*</span> sh /var/opt/gitlab/backups/backup.sh <span class="o">&gt;&gt;</span> /var/opt/gitlab/backups/backup.log
+</code></pre></div></div>
+
+<blockquote>
+  <p>2、更改用户组(当前操作的是onehour用户)</p>
+</blockquote>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo chown -R git:git /var/opt/gitlab/backups/backup.sh
+</code></pre></div></div>
+
+<blockquote>
+  <p>3、测试</p>
+</blockquote>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo sh /var/opt/gitlab/backups/backup.sh &gt;&gt; /var/opt/gitlab/backups/backup.log
+</code></pre></div></div>
+
+<blockquote>
+  <p>4、设置contab</p>
+</blockquote>
+
+<p>切换到root用户执行contab</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>contab -e
+</code></pre></div></div>
+
+<p>用nano操作</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>0 0 * * * sh /var/opt/gitlab/backups/backup.sh &gt;&gt; /var/opt/gitlab/backups/backup.log
+
+</code></pre></div></div>
+
+<p>Ctrl+X，按Y保存</p>
+
+<h3 id="清理">清理</h3>
+
+<blockquote>
+  <p>1、创建备份脚本，15天前的数据自动删除</p>
+</blockquote>
+
+<p>sudo vim /var/opt/gitlab/backups/remove.sh</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#!/bin/bash</span>
+find <span class="s2">"/var/opt/gitlab/backups/"</span> <span class="nt">-name</span> <span class="s2">"*.tar"</span> <span class="nt">-ctime</span> +15  <span class="nt">-exec</span> <span class="nb">rm</span> <span class="nt">-rf</span> <span class="o">{}</span> <span class="se">\;</span>  
+</code></pre></div></div>
+
+<blockquote>
+  <p>2、更改用户组(当前操作的是onehour用户)</p>
+</blockquote>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo chown -R git:git /var/opt/gitlab/backups/remove.sh
+</code></pre></div></div>
+
+<blockquote>
+  <p>3、测试</p>
+</blockquote>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo sh /var/opt/gitlab/backups/remove.sh
+</code></pre></div></div>
+
+<blockquote>
+  <p>4、设置contab</p>
+</blockquote>
+
+<p>切换到root用户执行contab</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>contab -e
+</code></pre></div></div>
+
+<p>用nano操作</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>45 10 * * * sh /var/opt/gitlab/backups/remove.sh  &gt;&gt; /var/opt/gitlab/backups/remove.log
+
+</code></pre></div></div>
+
+<p>Ctrl+X，按Y保存</p>
+
+<h2 id="升级gitlab">升级gitlab</h2>
+
+<p>升级前记得备份好数据，以防Error，官方介绍 <a href="https://about.gitlab.com/install/#ubuntu">https://about.gitlab.com/install/#ubuntu</a></p>
+
+<p><strong>注意，从低版本一次性升级到高版本可能会出问题，所以官方出了个逐步升级的路线图</strong>
+8.11.Z -&gt; 8.12.0 -&gt; 8.17.7 -&gt; 9.5.10 -&gt; 10.8.7 -&gt; 11.11.8 -&gt; 12.0.12 -&gt; 
+12.1.17 -&gt; 12.10.14 -&gt; 13.0.14 -&gt; 13.1.11 -&gt; 13.8.8 -&gt; latest 13.12.Z -&gt; latest 14.0.Z -&gt; latest 14.1.Z -&gt; latest 14.Y.Z</p>
+
+<p>官方升级路径：<a href="https://docs.gitlab.com/ee/update/index.html#upgrade-paths">https://docs.gitlab.com/ee/update/index.html#upgrade-paths</a></p>
+
+<h3 id="查看版本">查看版本</h3>
+
+<p>查看详细的版本信息</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code> sudo gitlab-rake gitlab:env:info
+</code></pre></div></div>
+
+<h3 id="到官方包库寻找对应版本">到官方包库寻找对应版本</h3>
+
+<p>包地址
+<a href="https://packages.gitlab.com/gitlab/gitlab-ce/">https://packages.gitlab.com/gitlab/gitlab-ce/</a></p>
+
+<p>操作前，先更新gitlab资源路径</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl -s https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.deb.sh | sudo bash
+</code></pre></div></div>
+
+<p>查找对应的包，点击进去能看到详情，可以看到apt怎么操作之类的，例如安装12.1.17版本</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo apt-get install gitlab-ce=12.1.17-ce.0
+</code></pre></div></div>
+
+<p><strong>这里的安装即是安装也是更新，会把你的数据也一起迁移了</strong></p>
+
+<p>然后重启gitlab</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo gitlab-ctl restart
+</code></pre></div></div>
+
+<p>重启nginx，我这里用的是外部的nginx，而且用的TCP连接，所以需要重启，重新连接socket。</p>
+
+<p><strong>注意，升级到13.5.1-ce.0后，要修改nginx 转发代理的路劲</strong></p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>#原来
+upstream gitlab-workhorse {
+  server unix:/var/opt/gitlab/gitlab-workhorse/socket  fail_timeout=0;
+}
+
+#修改
+upstream gitlab-workhorse {
+  server unix:/var/opt/gitlab/gitlab-workhorse/sockets/socket  fail_timeout=0;
 }
 </code></pre></div></div>
 
-<h3 id="运行">运行</h3>
+<h2 id="迭代">迭代</h2>
 <ul>
-  <li>生成静态页面和更新源</li>
+  <li>2022年01月08日 03:11:40 初稿</li>
 </ul>
 
-<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>php bin/satis build satis.json ./public
+<h2 id="参考">参考</h2>
+<p>1、<a href="https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5756">Permission denied on sockets after update to “13.5.1-ce.0” (#5756) · Issues · GitLab.org / omnibus-gitlab · GitLab</a></p>
 
-</code></pre></div></div>
-
-<p>执行命令后会生成public文件夹，下面有静态文件</p>
-
-<h3 id="部署站点">部署站点</h3>
-<ul>
-  <li>php cli部署</li>
-</ul>
-
-<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>php <span class="nt">-S</span> localhost:8866 <span class="nt">-t</span> ./public
-</code></pre></div></div>
-
-<ul>
-  <li>nginx 部署</li>
-</ul>
-
-<p>略</p>
-
-<h3 id="额外">额外</h3>
-<ul>
-  <li>linux crontab定时器实时更新</li>
-</ul>
-
-<p>略</p>
-
+<p>2、<a href="https://www.cnblogs.com/cheyunhua/p/14875506.html">gitlab备份、还原及迁移 - 技术颜良 - 博客园</a></p>
 
 
                 <hr>
@@ -217,13 +305,9 @@
                 <ul class="pager">
                     
                     <li class="previous">
-                        <a href="/linux-quick-button.html" data-toggle="tooltip" data-placement="top" title="unix bash快捷键">&larr; Previous Post</a>
+                        <a href="/crypto-zoon.html" data-toggle="tooltip" data-placement="top" title="区块链游戏 crypto-zoon，从入门到入坑">&larr; Previous Post</a>
                     </li>
                     
-                    
-                    <li class="next">
-                        <a href="/oauth2-slim.html" data-toggle="tooltip" data-placement="top" title="基于slim框架搭建Oauth2">Next Post &rarr;</a>
-                    </li>
                     
                 </ul>
 
