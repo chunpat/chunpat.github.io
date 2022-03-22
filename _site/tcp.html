@@ -6,7 +6,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="fromChinaBoy">
+    <meta name="description" content="chunpat">
 
     <title>关于TCP - Blog</title>
 
@@ -149,7 +149,7 @@
 <p>客户端第三次ACK不发送，半连接backlog满了</p>
 
 <p><strong>查看backlog满，服务端阻塞</strong></p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>netstat -s |grep ‘times the listen queue of a socket overflowed’
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>netstat -s |grep ‘times the listen queue of a socket overflowed’
 </code></pre></div></div>
 
 <h2 id="tcp-四次挥手常见的问题">TCP 四次挥手常见的问题</h2>
@@ -179,7 +179,7 @@
 <p>重启服务，客户端TIME WAIT占用端口。解决：设置so REUSEADDR （swoole 默认开启）</p>
 
 <p>其他解决办法</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>net.ipv4.tcp_timestamps=1
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>net.ipv4.tcp_timestamps=1
 net.ipv4.tcp_tw_reuse=1
 net.ipv4.ip_local_port_range调大
 不要开启net.ipv4.tcp_tw_recycle=1
@@ -196,7 +196,7 @@ net.ipv4.ip_local_port_range调大
 <p>swoole server SWOOLE_PROCESS模式close方法决定是否释放close
 swoole server SWOOLE_BASE模式 会自动调用底层FIN close释放，不会存在大量close wait</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$serv = new Swoole\Server("0.0.0.0", 9501, SWOOLE_BASE); //SWOOLE_PROCESS
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$serv = new Swoole\Server("0.0.0.0", 9501, SWOOLE_BASE); //SWOOLE_PROCESS
 </code></pre></div></div>
 
 <h2 id="tcp-短连接问题">TCP 短连接问题</h2>
@@ -262,7 +262,7 @@ swoole server SWOOLE_BASE模式 会自动调用底层FIN close释放，不会存
 <p>举例：以上图为例，服务端超时没收到东西，发送FIN到php客户端，php 底层tcp回ACK确认收到。但是长连接处于被动状态不发FIN到服务端主动关闭链接。
 这样服务端就处于在FIN_WAIT2、客户端在CLOSE_WAIT状态。
 客户端就一直处于CLOSE_WAIT，相反服务端由于有系统设置服务端自动断开连接（os系统超时时间）</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>net.ipv4.tcp_fin_timesout = 30
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>net.ipv4.tcp_fin_timesout = 30
 </code></pre></div></div>
 <p>所以服务端不会保持在FIN_WAIT2状态。</p>
 
@@ -292,7 +292,7 @@ swoole server SWOOLE_BASE模式 会自动调用底层FIN close释放，不会存
 
 <p>2、swoole tcp_keepalive</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$serv = new Swoole\Server("192.168.2.194", 6666, SWOOLE_PROCESS);
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$serv = new Swoole\Server("192.168.2.194", 6666, SWOOLE_PROCESS);
 $serv-&gt;set(array(
     'worker_num' =&gt; 1,
     'open_tcp_keepalive' =&gt; true,
@@ -307,7 +307,7 @@ $serv-&gt;set(array(
 
 <p>上面两个keepalive的缺点就是无法检测死链接，死链接会自动回ping检测。</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>array(
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>array(
     'heartbeat_idle_time'      =&gt; 600, // 表示一个连接如果600秒内未向服务器发送任何数据，此连接将被强制关闭
     'heartbeat_check_interval' =&gt; 60,  // 表示每60秒遍历一次
 );
@@ -435,7 +435,7 @@ $serv-&gt;set(array(
 
                     
                     <li>
-                        <a href="https://twitter.com/zzhpeng">
+                        <a href="https://twitter.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
@@ -446,7 +446,7 @@ $serv-&gt;set(array(
 
                     
                     <li>
-                        <a href="https://github.com/fromChinaBoy">
+                        <a href="https://github.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-github fa-stack-1x fa-inverse"></i>
@@ -458,7 +458,7 @@ $serv-&gt;set(array(
                     <!--
                     
                     <li>
-                        <a href="http://www.douban.com/people/zzhpeng">
+                        <a href="http://www.douban.com/people/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-douban fa-stack-1x fa-inverse"></i>
@@ -471,7 +471,7 @@ $serv-&gt;set(array(
                     <!--
                     
                     <li>
-                        <a href="https://www.facebook.com/zzhpeng">
+                        <a href="https://www.facebook.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
@@ -483,7 +483,7 @@ $serv-&gt;set(array(
 
                     
                     <li>
-                        <a target="_blank" href="https://www.zhihu.com/people/zzhpeng">
+                        <a target="_blank" href="https://www.zhihu.com/people/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa  fa-stack-1x fa-inverse">知</i>
@@ -495,7 +495,7 @@ $serv-&gt;set(array(
                     <!--
                     
                     <li>
-                        <a target="_blank" href="http://weibo.com/zzhpeng">
+                        <a target="_blank" href="http://weibo.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>

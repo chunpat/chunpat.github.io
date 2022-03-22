@@ -6,7 +6,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="fromChinaBoy">
+    <meta name="description" content="chunpat">
 
     <title>Mysql 索引问题 - Blog</title>
 
@@ -132,27 +132,27 @@
 <span class="o">+</span><span class="c1">----------------------+---------------------+------+-----+---------+----------------+</span>
 <span class="o">|</span> <span class="n">Field</span>                <span class="o">|</span> <span class="k">Type</span>                <span class="o">|</span> <span class="k">Null</span> <span class="o">|</span> <span class="k">Key</span> <span class="o">|</span> <span class="k">Default</span> <span class="o">|</span> <span class="n">Extra</span>          <span class="o">|</span>
 <span class="o">+</span><span class="c1">----------------------+---------------------+------+-----+---------+----------------+</span>
-<span class="o">|</span> <span class="n">id</span>                   <span class="o">|</span> <span class="n">int</span><span class="p">(</span><span class="mi">11</span><span class="p">)</span>             <span class="o">|</span> <span class="k">NO</span>   <span class="o">|</span> <span class="n">PRI</span> <span class="o">|</span> <span class="k">NULL</span>    <span class="o">|</span> <span class="n">auto_increment</span> <span class="o">|</span>
-<span class="o">|</span> <span class="n">sn</span>                   <span class="o">|</span> <span class="n">varchar</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span>         <span class="o">|</span> <span class="n">YES</span>  <span class="o">|</span> <span class="n">UNI</span> <span class="o">|</span> <span class="k">NULL</span>    <span class="o">|</span>                <span class="o">|</span>
-<span class="o">|</span> <span class="n">store_id</span>             <span class="o">|</span> <span class="n">int</span><span class="p">(</span><span class="mi">11</span><span class="p">)</span>             <span class="o">|</span> <span class="k">NO</span>   <span class="o">|</span> <span class="n">MUL</span> <span class="o">|</span> <span class="mi">0</span>       <span class="o">|</span>                <span class="o">|</span>
-<span class="o">|</span> <span class="n">source_id</span>            <span class="o">|</span> <span class="n">int</span><span class="p">(</span><span class="mi">11</span><span class="p">)</span>             <span class="o">|</span> <span class="k">NO</span>   <span class="o">|</span> <span class="n">MUL</span> <span class="o">|</span> <span class="k">NULL</span>    <span class="o">|</span>                <span class="o">|</span>
-<span class="o">|</span> <span class="n">source_type</span>          <span class="o">|</span> <span class="n">tinyint</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>          <span class="o">|</span> <span class="k">NO</span>   <span class="o">|</span>     <span class="o">|</span> <span class="k">NULL</span>    <span class="o">|</span>                <span class="o">|</span>
-<span class="o">|</span> <span class="n">bill_type</span>            <span class="o">|</span> <span class="n">tinyint</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>          <span class="o">|</span> <span class="k">NO</span>   <span class="o">|</span>     <span class="o">|</span> <span class="k">NULL</span>    <span class="o">|</span>                <span class="o">|</span>
-<span class="o">|</span> <span class="n">money</span>                <span class="o">|</span> <span class="n">decimal</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>       <span class="o">|</span> <span class="k">NO</span>   <span class="o">|</span>     <span class="o">|</span> <span class="mi">0</span><span class="p">.</span><span class="mi">00</span>    <span class="o">|</span>                <span class="o">|</span>
-<span class="o">|</span> <span class="n">income_money</span>         <span class="o">|</span> <span class="n">decimal</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>       <span class="o">|</span> <span class="k">NO</span>   <span class="o">|</span>     <span class="o">|</span> <span class="mi">0</span><span class="p">.</span><span class="mi">00</span>    <span class="o">|</span>                <span class="o">|</span>
-<span class="o">|</span> <span class="n">user_commission</span>      <span class="o">|</span> <span class="n">decimal</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>       <span class="o">|</span> <span class="k">NO</span>   <span class="o">|</span>     <span class="o">|</span> <span class="mi">0</span><span class="p">.</span><span class="mi">00</span>    <span class="o">|</span>                <span class="o">|</span>
-<span class="o">|</span> <span class="n">poundage</span>             <span class="o">|</span> <span class="n">decimal</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>       <span class="o">|</span> <span class="k">NO</span>   <span class="o">|</span>     <span class="o">|</span> <span class="mi">0</span><span class="p">.</span><span class="mi">00</span>    <span class="o">|</span>                <span class="o">|</span>
-<span class="o">|</span> <span class="n">platform_commission</span>  <span class="o">|</span> <span class="n">decimal</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>       <span class="o">|</span> <span class="k">NO</span>   <span class="o">|</span>     <span class="o">|</span> <span class="mi">0</span><span class="p">.</span><span class="mi">00</span>    <span class="o">|</span>                <span class="o">|</span>
-<span class="o">|</span> <span class="n">wallet_money_before</span>  <span class="o">|</span> <span class="n">decimal</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>       <span class="o">|</span> <span class="k">NO</span>   <span class="o">|</span>     <span class="o">|</span> <span class="mi">0</span><span class="p">.</span><span class="mi">00</span>    <span class="o">|</span>                <span class="o">|</span>
-<span class="o">|</span> <span class="n">wallet_money_after</span>   <span class="o">|</span> <span class="n">decimal</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>       <span class="o">|</span> <span class="k">NO</span>   <span class="o">|</span>     <span class="o">|</span> <span class="mi">0</span><span class="p">.</span><span class="mi">00</span>    <span class="o">|</span>                <span class="o">|</span>
-<span class="o">|</span> <span class="k">desc</span>                 <span class="o">|</span> <span class="n">varchar</span><span class="p">(</span><span class="mi">255</span><span class="p">)</span>        <span class="o">|</span> <span class="n">YES</span>  <span class="o">|</span>     <span class="o">|</span> <span class="k">NULL</span>    <span class="o">|</span>                <span class="o">|</span>
-<span class="o">|</span> <span class="n">remark</span>               <span class="o">|</span> <span class="n">varchar</span><span class="p">(</span><span class="mi">255</span><span class="p">)</span>        <span class="o">|</span> <span class="n">YES</span>  <span class="o">|</span>     <span class="o">|</span> <span class="k">NULL</span>    <span class="o">|</span>                <span class="o">|</span>
-<span class="o">|</span> <span class="n">create_time</span>          <span class="o">|</span> <span class="k">timestamp</span>           <span class="o">|</span> <span class="n">YES</span>  <span class="o">|</span>     <span class="o">|</span> <span class="k">NULL</span>    <span class="o">|</span>                <span class="o">|</span>
-<span class="o">|</span> <span class="n">update_time</span>          <span class="o">|</span> <span class="k">timestamp</span>           <span class="o">|</span> <span class="n">YES</span>  <span class="o">|</span>     <span class="o">|</span> <span class="k">NULL</span>    <span class="o">|</span>                <span class="o">|</span>
-<span class="o">|</span> <span class="n">delete_time</span>          <span class="o">|</span> <span class="k">timestamp</span>           <span class="o">|</span> <span class="n">YES</span>  <span class="o">|</span>     <span class="o">|</span> <span class="k">NULL</span>    <span class="o">|</span>                <span class="o">|</span>
-<span class="o">|</span> <span class="n">account_type</span>         <span class="o">|</span> <span class="n">tinyint</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="n">unsigned</span> <span class="o">|</span> <span class="k">NO</span>   <span class="o">|</span>     <span class="o">|</span> <span class="mi">0</span>       <span class="o">|</span>                <span class="o">|</span>
-<span class="o">|</span> <span class="n">source_payment_model</span> <span class="o">|</span> <span class="n">varchar</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>         <span class="o">|</span> <span class="n">YES</span>  <span class="o">|</span>     <span class="o">|</span> <span class="k">NULL</span>    <span class="o">|</span>                <span class="o">|</span>
-<span class="o">|</span> <span class="n">is_virtual</span>           <span class="o">|</span> <span class="n">tinyint</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>          <span class="o">|</span> <span class="k">NO</span>   <span class="o">|</span>     <span class="o">|</span> <span class="mi">0</span>       <span class="o">|</span>                <span class="o">|</span>
+<span class="o">|</span> <span class="n">id</span>                   <span class="o">|</span> <span class="nb">int</span><span class="p">(</span><span class="mi">11</span><span class="p">)</span>             <span class="o">|</span> <span class="k">NO</span>   <span class="o">|</span> <span class="n">PRI</span> <span class="o">|</span> <span class="k">NULL</span>    <span class="o">|</span> <span class="n">auto_increment</span> <span class="o">|</span>
+<span class="o">|</span> <span class="n">sn</span>                   <span class="o">|</span> <span class="nb">varchar</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span>         <span class="o">|</span> <span class="n">YES</span>  <span class="o">|</span> <span class="n">UNI</span> <span class="o">|</span> <span class="k">NULL</span>    <span class="o">|</span>                <span class="o">|</span>
+<span class="o">|</span> <span class="n">store_id</span>             <span class="o">|</span> <span class="nb">int</span><span class="p">(</span><span class="mi">11</span><span class="p">)</span>             <span class="o">|</span> <span class="k">NO</span>   <span class="o">|</span> <span class="n">MUL</span> <span class="o">|</span> <span class="mi">0</span>       <span class="o">|</span>                <span class="o">|</span>
+<span class="o">|</span> <span class="n">source_id</span>            <span class="o">|</span> <span class="nb">int</span><span class="p">(</span><span class="mi">11</span><span class="p">)</span>             <span class="o">|</span> <span class="k">NO</span>   <span class="o">|</span> <span class="n">MUL</span> <span class="o">|</span> <span class="k">NULL</span>    <span class="o">|</span>                <span class="o">|</span>
+<span class="o">|</span> <span class="n">source_type</span>          <span class="o">|</span> <span class="nb">tinyint</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>          <span class="o">|</span> <span class="k">NO</span>   <span class="o">|</span>     <span class="o">|</span> <span class="k">NULL</span>    <span class="o">|</span>                <span class="o">|</span>
+<span class="o">|</span> <span class="n">bill_type</span>            <span class="o">|</span> <span class="nb">tinyint</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>          <span class="o">|</span> <span class="k">NO</span>   <span class="o">|</span>     <span class="o">|</span> <span class="k">NULL</span>    <span class="o">|</span>                <span class="o">|</span>
+<span class="o">|</span> <span class="n">money</span>                <span class="o">|</span> <span class="nb">decimal</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>       <span class="o">|</span> <span class="k">NO</span>   <span class="o">|</span>     <span class="o">|</span> <span class="mi">0</span><span class="p">.</span><span class="mi">00</span>    <span class="o">|</span>                <span class="o">|</span>
+<span class="o">|</span> <span class="n">income_money</span>         <span class="o">|</span> <span class="nb">decimal</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>       <span class="o">|</span> <span class="k">NO</span>   <span class="o">|</span>     <span class="o">|</span> <span class="mi">0</span><span class="p">.</span><span class="mi">00</span>    <span class="o">|</span>                <span class="o">|</span>
+<span class="o">|</span> <span class="n">user_commission</span>      <span class="o">|</span> <span class="nb">decimal</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>       <span class="o">|</span> <span class="k">NO</span>   <span class="o">|</span>     <span class="o">|</span> <span class="mi">0</span><span class="p">.</span><span class="mi">00</span>    <span class="o">|</span>                <span class="o">|</span>
+<span class="o">|</span> <span class="n">poundage</span>             <span class="o">|</span> <span class="nb">decimal</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>       <span class="o">|</span> <span class="k">NO</span>   <span class="o">|</span>     <span class="o">|</span> <span class="mi">0</span><span class="p">.</span><span class="mi">00</span>    <span class="o">|</span>                <span class="o">|</span>
+<span class="o">|</span> <span class="n">platform_commission</span>  <span class="o">|</span> <span class="nb">decimal</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>       <span class="o">|</span> <span class="k">NO</span>   <span class="o">|</span>     <span class="o">|</span> <span class="mi">0</span><span class="p">.</span><span class="mi">00</span>    <span class="o">|</span>                <span class="o">|</span>
+<span class="o">|</span> <span class="n">wallet_money_before</span>  <span class="o">|</span> <span class="nb">decimal</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>       <span class="o">|</span> <span class="k">NO</span>   <span class="o">|</span>     <span class="o">|</span> <span class="mi">0</span><span class="p">.</span><span class="mi">00</span>    <span class="o">|</span>                <span class="o">|</span>
+<span class="o">|</span> <span class="n">wallet_money_after</span>   <span class="o">|</span> <span class="nb">decimal</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>       <span class="o">|</span> <span class="k">NO</span>   <span class="o">|</span>     <span class="o">|</span> <span class="mi">0</span><span class="p">.</span><span class="mi">00</span>    <span class="o">|</span>                <span class="o">|</span>
+<span class="o">|</span> <span class="k">desc</span>                 <span class="o">|</span> <span class="nb">varchar</span><span class="p">(</span><span class="mi">255</span><span class="p">)</span>        <span class="o">|</span> <span class="n">YES</span>  <span class="o">|</span>     <span class="o">|</span> <span class="k">NULL</span>    <span class="o">|</span>                <span class="o">|</span>
+<span class="o">|</span> <span class="n">remark</span>               <span class="o">|</span> <span class="nb">varchar</span><span class="p">(</span><span class="mi">255</span><span class="p">)</span>        <span class="o">|</span> <span class="n">YES</span>  <span class="o">|</span>     <span class="o">|</span> <span class="k">NULL</span>    <span class="o">|</span>                <span class="o">|</span>
+<span class="o">|</span> <span class="n">create_time</span>          <span class="o">|</span> <span class="nb">timestamp</span>           <span class="o">|</span> <span class="n">YES</span>  <span class="o">|</span>     <span class="o">|</span> <span class="k">NULL</span>    <span class="o">|</span>                <span class="o">|</span>
+<span class="o">|</span> <span class="n">update_time</span>          <span class="o">|</span> <span class="nb">timestamp</span>           <span class="o">|</span> <span class="n">YES</span>  <span class="o">|</span>     <span class="o">|</span> <span class="k">NULL</span>    <span class="o">|</span>                <span class="o">|</span>
+<span class="o">|</span> <span class="n">delete_time</span>          <span class="o">|</span> <span class="nb">timestamp</span>           <span class="o">|</span> <span class="n">YES</span>  <span class="o">|</span>     <span class="o">|</span> <span class="k">NULL</span>    <span class="o">|</span>                <span class="o">|</span>
+<span class="o">|</span> <span class="n">account_type</span>         <span class="o">|</span> <span class="nb">tinyint</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="nb">unsigned</span> <span class="o">|</span> <span class="k">NO</span>   <span class="o">|</span>     <span class="o">|</span> <span class="mi">0</span>       <span class="o">|</span>                <span class="o">|</span>
+<span class="o">|</span> <span class="n">source_payment_model</span> <span class="o">|</span> <span class="nb">varchar</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>         <span class="o">|</span> <span class="n">YES</span>  <span class="o">|</span>     <span class="o">|</span> <span class="k">NULL</span>    <span class="o">|</span>                <span class="o">|</span>
+<span class="o">|</span> <span class="n">is_virtual</span>           <span class="o">|</span> <span class="nb">tinyint</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>          <span class="o">|</span> <span class="k">NO</span>   <span class="o">|</span>     <span class="o">|</span> <span class="mi">0</span>       <span class="o">|</span>                <span class="o">|</span>
 <span class="o">+</span><span class="c1">----------------------+---------------------+------+-----+---------+----------------+</span>
 <span class="mi">21</span> <span class="k">rows</span> <span class="k">in</span> <span class="k">set</span> <span class="p">(</span><span class="mi">0</span><span class="p">.</span><span class="mi">00</span> <span class="n">sec</span><span class="p">)</span>
 </code></pre></div></div>
@@ -278,7 +278,7 @@
 <span class="mi">1</span> <span class="k">row</span> <span class="k">in</span> <span class="k">set</span><span class="p">,</span> <span class="mi">1</span> <span class="n">warning</span> <span class="p">(</span><span class="mi">0</span><span class="p">.</span><span class="mi">00</span> <span class="n">sec</span><span class="p">)</span>
 </code></pre></div></div>
 
-<p><code class="highlighter-rouge">总结：这个表的索引idx_storeid_isvirtual_deletetime_createtime 有问题。
+<p><code class="language-plaintext highlighter-rouge">总结：这个表的索引idx_storeid_isvirtual_deletetime_createtime 有问题。
 第一，isvirtual的值只有1，0，而多数查询的时候只需isvirtual = 0和所有，所以没必要建立索引；
 第二，delete_time软删除字段，一般都是`delete_time` IS NULL，故不需要加索引，所以修改索引字段idx_storeid_createtime</code></p>
 
@@ -409,7 +409,7 @@
 
                     
                     <li>
-                        <a href="https://twitter.com/zzhpeng">
+                        <a href="https://twitter.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
@@ -420,7 +420,7 @@
 
                     
                     <li>
-                        <a href="https://github.com/fromChinaBoy">
+                        <a href="https://github.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-github fa-stack-1x fa-inverse"></i>
@@ -432,7 +432,7 @@
                     <!--
                     
                     <li>
-                        <a href="http://www.douban.com/people/zzhpeng">
+                        <a href="http://www.douban.com/people/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-douban fa-stack-1x fa-inverse"></i>
@@ -445,7 +445,7 @@
                     <!--
                     
                     <li>
-                        <a href="https://www.facebook.com/zzhpeng">
+                        <a href="https://www.facebook.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
@@ -457,7 +457,7 @@
 
                     
                     <li>
-                        <a target="_blank" href="https://www.zhihu.com/people/zzhpeng">
+                        <a target="_blank" href="https://www.zhihu.com/people/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa  fa-stack-1x fa-inverse">知</i>
@@ -469,7 +469,7 @@
                     <!--
                     
                     <li>
-                        <a target="_blank" href="http://weibo.com/zzhpeng">
+                        <a target="_blank" href="http://weibo.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>

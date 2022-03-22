@@ -6,7 +6,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="fromChinaBoy">
+    <meta name="description" content="chunpat">
 
     <title>基于frp,gitlab的docker镜像实现本地gitlab外网访问(一) - Blog</title>
 
@@ -173,7 +173,7 @@
   <li>本地客户端frpc配置</li>
 </ul>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[common]
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[common]
 server_addr = *.*.*.* #填写自己的外网服务器的ip
 server_port = 7000
 
@@ -188,7 +188,7 @@ custom_domains = gitlab.zzhpeng.cn
   <li>外网frps配置</li>
 </ul>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[common]
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[common]
 bind_port = 7000
 vhost_http_port = 8080
 subdomain_host = gitlab.zzhpeng.cn                            
@@ -203,14 +203,14 @@ subdomain_host = gitlab.zzhpeng.cn
   <li>client端启动</li>
 </ul>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>./frpc -c ./frpc.ini
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>./frpc -c ./frpc.ini
 </code></pre></div></div>
 
 <ul>
   <li>server端启动</li>
 </ul>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>./frps -c ./frps.ini
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>./frps -c ./frps.ini
 </code></pre></div></div>
 
 <h3 id="外网域名配置与测试">外网域名配置与测试</h3>
@@ -227,7 +227,7 @@ subdomain_host = gitlab.zzhpeng.cn
 <p><img src="http://img.zzhpeng.cn/FuPWVEIWOixgp6wM2vmBfP84_emk" alt="" /></p>
 
 <h3 id="外网域名访问优化nginx转发">外网域名访问优化–nginx转发</h3>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
 server{
     listen 80;
     server_name  gitlab.zzhpeng.cn;
@@ -268,7 +268,7 @@ server{
 </blockquote>
 
 <p>A:上面本地docker-compose搭建的环境，将映射出去的8686端口改为80，映射出来的config配置文件下有gitlab.rb，修改如下配置项并改公司路由器的host：</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code> # For HTTP
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code> # For HTTP
  external_url "http://gitlab.example.com:8929"
 
  or
@@ -390,7 +390,7 @@ server{
 
                     
                     <li>
-                        <a href="https://twitter.com/zzhpeng">
+                        <a href="https://twitter.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
@@ -401,7 +401,7 @@ server{
 
                     
                     <li>
-                        <a href="https://github.com/fromChinaBoy">
+                        <a href="https://github.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-github fa-stack-1x fa-inverse"></i>
@@ -413,7 +413,7 @@ server{
                     <!--
                     
                     <li>
-                        <a href="http://www.douban.com/people/zzhpeng">
+                        <a href="http://www.douban.com/people/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-douban fa-stack-1x fa-inverse"></i>
@@ -426,7 +426,7 @@ server{
                     <!--
                     
                     <li>
-                        <a href="https://www.facebook.com/zzhpeng">
+                        <a href="https://www.facebook.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
@@ -438,7 +438,7 @@ server{
 
                     
                     <li>
-                        <a target="_blank" href="https://www.zhihu.com/people/zzhpeng">
+                        <a target="_blank" href="https://www.zhihu.com/people/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa  fa-stack-1x fa-inverse">知</i>
@@ -450,7 +450,7 @@ server{
                     <!--
                     
                     <li>
-                        <a target="_blank" href="http://weibo.com/zzhpeng">
+                        <a target="_blank" href="http://weibo.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>

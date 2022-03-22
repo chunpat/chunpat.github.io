@@ -6,7 +6,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="fromChinaBoy">
+    <meta name="description" content="chunpat">
 
     <title>使用Linux的cpu挖xmr币 - Blog</title>
 
@@ -119,7 +119,7 @@
                 <p>系统版本：CentOS Linux release 7.6.1810 (Core)</p>
 
 <h2 id="1创建一个专门的用户">1、创建一个专门的用户</h2>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>useradd coin
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>useradd coin
 passwd coin
 visudo //给sudo权限，你懂得
 su coin
@@ -131,7 +131,7 @@ su coin
   <p>安装依赖</p>
 </blockquote>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo yum install -y centos-release-scl epel-release
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo yum install -y centos-release-scl epel-release
 sudo yum install -y cmake3 devtoolset-4-gcc* hwloc-devel libmicrohttpd-devel openssl-devel make git
 //临时使用devtoolset-4
 scl enable devtoolset-4 bash
@@ -143,7 +143,7 @@ git clone https://github.com/fireice-uk/xmr-stak.git
 </blockquote>
 
 <p>因为master分支去掉了Monero币，而且剩下的都是些无名币。</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cd xmr-stak
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cd xmr-stak
 git fetch origin xmr-stak-rx
 </code></pre></div></div>
 
@@ -151,14 +151,14 @@ git fetch origin xmr-stak-rx
   <p>编译安装，只使用CPU进行挖矿</p>
 </blockquote>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mkdir build
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mkdir build
 cd build
 sudo cmake3 -DCUDA_ENABLE=OFF -DOpenCL_ENABLE=OFF ..
 sudo make install
 </code></pre></div></div>
 
 <h2 id="3启动程序填写币钱包地址矿池ip等">3、启动程序，填写币钱包地址、矿池ip等</h2>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>./bin/xmr-stak-rx //之后有提示填写钱包地址和矿池ip地址，其他信息都是次要的
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>./bin/xmr-stak-rx //之后有提示填写钱包地址和矿池ip地址，其他信息都是次要的
 </code></pre></div></div>
 <p><strong>./bin/xmr-stak-rx 可以先看看配置是否正确，然后在nohup ./bin/xmr-stak-rx &amp; 挂载在后台</strong></p>
 
@@ -280,7 +280,7 @@ sudo make install
 
                     
                     <li>
-                        <a href="https://twitter.com/zzhpeng">
+                        <a href="https://twitter.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
@@ -291,7 +291,7 @@ sudo make install
 
                     
                     <li>
-                        <a href="https://github.com/fromChinaBoy">
+                        <a href="https://github.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-github fa-stack-1x fa-inverse"></i>
@@ -303,7 +303,7 @@ sudo make install
                     <!--
                     
                     <li>
-                        <a href="http://www.douban.com/people/zzhpeng">
+                        <a href="http://www.douban.com/people/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-douban fa-stack-1x fa-inverse"></i>
@@ -316,7 +316,7 @@ sudo make install
                     <!--
                     
                     <li>
-                        <a href="https://www.facebook.com/zzhpeng">
+                        <a href="https://www.facebook.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
@@ -328,7 +328,7 @@ sudo make install
 
                     
                     <li>
-                        <a target="_blank" href="https://www.zhihu.com/people/zzhpeng">
+                        <a target="_blank" href="https://www.zhihu.com/people/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa  fa-stack-1x fa-inverse">知</i>
@@ -340,7 +340,7 @@ sudo make install
                     <!--
                     
                     <li>
-                        <a target="_blank" href="http://weibo.com/zzhpeng">
+                        <a target="_blank" href="http://weibo.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>

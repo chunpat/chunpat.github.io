@@ -6,7 +6,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="fromChinaBoy">
+    <meta name="description" content="chunpat">
 
     <title>iptables和nginx配置防御cc学习 - Blog</title>
 
@@ -121,12 +121,12 @@
 学iptables的内在意思。</p>
 
 <p>配置的iptables两条命令</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo iptables -I INPUT -p tcp --dport 443 -m connlimit --connlimit-above 30 -j REJECT
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo iptables -I INPUT -p tcp --dport 443 -m connlimit --connlimit-above 30 -j REJECT
 sudo iptables -I INPUT -p tcp --dport 80 -m connlimit --connlimit-above 30 -j REJECT
 </code></pre></div></div>
 <p>解释下这两条命令，意思都是表示在同一时刻最大的tcp为30连接数限制，超过30连接数就会被reject拒绝。</p>
 
-<p><code class="highlighter-rouge">记住是同一时刻！！!</code></p>
+<p><code class="language-plaintext highlighter-rouge">记住是同一时刻！！!</code></p>
 
 <p>同一时刻，即是tcp处于ESTABLISHED连接状态的。那这些怎么看呢？</p>
 
@@ -134,7 +134,7 @@ sudo iptables -I INPUT -p tcp --dport 80 -m connlimit --connlimit-above 30 -j RE
   <p>案例</p>
 </blockquote>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>netstat -nat  | grep :443
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>netstat -nat  | grep :443
 
 Proto Recv-Q Send-Q Local-Address           Foreign-Address         State
 tcp        0      0 0.0.0.0:443             0.0.0.0:*               LISTEN     
@@ -192,28 +192,28 @@ tcp        0      0 172.18.245.246:443      113.67.9.211:14564      TIME_WAIT
   <p>统计对外443端口连接数</p>
 </blockquote>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>netstat -nat|grep "47.106.188.48:443"|wc -l
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>netstat -nat|grep "47.106.188.48:443"|wc -l
 </code></pre></div></div>
 
 <blockquote>
   <p>统计对外443已连接上的，状态为ESTABLISHED</p>
 </blockquote>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>netstat -nat | grep ESTABLISHED | grep 47.106.188.48:443 | wc -l  
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>netstat -nat | grep ESTABLISHED | grep 47.106.188.48:443 | wc -l  
 </code></pre></div></div>
 
 <blockquote>
   <p>统计对外443等待连接的，状态为SYN_SENT</p>
 </blockquote>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>netstat -nat | grep SYN_SENT | grep 47.106.188.48:443 | wc -l  
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>netstat -nat | grep SYN_SENT | grep 47.106.188.48:443 | wc -l  
 </code></pre></div></div>
 
 <p>iptables配置完后，过几天又出现了nginx的502情况，在nginx error查看当时的那个时间段的该ip的请求失败数。</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>grep '2020/01/01 19:02:31' xxx.com.error.log|wc -l   //结果显示62个请求失败数
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>grep '2020/01/01 19:02:31' xxx.com.error.log|wc -l   //结果显示62个请求失败数
 </code></pre></div></div>
 
-<p><code class="highlighter-rouge">初步猜想</code>：nginx error显示62个请求失败数! 保持30个连接数量，但是请求却是一直在请求，动态语言php-cgi处理不过来，nginx
+<p><code class="language-plaintext highlighter-rouge">初步猜想</code>：nginx error显示62个请求失败数! 保持30个连接数量，但是请求却是一直在请求，动态语言php-cgi处理不过来，nginx
 传过来的请求，就会直接返回错误。导致nginx直接将请求，记做错误写入error日志。</p>
 
 <p>画个流程图：
@@ -235,7 +235,7 @@ tcp        0      0 172.18.245.246:443      113.67.9.211:14564      TIME_WAIT
   <p>查看iptables状态</p>
 </blockquote>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo ufw status  //会显示 Status: active ，证明已经开启
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo ufw status  //会显示 Status: active ，证明已经开启
 </code></pre></div></div>
 
 <blockquote>
@@ -243,19 +243,19 @@ tcp        0      0 172.18.245.246:443      113.67.9.211:14564      TIME_WAIT
 </blockquote>
 
 <p>添加，防御同一时刻20连接数限制</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo iptables -I INPUT -p tcp --dport 443 -m connlimit --connlimit-above 20 -j REJECT
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo iptables -I INPUT -p tcp --dport 443 -m connlimit --connlimit-above 20 -j REJECT
 </code></pre></div></div>
 
 <p>删除防御同一时刻20连接数限制</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo iptables -D INPUT -p tcp --dport 443 -m connlimit --connlimit-above 20 -j REJECT
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo iptables -D INPUT -p tcp --dport 443 -m connlimit --connlimit-above 20 -j REJECT
 </code></pre></div></div>
 
 <p>查看是否生效</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo iptables -nL
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo iptables -nL
 </code></pre></div></div>
 
 <p>开机生效</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>自查
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>自查
 </code></pre></div></div>
 
 <blockquote>
@@ -291,7 +291,7 @@ tcp        0      0 172.18.245.246:443      113.67.9.211:14564      TIME_WAIT
 <p>如图下，为F5请求产生502后，查看服务器tcp情况，还保持着20个连接数，和80个准备连接数。
 <img src="http://img.zzhpeng.cn/FmQH6dfFWvqmgHrcTF_EcpYUjQPW" alt="tcp连接数变化" /></p>
 
-<p><code class="highlighter-rouge">结论：iptable的限制20个连接数，能限制流量，但是F5攻击触及到数据库，就存在数据库那边的读的压力。
+<p><code class="language-plaintext highlighter-rouge">结论：iptable的限制20个连接数，能限制流量，但是F5攻击触及到数据库，就存在数据库那边的读的压力。
 如果是静态或者缓存资源的的响应是没问题的，所以这里找到了nginx的cc防御。遇到一个时间段过多的流量可以抛出
 个网络异常或503响应给浏览器，这样用户持续的F5就不会影响服务器了</code></p>
 
@@ -299,21 +299,21 @@ tcp        0      0 172.18.245.246:443      113.67.9.211:14564      TIME_WAIT
   <p>nginx.conf主配置</p>
 </blockquote>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    limit_conn_zone $binary_remote_addr zone=perip:10m;//远端ip 限制 
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    limit_conn_zone $binary_remote_addr zone=perip:10m;//远端ip 限制 
     limit_conn_zone $server_name zone=perserver:10m;//服务器域名 限制
 </code></pre></div></div>
 
-<p><code class="highlighter-rouge">容器共使用10M的内存来对于IP传输开销</code></p>
+<p><code class="language-plaintext highlighter-rouge">容器共使用10M的内存来对于IP传输开销</code></p>
 
 <blockquote>
   <p>server.conf某个网站</p>
 </blockquote>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    limit_conn perserver 300;//远端服务器域名 300个并发限制
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    limit_conn perserver 300;//远端服务器域名 300个并发限制
     limit_conn perip 25;//远端ip25个并发 限制
     limit_rate 1024k;
 </code></pre></div></div>
-<p><code class="highlighter-rouge">limit_rate 512k： 对每个连接限速512k. 注意，这里是对连接限速，而不是对IP限速。如果一个IP允许两个并发连接，那么这个IP就是限速limit_rate×2。</code></p>
+<p><code class="language-plaintext highlighter-rouge">limit_rate 512k： 对每个连接限速512k. 注意，这里是对连接限速，而不是对IP限速。如果一个IP允许两个并发连接，那么这个IP就是限速limit_rate×2。</code></p>
 
 <p>配置，这里我直接用了宝塔的UI配置，这里是在server外部配置的，全局。
 <img src="http://img.zzhpeng.cn/Fp8s437_mKXOffD-bKDyTub_vxg4" alt="宝塔设置" /></p>
@@ -441,7 +441,7 @@ tcp        0      0 172.18.245.246:443      113.67.9.211:14564      TIME_WAIT
 
                     
                     <li>
-                        <a href="https://twitter.com/zzhpeng">
+                        <a href="https://twitter.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
@@ -452,7 +452,7 @@ tcp        0      0 172.18.245.246:443      113.67.9.211:14564      TIME_WAIT
 
                     
                     <li>
-                        <a href="https://github.com/fromChinaBoy">
+                        <a href="https://github.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-github fa-stack-1x fa-inverse"></i>
@@ -464,7 +464,7 @@ tcp        0      0 172.18.245.246:443      113.67.9.211:14564      TIME_WAIT
                     <!--
                     
                     <li>
-                        <a href="http://www.douban.com/people/zzhpeng">
+                        <a href="http://www.douban.com/people/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-douban fa-stack-1x fa-inverse"></i>
@@ -477,7 +477,7 @@ tcp        0      0 172.18.245.246:443      113.67.9.211:14564      TIME_WAIT
                     <!--
                     
                     <li>
-                        <a href="https://www.facebook.com/zzhpeng">
+                        <a href="https://www.facebook.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
@@ -489,7 +489,7 @@ tcp        0      0 172.18.245.246:443      113.67.9.211:14564      TIME_WAIT
 
                     
                     <li>
-                        <a target="_blank" href="https://www.zhihu.com/people/zzhpeng">
+                        <a target="_blank" href="https://www.zhihu.com/people/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa  fa-stack-1x fa-inverse">知</i>
@@ -501,7 +501,7 @@ tcp        0      0 172.18.245.246:443      113.67.9.211:14564      TIME_WAIT
                     <!--
                     
                     <li>
-                        <a target="_blank" href="http://weibo.com/zzhpeng">
+                        <a target="_blank" href="http://weibo.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>

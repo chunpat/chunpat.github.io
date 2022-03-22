@@ -6,7 +6,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="fromChinaBoy">
+    <meta name="description" content="chunpat">
 
     <title>Mysql 逻辑数据恢复 - Blog</title>
 
@@ -126,14 +126,14 @@
 
 <h2 id="数据库逻辑恢复">数据库逻辑恢复</h2>
 
-<p>解压下载后压缩文件，然后选择对应要恢复的数据库。<code class="highlighter-rouge">注意：➜ source 是目录</code></p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>➜ source gunzip -c sima_datafull_202009291740_1601372414.sql.gz|mysql -uroot -p sima
+<p>解压下载后压缩文件，然后选择对应要恢复的数据库。<code class="language-plaintext highlighter-rouge">注意：➜ source 是目录</code></p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>➜ source gunzip -c sima_datafull_202009291740_1601372414.sql.gz|mysql -uroot -p sima
 Enter password: 
 ERROR 1840 (HY000) at line 24: @@GLOBAL.GTID_PURGED can only be set when @@GLOBAL.GTID_EXECUTED is empty.
 </code></pre></div></div>
 
-<p><code class="highlighter-rouge">上面出现error</code>，度娘下，提示集群迁移到单实例的设置问题，操作：</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>➜  source mysql -uroot -p 
+<p><code class="language-plaintext highlighter-rouge">上面出现error</code>，度娘下，提示集群迁移到单实例的设置问题，操作：</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>➜  source mysql -uroot -p 
 Enter password: 
 mysql&gt; reset master;
 Query OK, 0 rows affected (0.01 sec)
@@ -244,7 +244,7 @@ Query OK, 0 rows affected (0.01 sec)
 
                     
                     <li>
-                        <a href="https://twitter.com/zzhpeng">
+                        <a href="https://twitter.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
@@ -255,7 +255,7 @@ Query OK, 0 rows affected (0.01 sec)
 
                     
                     <li>
-                        <a href="https://github.com/fromChinaBoy">
+                        <a href="https://github.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-github fa-stack-1x fa-inverse"></i>
@@ -267,7 +267,7 @@ Query OK, 0 rows affected (0.01 sec)
                     <!--
                     
                     <li>
-                        <a href="http://www.douban.com/people/zzhpeng">
+                        <a href="http://www.douban.com/people/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-douban fa-stack-1x fa-inverse"></i>
@@ -280,7 +280,7 @@ Query OK, 0 rows affected (0.01 sec)
                     <!--
                     
                     <li>
-                        <a href="https://www.facebook.com/zzhpeng">
+                        <a href="https://www.facebook.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
@@ -292,7 +292,7 @@ Query OK, 0 rows affected (0.01 sec)
 
                     
                     <li>
-                        <a target="_blank" href="https://www.zhihu.com/people/zzhpeng">
+                        <a target="_blank" href="https://www.zhihu.com/people/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa  fa-stack-1x fa-inverse">知</i>
@@ -304,7 +304,7 @@ Query OK, 0 rows affected (0.01 sec)
                     <!--
                     
                     <li>
-                        <a target="_blank" href="http://weibo.com/zzhpeng">
+                        <a target="_blank" href="http://weibo.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>

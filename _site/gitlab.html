@@ -6,7 +6,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="fromChinaBoy">
+    <meta name="description" content="chunpat">
 
     <title>Self-host Gitlab的相关操作 - Blog</title>
 
@@ -119,11 +119,11 @@
 <h2 id="apt-get-直接安装">apt-get 直接安装</h2>
 
 <p>更新gitlab源</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl -s https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.deb.sh | sudo bash
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl -s https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.deb.sh | sudo bash
 </code></pre></div></div>
 
 <p>安装，默认最新版</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo apt-get install gitlab-ce
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo apt-get install gitlab-ce
 </code></pre></div></div>
 
 <h1 id="进阶debian-系列系统为例">进阶（Debian 系列系统为例）</h1>
@@ -139,7 +139,7 @@
 <p><img src="../img/2022-01-08-gitlab/advanced_1.png" alt="" /></p>
 
 <p>修改完，重新加载配置&amp;重启即可。</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>#重新加载配置
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>#重新加载配置
 sudo gitlab-ctl reconfigure
 
 #重启
@@ -156,22 +156,22 @@ sudo gitlab-ctl restart
 </blockquote>
 
 <p>sudo vim /var/opt/gitlab/backups/remove.sh</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#!/bin/bash</span>
-0 0 <span class="k">*</span> <span class="k">*</span> <span class="k">*</span> sh /var/opt/gitlab/backups/backup.sh <span class="o">&gt;&gt;</span> /var/opt/gitlab/backups/backup.log
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>#!/bin/bash
+0 0 * * * sh /var/opt/gitlab/backups/backup.sh &gt;&gt; /var/opt/gitlab/backups/backup.log
 </code></pre></div></div>
 
 <blockquote>
   <p>2、更改用户组(当前操作的是onehour用户)</p>
 </blockquote>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo chown -R git:git /var/opt/gitlab/backups/backup.sh
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo chown -R git:git /var/opt/gitlab/backups/backup.sh
 </code></pre></div></div>
 
 <blockquote>
   <p>3、测试</p>
 </blockquote>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo sh /var/opt/gitlab/backups/backup.sh &gt;&gt; /var/opt/gitlab/backups/backup.log
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo sh /var/opt/gitlab/backups/backup.sh &gt;&gt; /var/opt/gitlab/backups/backup.log
 </code></pre></div></div>
 
 <blockquote>
@@ -180,12 +180,12 @@ sudo gitlab-ctl restart
 
 <p>切换到root用户执行contab</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>contab -e
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>contab -e
 </code></pre></div></div>
 
 <p>用nano操作</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>0 0 * * * sh /var/opt/gitlab/backups/backup.sh &gt;&gt; /var/opt/gitlab/backups/backup.log
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>0 0 * * * sh /var/opt/gitlab/backups/backup.sh &gt;&gt; /var/opt/gitlab/backups/backup.log
 
 </code></pre></div></div>
 
@@ -198,22 +198,22 @@ sudo gitlab-ctl restart
 </blockquote>
 
 <p>sudo vim /var/opt/gitlab/backups/remove.sh</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#!/bin/bash</span>
-find <span class="s2">"/var/opt/gitlab/backups/"</span> <span class="nt">-name</span> <span class="s2">"*.tar"</span> <span class="nt">-ctime</span> +15  <span class="nt">-exec</span> <span class="nb">rm</span> <span class="nt">-rf</span> <span class="o">{}</span> <span class="se">\;</span>  
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>#!/bin/bash
+find "/var/opt/gitlab/backups/" -name "*.tar" -ctime +15  -exec rm -rf {} \;  
 </code></pre></div></div>
 
 <blockquote>
   <p>2、更改用户组(当前操作的是onehour用户)</p>
 </blockquote>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo chown -R git:git /var/opt/gitlab/backups/remove.sh
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo chown -R git:git /var/opt/gitlab/backups/remove.sh
 </code></pre></div></div>
 
 <blockquote>
   <p>3、测试</p>
 </blockquote>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo sh /var/opt/gitlab/backups/remove.sh
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo sh /var/opt/gitlab/backups/remove.sh
 </code></pre></div></div>
 
 <blockquote>
@@ -222,12 +222,12 @@ find <span class="s2">"/var/opt/gitlab/backups/"</span> <span class="nt">-name</
 
 <p>切换到root用户执行contab</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>contab -e
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>contab -e
 </code></pre></div></div>
 
 <p>用nano操作</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>45 10 * * * sh /var/opt/gitlab/backups/remove.sh  &gt;&gt; /var/opt/gitlab/backups/remove.log
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>45 10 * * * sh /var/opt/gitlab/backups/remove.sh  &gt;&gt; /var/opt/gitlab/backups/remove.log
 
 </code></pre></div></div>
 
@@ -246,7 +246,7 @@ find <span class="s2">"/var/opt/gitlab/backups/"</span> <span class="nt">-name</
 <h3 id="查看版本">查看版本</h3>
 
 <p>查看详细的版本信息</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code> sudo gitlab-rake gitlab:env:info
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code> sudo gitlab-rake gitlab:env:info
 </code></pre></div></div>
 
 <h3 id="到官方包库寻找对应版本">到官方包库寻找对应版本</h3>
@@ -255,26 +255,26 @@ find <span class="s2">"/var/opt/gitlab/backups/"</span> <span class="nt">-name</
 <a href="https://packages.gitlab.com/gitlab/gitlab-ce/">https://packages.gitlab.com/gitlab/gitlab-ce/</a></p>
 
 <p>操作前，先更新gitlab资源路径</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl -s https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.deb.sh | sudo bash
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl -s https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.deb.sh | sudo bash
 </code></pre></div></div>
 
 <p>查找对应的包，点击进去能看到详情，可以看到apt怎么操作之类的，例如安装12.1.17版本</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo apt-get install gitlab-ce=12.1.17-ce.0
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo apt-get install gitlab-ce=12.1.17-ce.0
 </code></pre></div></div>
 
 <p><strong>这里的安装即是安装也是更新，会把你的数据也一起迁移了</strong></p>
 
 <p>然后重启gitlab</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo gitlab-ctl restart
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo gitlab-ctl restart
 </code></pre></div></div>
 
 <p>重启nginx，我这里用的是外部的nginx，而且用的TCP连接，所以需要重启，重新连接socket。</p>
 
 <p><strong>注意，升级到13.5.1-ce.0后，要修改nginx 转发代理的路劲</strong></p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>#原来
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>#原来
 upstream gitlab-workhorse {
   server unix:/var/opt/gitlab/gitlab-workhorse/socket  fail_timeout=0;
 }
@@ -308,6 +308,10 @@ upstream gitlab-workhorse {
                         <a href="/crypto-zoon.html" data-toggle="tooltip" data-placement="top" title="区块链游戏 crypto-zoon，从入门到入坑">&larr; Previous Post</a>
                     </li>
                     
+                    
+                    <li class="next">
+                        <a href="/php-exception.html" data-toggle="tooltip" data-placement="top" title="PHP 异常处理">Next Post &rarr;</a>
+                    </li>
                     
                 </ul>
 
@@ -384,7 +388,7 @@ upstream gitlab-workhorse {
 
                     
                     <li>
-                        <a href="https://twitter.com/zzhpeng">
+                        <a href="https://twitter.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
@@ -395,7 +399,7 @@ upstream gitlab-workhorse {
 
                     
                     <li>
-                        <a href="https://github.com/fromChinaBoy">
+                        <a href="https://github.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-github fa-stack-1x fa-inverse"></i>
@@ -407,7 +411,7 @@ upstream gitlab-workhorse {
                     <!--
                     
                     <li>
-                        <a href="http://www.douban.com/people/zzhpeng">
+                        <a href="http://www.douban.com/people/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-douban fa-stack-1x fa-inverse"></i>
@@ -420,7 +424,7 @@ upstream gitlab-workhorse {
                     <!--
                     
                     <li>
-                        <a href="https://www.facebook.com/zzhpeng">
+                        <a href="https://www.facebook.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
@@ -432,7 +436,7 @@ upstream gitlab-workhorse {
 
                     
                     <li>
-                        <a target="_blank" href="https://www.zhihu.com/people/zzhpeng">
+                        <a target="_blank" href="https://www.zhihu.com/people/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa  fa-stack-1x fa-inverse">知</i>
@@ -444,7 +448,7 @@ upstream gitlab-workhorse {
                     <!--
                     
                     <li>
-                        <a target="_blank" href="http://weibo.com/zzhpeng">
+                        <a target="_blank" href="http://weibo.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>

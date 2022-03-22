@@ -6,7 +6,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="fromChinaBoy">
+    <meta name="description" content="chunpat">
 
     <title>重学 MySQL 的Left Join操作 - Blog</title>
 
@@ -130,9 +130,9 @@
 <span class="c1">-- ----------------------------</span>
 <span class="k">DROP</span> <span class="k">TABLE</span> <span class="n">IF</span> <span class="k">EXISTS</span> <span class="nv">`store`</span><span class="p">;</span>
 <span class="k">CREATE</span> <span class="k">TABLE</span> <span class="nv">`store`</span> <span class="p">(</span>
-  <span class="nv">`id`</span> <span class="n">int</span><span class="p">(</span><span class="mi">11</span><span class="p">)</span> <span class="k">NOT</span> <span class="k">NULL</span> <span class="n">AUTO_INCREMENT</span><span class="p">,</span>
-  <span class="nv">`name`</span> <span class="n">varchar</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span> <span class="k">COLLATE</span> <span class="n">utf8mb4_unicode_ci</span> <span class="k">DEFAULT</span> <span class="k">NULL</span> <span class="k">COMMENT</span> <span class="s1">'门店名称'</span><span class="p">,</span>
-  <span class="nv">`business_type`</span> <span class="n">tinyint</span><span class="p">(</span><span class="mi">255</span><span class="p">)</span> <span class="k">DEFAULT</span> <span class="k">NULL</span> <span class="k">COMMENT</span> <span class="s1">'门店类型:1直营2加盟'</span><span class="p">,</span>
+  <span class="nv">`id`</span> <span class="nb">int</span><span class="p">(</span><span class="mi">11</span><span class="p">)</span> <span class="k">NOT</span> <span class="k">NULL</span> <span class="n">AUTO_INCREMENT</span><span class="p">,</span>
+  <span class="nv">`name`</span> <span class="nb">varchar</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span> <span class="k">COLLATE</span> <span class="n">utf8mb4_unicode_ci</span> <span class="k">DEFAULT</span> <span class="k">NULL</span> <span class="k">COMMENT</span> <span class="s1">'门店名称'</span><span class="p">,</span>
+  <span class="nv">`business_type`</span> <span class="nb">tinyint</span><span class="p">(</span><span class="mi">255</span><span class="p">)</span> <span class="k">DEFAULT</span> <span class="k">NULL</span> <span class="k">COMMENT</span> <span class="s1">'门店类型:1直营2加盟'</span><span class="p">,</span>
   <span class="k">PRIMARY</span> <span class="k">KEY</span> <span class="p">(</span><span class="nv">`id`</span><span class="p">)</span>
 <span class="p">)</span> <span class="n">ENGINE</span><span class="o">=</span><span class="n">InnoDB</span> <span class="n">AUTO_INCREMENT</span><span class="o">=</span><span class="mi">5</span> <span class="k">DEFAULT</span> <span class="n">CHARSET</span><span class="o">=</span><span class="n">utf8mb4</span> <span class="k">COLLATE</span><span class="o">=</span><span class="n">utf8mb4_unicode_ci</span><span class="p">;</span>
 
@@ -151,10 +151,10 @@
 <span class="c1">-- ----------------------------</span>
 <span class="k">DROP</span> <span class="k">TABLE</span> <span class="n">IF</span> <span class="k">EXISTS</span> <span class="nv">`store_wallet_bill`</span><span class="p">;</span>
 <span class="k">CREATE</span> <span class="k">TABLE</span> <span class="nv">`store_wallet_bill`</span> <span class="p">(</span>
-  <span class="nv">`id`</span> <span class="n">int</span><span class="p">(</span><span class="mi">11</span><span class="p">)</span> <span class="k">NOT</span> <span class="k">NULL</span> <span class="n">AUTO_INCREMENT</span><span class="p">,</span>
-  <span class="nv">`bill`</span> <span class="n">decimal</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span> <span class="k">DEFAULT</span> <span class="k">NULL</span> <span class="k">COMMENT</span> <span class="s1">'流水'</span><span class="p">,</span>
-  <span class="nv">`store_id`</span> <span class="n">int</span><span class="p">(</span><span class="mi">11</span><span class="p">)</span> <span class="k">DEFAULT</span> <span class="k">NULL</span> <span class="k">COMMENT</span> <span class="s1">'门店id'</span><span class="p">,</span>
-  <span class="nv">`create_time`</span> <span class="n">datetime</span> <span class="k">DEFAULT</span> <span class="k">NULL</span> <span class="k">COMMENT</span> <span class="s1">'生成时间'</span><span class="p">,</span>
+  <span class="nv">`id`</span> <span class="nb">int</span><span class="p">(</span><span class="mi">11</span><span class="p">)</span> <span class="k">NOT</span> <span class="k">NULL</span> <span class="n">AUTO_INCREMENT</span><span class="p">,</span>
+  <span class="nv">`bill`</span> <span class="nb">decimal</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span> <span class="k">DEFAULT</span> <span class="k">NULL</span> <span class="k">COMMENT</span> <span class="s1">'流水'</span><span class="p">,</span>
+  <span class="nv">`store_id`</span> <span class="nb">int</span><span class="p">(</span><span class="mi">11</span><span class="p">)</span> <span class="k">DEFAULT</span> <span class="k">NULL</span> <span class="k">COMMENT</span> <span class="s1">'门店id'</span><span class="p">,</span>
+  <span class="nv">`create_time`</span> <span class="nb">datetime</span> <span class="k">DEFAULT</span> <span class="k">NULL</span> <span class="k">COMMENT</span> <span class="s1">'生成时间'</span><span class="p">,</span>
   <span class="k">PRIMARY</span> <span class="k">KEY</span> <span class="p">(</span><span class="nv">`id`</span><span class="p">)</span>
 <span class="p">)</span> <span class="n">ENGINE</span><span class="o">=</span><span class="n">InnoDB</span> <span class="n">AUTO_INCREMENT</span><span class="o">=</span><span class="mi">7</span> <span class="k">DEFAULT</span> <span class="n">CHARSET</span><span class="o">=</span><span class="n">utf8mb4</span> <span class="k">COLLATE</span><span class="o">=</span><span class="n">utf8mb4_unicode_ci</span><span class="p">;</span>
 
@@ -226,7 +226,7 @@
 </table>
 
 <blockquote>
-  <p>2、第二条Sql，将第一条Sql的where后面的<code class="highlighter-rouge">store</code>.business_type = 1移到left join的on后面。</p>
+  <p>2、第二条Sql，将第一条Sql的where后面的<code class="language-plaintext highlighter-rouge">store</code>.business_type = 1移到left join的on后面。</p>
 </blockquote>
 
 <div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">SELECT</span>
@@ -280,7 +280,7 @@
 <div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">SELECT</span> <span class="o">*</span> <span class="k">FROM</span> <span class="n">LT</span> <span class="k">LEFT</span> <span class="k">JOIN</span> <span class="n">RT</span> <span class="k">ON</span> <span class="n">P1</span><span class="p">(</span><span class="n">LT</span><span class="p">,</span><span class="n">RT</span><span class="p">))</span> <span class="k">WHERE</span> <span class="n">P2</span><span class="p">(</span><span class="n">LT</span><span class="p">,</span><span class="n">RT</span><span class="p">)</span>
 </code></pre></div></div>
 <p>其中P1是on过滤条件，缺失则认为是TRUE，P2是where过滤条件，缺失也认为是TRUE，该语句的执行逻辑伪代码大概如下：</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>FOR each row lt in LT {   // 遍历左表的每一行
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>FOR each row lt in LT {   // 遍历左表的每一行
   BOOL b = FALSE;
   FOR each row rt in RT such that P1(lt, rt) {// 遍历右表每一行，找到满足join条件的行 !!!!注意这里，这就是on后面加上`store`.business_type = 1但是还是会出现business_type=2的原因
     IF P2(lt, rt) {//满足 where 过滤条件
@@ -312,7 +312,7 @@
   <p>2、第二条Sql</p>
 </blockquote>
 
-<p>从上面的伪代码可以看到，on后面加上<code class="highlighter-rouge">store</code>.business_type = 1 。左边store表的name=’门店D’ 满足第二个遍历条件，不满足IF P2(lt, rt) ，
+<p>从上面的伪代码可以看到，on后面加上<code class="language-plaintext highlighter-rouge">store</code>.business_type = 1 。左边store表的name=’门店D’ 满足第二个遍历条件，不满足IF P2(lt, rt) ，
 所以一条都没。左边store表的name=’门店B’,不满足第二个遍历条件，所以右边是null。</p>
 
 <h2 id="豁然开朗">豁然开朗</h2>
@@ -324,18 +324,18 @@
 <h2 id="注意">注意</h2>
 
 <p>Mysql5.7+版本限制使用GROUP BY 的select 筛选元素，报错大概如下</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>SELECT list is not in GROUP BY clause and contains nonaggregated column 'userinfo.t_long.user_name' which is not functionally dependent on columns in GROUP BY clause; this is incompatible with sql_mode=only_full_group_by
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>SELECT list is not in GROUP BY clause and contains nonaggregated column 'userinfo.t_long.user_name' which is not functionally dependent on columns in GROUP BY clause; this is incompatible with sql_mode=only_full_group_by
 </code></pre></div></div>
 
 <blockquote>
   <p>1、临时性解决方案</p>
 </blockquote>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>select @@sql_mode; //会显示一些sql_mode属性
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>select @@sql_mode; //会显示一些sql_mode属性
 </code></pre></div></div>
 
 <p>然后去掉 ONLY_FULL_GROUP_BY，重新设置</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>set global sql_mode='STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>set global sql_mode='STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
 set session sql_mode='STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
 </code></pre></div></div>
 
@@ -448,7 +448,7 @@ set session sql_mode='STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR
 
                     
                     <li>
-                        <a href="https://twitter.com/zzhpeng">
+                        <a href="https://twitter.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
@@ -459,7 +459,7 @@ set session sql_mode='STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR
 
                     
                     <li>
-                        <a href="https://github.com/fromChinaBoy">
+                        <a href="https://github.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-github fa-stack-1x fa-inverse"></i>
@@ -471,7 +471,7 @@ set session sql_mode='STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR
                     <!--
                     
                     <li>
-                        <a href="http://www.douban.com/people/zzhpeng">
+                        <a href="http://www.douban.com/people/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-douban fa-stack-1x fa-inverse"></i>
@@ -484,7 +484,7 @@ set session sql_mode='STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR
                     <!--
                     
                     <li>
-                        <a href="https://www.facebook.com/zzhpeng">
+                        <a href="https://www.facebook.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
@@ -496,7 +496,7 @@ set session sql_mode='STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR
 
                     
                     <li>
-                        <a target="_blank" href="https://www.zhihu.com/people/zzhpeng">
+                        <a target="_blank" href="https://www.zhihu.com/people/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa  fa-stack-1x fa-inverse">知</i>
@@ -508,7 +508,7 @@ set session sql_mode='STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR
                     <!--
                     
                     <li>
-                        <a target="_blank" href="http://weibo.com/zzhpeng">
+                        <a target="_blank" href="http://weibo.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>

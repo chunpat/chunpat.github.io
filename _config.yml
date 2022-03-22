@@ -1,46 +1,47 @@
 # Site settings
 title: Blog
 header-img: "img/autumn2.jpg"
-tagline: "吉光片羽"  
-description: "fromChinaBoy"
+tagline: "吉光片羽"
+description: "chunpat"
 baseurl: ""
 # url: "https://www.zzhpeng.com"
 # url: "http://localhost:4000"
 
 url: https://www.zzhpeng.com
 
-# enforce_ssl: 
+# enforce_ssl:
 
 # About/contact
-owner: 
+owner:
   name: "zzhpeng"
   email: zhangzhenpeng008@email.com
   bio: "明朝即長路 惜取此時心"
 
 # Data
 
-# gavatar: 
-favicon: img/favicon.ico
-douban_username: zzhpeng
-twitter_username: zzhpeng
-github_username: fromChinaBoy
-facebook_username: zzhpeng
-weibo_username: zzhpeng
-zhihu_username: zzhpeng
+# gavatar:
+favicon: chunpat
+douban_username: chunpat
+twitter_username: chunpat
+github_username: chunpat
+facebook_username: chunpat
+weibo_username: chunpat
+zhihu_username: chunpat
 
-# Build settings  
+# Build settings
 
-# use Github Flavored Markdown !important  
-# document: http://jekyllrb.com/docs/configuration/#kramdown  
+# use Github Flavored Markdown !important
+# document: http://jekyllrb.com/docs/configuration/#kramdown
 
 markdown: kramdown
 kramdown:
   input: GFM
 highlighter: rouge
 
-gems: 
-- jekyll-paginate
-# - jekyll-gallery-generator 
+#gems: [jekyll-coffeescript, jekyll-watch, jekyll-assets]
+gems:
+  - jekyll-paginate
+  #- jekyll-gallery-generator
 permalink: none
 paginate: 8
 exclude: ["less","node_modules","Gruntfile.js","package.json","README.md"]
@@ -54,7 +55,7 @@ timezone: Asia/Shanghai
 # Defaults for posts
 defaults:
   -
-    scope: 
+    scope:
       path: ""
       type: "posts"
     values:
@@ -63,15 +64,15 @@ defaults:
       header-img: "img/fantasy.jpg" # We don't want posts without a header image, that whould mean white on white
 
 
-# Comments 
+# Comments
 comments :
   provider : disqus
   disqus :
       short_name : Azeril
 
 # Analytics and webmaster tools stuff goes here
-google_analytics: UA-66863061-1
-google_verify:
+#google_analytics: UA-66863061-1
+#google_verify:
 # https://ssl.bing.com/webmaster/configure/verify/ownership Option 2 content= goes here
 bing_verify:
 

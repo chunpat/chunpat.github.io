@@ -6,7 +6,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="fromChinaBoy">
+    <meta name="description" content="chunpat">
 
     <title>elasticsearch业务问题 - Blog</title>
 
@@ -119,7 +119,7 @@
   <p>要搜索的内容</p>
 </blockquote>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>P92325 iphone 7s plus 4G 黑色 美版 无锁
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>P92325 iphone 7s plus 4G 黑色 美版 无锁
 P92324 iphone 7 128g 金色 有锁 通用版
 </code></pre></div></div>
 
@@ -152,11 +152,11 @@ P92324 iphone 7 128g 金色 有锁 通用版
 </blockquote>
 
 <h3 id="1创建索引">1、创建索引</h3>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl -XPUT http://localhost:9200/model
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl -XPUT http://localhost:9200/model
 </code></pre></div></div>
 
 <h3 id="2设置索引属性map">2、设置索引属性map</h3>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl -XPOST http://localhost:9200/model/_mapping -H 'Content-Type:application/json' -d'
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl -XPOST http://localhost:9200/model/_mapping -H 'Content-Type:application/json' -d'
 {
         "properties": {
             "name": {
@@ -170,7 +170,7 @@ P92324 iphone 7 128g 金色 有锁 通用版
 </code></pre></div></div>
 
 <h3 id="3写入doc数据">3、写入doc数据</h3>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl -XPOST http://localhost:9200/model/_create/1 -H 'Content-Type:application/json' -d'
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl -XPOST http://localhost:9200/model/_create/1 -H 'Content-Type:application/json' -d'
 {"content":"P92325 iphone7splus4G黑色美版无锁"}
 '
 curl -XPOST http://localhost:9200/model/_create/2 -H 'Content-Type:application/json' -d'
@@ -179,13 +179,13 @@ curl -XPOST http://localhost:9200/model/_create/2 -H 'Content-Type:application/j
 
 </code></pre></div></div>
 <h3 id="4查看doc状态">4、查看doc状态</h3>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl -X GET "http://localhost:9200/_cat/indices?v"
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl -X GET "http://localhost:9200/_cat/indices?v"
 </code></pre></div></div>
 
 <h3 id="5搜索数据">5、搜索数据</h3>
 
 <p>iphone7splus 或 iphone 7s plus 查找搜索出 P92325 iphone 7s plus 4G 黑色 美版 无锁</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl -XPOST http://localhost:9200/model/_search  -H 'Content-Type:application/json' -d'
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl -XPOST http://localhost:9200/model/_search  -H 'Content-Type:application/json' -d'
 {
     "size" : 100,
     "query" : { "match" : { "content" : "iphone7splus" }}
@@ -194,7 +194,7 @@ curl -XPOST http://localhost:9200/model/_create/2 -H 'Content-Type:application/j
 '
 </code></pre></div></div>
 <p>结果，啥都没：</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{
 	"took": 249,
 	"timed_out": false,
 	"_shards": {
@@ -219,7 +219,7 @@ curl -XPOST http://localhost:9200/model/_create/2 -H 'Content-Type:application/j
 </blockquote>
 
 <p>搜索词ik_smart分析</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl -XGET "http://localhost:9200/model/_analyze" -H 'Content-Type: application/json' -d'
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl -XGET "http://localhost:9200/model/_analyze" -H 'Content-Type: application/json' -d'
 {
    "text":"iphone7splus","tokenizer": "ik_smart"
 }'
@@ -227,7 +227,7 @@ curl -XPOST http://localhost:9200/model/_create/2 -H 'Content-Type:application/j
 </code></pre></div></div>
 
 <p>结果出现</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{
 	"tokens": [{
 		"token": "iphone7splus",
 		"start_offset": 0,
@@ -239,14 +239,14 @@ curl -XPOST http://localhost:9200/model/_create/2 -H 'Content-Type:application/j
 </code></pre></div></div>
 
 <p>查找文ik_max_word分析</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl -XGET "http://localhost:9200/model/_analyze" -H 'Content-Type: application/json' -d'
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl -XGET "http://localhost:9200/model/_analyze" -H 'Content-Type: application/json' -d'
 {
    "text":"iphone7splus4G黑色美版无锁","tokenizer": "ik_max_word"
 }'
 </code></pre></div></div>
 
 <p>结果，不会出现iphone7splus</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
 {
     "tokens": [
         {
@@ -326,14 +326,14 @@ curl -XPOST http://localhost:9200/model/_create/2 -H 'Content-Type:application/j
 <p>所以说，去掉空格方案是不行的，那就不去掉咯</p>
 
 <p>分析语句</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl -XGET "http://localhost:9200/model/_analyze" -H 'Content-Type: application/json' -d'
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl -XGET "http://localhost:9200/model/_analyze" -H 'Content-Type: application/json' -d'
 {
    "text":"iphone 7s plus 4G 黑色 美版 无锁","tokenizer": "ik_max_word"
 }'
 </code></pre></div></div>
 
 <p>结果，还是没有iphone7splus组合，那么搜索哪里也不去掉空格吧。这样就可以搜索到了。</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{
     "tokens": [
         {
             "token": "iphone",
@@ -429,7 +429,7 @@ curl -XPOST http://localhost:9200/model/_create/2 -H 'Content-Type:application/j
 </blockquote>
 
 <p>解决方案是将搜索分析都改为ik_max_word，这样搜索词和文章的颗粒度都分的很细。</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl -XPOST http://localhost:9200/model/_mapping -H 'Content-Type:application/json' -d'
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl -XPOST http://localhost:9200/model/_mapping -H 'Content-Type:application/json' -d'
 {
         "properties": {
             "name": {
@@ -553,7 +553,7 @@ curl -XPOST http://localhost:9200/model/_create/2 -H 'Content-Type:application/j
 
                     
                     <li>
-                        <a href="https://twitter.com/zzhpeng">
+                        <a href="https://twitter.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
@@ -564,7 +564,7 @@ curl -XPOST http://localhost:9200/model/_create/2 -H 'Content-Type:application/j
 
                     
                     <li>
-                        <a href="https://github.com/fromChinaBoy">
+                        <a href="https://github.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-github fa-stack-1x fa-inverse"></i>
@@ -576,7 +576,7 @@ curl -XPOST http://localhost:9200/model/_create/2 -H 'Content-Type:application/j
                     <!--
                     
                     <li>
-                        <a href="http://www.douban.com/people/zzhpeng">
+                        <a href="http://www.douban.com/people/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-douban fa-stack-1x fa-inverse"></i>
@@ -589,7 +589,7 @@ curl -XPOST http://localhost:9200/model/_create/2 -H 'Content-Type:application/j
                     <!--
                     
                     <li>
-                        <a href="https://www.facebook.com/zzhpeng">
+                        <a href="https://www.facebook.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
@@ -601,7 +601,7 @@ curl -XPOST http://localhost:9200/model/_create/2 -H 'Content-Type:application/j
 
                     
                     <li>
-                        <a target="_blank" href="https://www.zhihu.com/people/zzhpeng">
+                        <a target="_blank" href="https://www.zhihu.com/people/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa  fa-stack-1x fa-inverse">知</i>
@@ -613,7 +613,7 @@ curl -XPOST http://localhost:9200/model/_create/2 -H 'Content-Type:application/j
                     <!--
                     
                     <li>
-                        <a target="_blank" href="http://weibo.com/zzhpeng">
+                        <a target="_blank" href="http://weibo.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>

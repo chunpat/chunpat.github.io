@@ -6,7 +6,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="fromChinaBoy">
+    <meta name="description" content="chunpat">
 
     <title>更换mac默认bash shell为zsh - Blog</title>
 
@@ -124,50 +124,50 @@
 <p>原本的源是github的，由于墙的问题可能会有点慢，所以换成国内的源。</p>
 
 <p>替换brew.git</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cd "$(brew --repo)"
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cd "$(brew --repo)"
 git remote set-url origin https://mirrors.ustc.edu.cn/brew.git
 </code></pre></div></div>
 
 <p>替换homebrew-core.git:</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cd "$(brew --repo)/Library/Taps/homebrew/homebrew-core"
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cd "$(brew --repo)/Library/Taps/homebrew/homebrew-core"
 git remote set-url origin https://mirrors.ustc.edu.cn/homebrew-core.git
 </code></pre></div></div>
 
 <p>更新Homebrew</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>brew update
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>brew update
 </code></pre></div></div>
 
 <h3 id="安装">安装</h3>
 
 <p>安装zsh</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>brew install zsh
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>brew install zsh
 </code></pre></div></div>
 
 <p>安装oh-my-zsh</p>
 
 <p>到home目录。</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cd ~
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cd ~
 </code></pre></div></div>
 
 <p>从github下载oh-my-zsh。</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git clone git://github.com/robbyrussell/oh-my-zsh.git ~/.oh-my-zsh
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git clone git://github.com/robbyrussell/oh-my-zsh.git ~/.oh-my-zsh
 </code></pre></div></div>
 
 <p>生成zsh配置文件zshrc。</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cp ~/.oh-my-zsh/templates/zshrc.zsh-template ~/.zshrc
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cp ~/.oh-my-zsh/templates/zshrc.zsh-template ~/.zshrc
 </code></pre></div></div>
 
 <p>兼容bash设置的参数，将原来设置在bash的参数copy到zsh的~/.zshrc文件下。</p>
 
 <p>修改默认shell为zsh</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>chsh -s /bin/zsh
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>chsh -s /bin/zsh
 </code></pre></div></div>
 
 <h3 id="问题">问题</h3>
 
 <p>chsh -s /bin/zsh 后出现 chsh: no changes made</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dscl . -read /Users/$USER/ UserShell
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dscl . -read /Users/$USER/ UserShell
 exec su - $USER
 </code></pre></div></div>
 
@@ -276,7 +276,7 @@ exec su - $USER
 
                     
                     <li>
-                        <a href="https://twitter.com/zzhpeng">
+                        <a href="https://twitter.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
@@ -287,7 +287,7 @@ exec su - $USER
 
                     
                     <li>
-                        <a href="https://github.com/fromChinaBoy">
+                        <a href="https://github.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-github fa-stack-1x fa-inverse"></i>
@@ -299,7 +299,7 @@ exec su - $USER
                     <!--
                     
                     <li>
-                        <a href="http://www.douban.com/people/zzhpeng">
+                        <a href="http://www.douban.com/people/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-douban fa-stack-1x fa-inverse"></i>
@@ -312,7 +312,7 @@ exec su - $USER
                     <!--
                     
                     <li>
-                        <a href="https://www.facebook.com/zzhpeng">
+                        <a href="https://www.facebook.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
@@ -324,7 +324,7 @@ exec su - $USER
 
                     
                     <li>
-                        <a target="_blank" href="https://www.zhihu.com/people/zzhpeng">
+                        <a target="_blank" href="https://www.zhihu.com/people/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa  fa-stack-1x fa-inverse">知</i>
@@ -336,7 +336,7 @@ exec su - $USER
                     <!--
                     
                     <li>
-                        <a target="_blank" href="http://weibo.com/zzhpeng">
+                        <a target="_blank" href="http://weibo.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>

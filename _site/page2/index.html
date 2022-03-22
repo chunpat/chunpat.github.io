@@ -6,7 +6,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="fromChinaBoy">
+    <meta name="description" content="chunpat">
 
     <title>Blog</title>
 
@@ -103,6 +103,25 @@
 	<div class="row">
 		<div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
 			
+<div class="post-preview">
+    <a href="/mysql-join.html">
+        <h2 class="post-title">            
+            重学 MySQL 的Left Join操作
+        </h2>
+        
+        <div class="post-content-preview">
+            软件版本：mysql8.0.18
+
+起因
+今日有个需求，根据门店流水算出直营门店当月的使用天数。这需求大概只需要门店表和门店流水表即可，看上去挺简单，两张表left join，然后group by
+就能解决，但是调整了下，结果却不一样了，感到迷惑。我大概只记得，以左边为主，遍历右边，on后面条...
+        </div>
+    </a>
+    <p class="post-meta">Posted by zzhpeng on May 12, 2020</p>
+</div>
+
+<hr>
+
 <div class="post-preview">
     <a href="/xmr-mining.html">
         <h2 class="post-title">            
@@ -256,26 +275,6 @@ nginx抛出502,证明是它的反向代理出错，这个代理php-cgi挂掉了�
 
 <hr>
 
-<div class="post-preview">
-    <a href="/mysql-in.html">
-        <h2 class="post-title">            
-            Mysql使用IN功能相关与性能对比
-        </h2>
-        
-        <div class="post-content-preview">
-            问题概述
-平时Mysql喜欢先sql语句找出id字符串，然后用in后面接（id，id，……）去查找数据。查阅相关文章，说sql语句长度有限制，随着数据增长就不能执行，但是
-这个长度却很大，一般可以不用考虑。
-
-查看方法。
-mysql&gt;show variables like '%max_a...
-        </div>
-    </a>
-    <p class="post-meta">Posted by zzhpeng on October 7, 2019</p>
-</div>
-
-<hr>
-
 
 <!-- Pager -->
 
@@ -333,7 +332,7 @@ mysql&gt;show variables like '%max_a...
 
                     
                     <li>
-                        <a href="https://twitter.com/zzhpeng">
+                        <a href="https://twitter.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
@@ -344,7 +343,7 @@ mysql&gt;show variables like '%max_a...
 
                     
                     <li>
-                        <a href="https://github.com/fromChinaBoy">
+                        <a href="https://github.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-github fa-stack-1x fa-inverse"></i>
@@ -356,7 +355,7 @@ mysql&gt;show variables like '%max_a...
                     <!--
                     
                     <li>
-                        <a href="http://www.douban.com/people/zzhpeng">
+                        <a href="http://www.douban.com/people/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-douban fa-stack-1x fa-inverse"></i>
@@ -369,7 +368,7 @@ mysql&gt;show variables like '%max_a...
                     <!--
                     
                     <li>
-                        <a href="https://www.facebook.com/zzhpeng">
+                        <a href="https://www.facebook.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
@@ -381,7 +380,7 @@ mysql&gt;show variables like '%max_a...
 
                     
                     <li>
-                        <a target="_blank" href="https://www.zhihu.com/people/zzhpeng">
+                        <a target="_blank" href="https://www.zhihu.com/people/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa  fa-stack-1x fa-inverse">知</i>
@@ -393,7 +392,7 @@ mysql&gt;show variables like '%max_a...
                     <!--
                     
                     <li>
-                        <a target="_blank" href="http://weibo.com/zzhpeng">
+                        <a target="_blank" href="http://weibo.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>

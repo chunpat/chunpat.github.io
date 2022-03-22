@@ -6,7 +6,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="fromChinaBoy">
+    <meta name="description" content="chunpat">
 
     <title>生产环境又出现nginx502了！！ - Blog</title>
 
@@ -136,12 +136,12 @@
 
 <p>根据nginx这个提示查了相关资料，得到了3个解决方案</p>
 <h3 id="1php-fpm的sock通讯方式-改为-tcp">1、php-fpm的sock通讯方式 改为 tcp</h3>
-<p><code class="highlighter-rouge">结论：不考虑，查了相关的blog，出现了相同问题，还从tcp改为sock模式呢！！</code></p>
+<p><code class="language-plaintext highlighter-rouge">结论：不考虑，查了相关的blog，出现了相同问题，还从tcp改为sock模式呢！！</code></p>
 
 <h3 id="2用两个php-fpm-socknginx负载均衡">2、用两个php-fpm sock，nginx负载均衡</h3>
 <p>2.1、复制一份配置文件，修改里边的pid sock
 cp /usr/local/php/etc/php-fpm.conf cp /usr/local/php/etc/php-fpm2.conf</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[global]
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[global]
 pid = /usr/local/php/var/run/php-fpm2.pid
 error_log = /usr/local/php/var/log/php-fpm2.log
 log_level = notice
@@ -153,7 +153,7 @@ listen = /tmp/php-cgi2.sock
 <p>2.2、复制一个启动文件，也修改相关的信息</p>
 
 <p>cp /etc/init.d/php-fpm /etc/init.d/php-fpm2</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>php_fpm_BIN=${exec_prefix}/sbin/php-fpm
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>php_fpm_BIN=${exec_prefix}/sbin/php-fpm
 php_fpm_CONF=${prefix}/etc/php-fpm2.conf
 php_fpm_PID=${prefix}/var/run/php-fpm2.pid
 </code></pre></div></div>
@@ -162,7 +162,7 @@ php_fpm_PID=${prefix}/var/run/php-fpm2.pid
 /etc/init.d/php-fpm2 start</p>
 
 <p>2.4、nginx 配置文件，增加 upstream模块</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>upstream backend{
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>upstream backend{
     server unix:/tmp/php-cgi.sock;
     server unix:/tmp/php-cgi2.sock;
 }
@@ -172,7 +172,7 @@ php_fpm_PID=${prefix}/var/run/php-fpm2.pid
 重新加载
 /etc/init.d/nginx reload</p>
 
-<p><code class="highlighter-rouge">结论：这个方法，和我直接调大php-fpm max_children差不多，不考虑。</code></p>
+<p><code class="language-plaintext highlighter-rouge">结论：这个方法，和我直接调大php-fpm max_children差不多，不考虑。</code></p>
 
 <h3 id="3php-fpm的listenbacklog默认-1改为1024或者4096即是调大">3、php-fpm的listen.backlog默认-1改为1024或者4096，即是调大</h3>
 <p>V友:onepunch回复，整理如下</p>
@@ -183,24 +183,24 @@ php_fpm_PID=${prefix}/var/run/php-fpm2.pid
 这样 nginx 就会报这个错了，连接不上。php-fpm 的 backlog 是 accpet queue 的最大长度</p>
 
 <p>查看系统内核的最大长度</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cat /proc/sys/net/core/somaxconn 128
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cat /proc/sys/net/core/somaxconn 128
 </code></pre></div></div>
 
 <p>查看 php-fpm 里的配置 listen.backlog 是 4096，由于会取这 2 个的最小值， 所以是 128。</p>
 
 <p>验证当时的请求：</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>grep '2019-12-06T16:48' bi_svc.access.log.1 | wc -l //9903
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>grep '2019-12-06T16:48' bi_svc.access.log.1 | wc -l //9903
 </code></pre></div></div>
 
 <p>计算9903/60等于每秒请求数165，165&gt;128 了, 请求太多了，应该是 accpet queue 满了</p>
 
 <h4 id="解决办法">解决办法</h4>
 <p>vi /etc/sysctl.conf</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>net.core.somaxconn = 1024
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>net.core.somaxconn = 1024
 </code></pre></div></div>
 <p>将 /proc/sys/net/core/somaxconn 改成 1024 就不会出问题了</p>
 
-<p><code class="highlighter-rouge">结论：这个方法是稳定PV提升、IO提升的解决方案，不过我这边遇到的是突然的提升，所以我这边不会这样子做</code></p>
+<p><code class="language-plaintext highlighter-rouge">结论：这个方法是稳定PV提升、IO提升的解决方案，不过我这边遇到的是突然的提升，所以我这边不会这样子做</code></p>
 
 <h2 id="更多服务器信息">更多服务器信息</h2>
 <h3 id="1云服务器ecs">1、云服务器ECS</h3>
@@ -223,7 +223,7 @@ php_fpm_PID=${prefix}/var/run/php-fpm2.pid
 <h2 id="最后选择">最后选择</h2>
 <p>用户请求飙升，平台又没有做什么活动，查看了nginx access log，分析同一个ip，同一时间段上百个请求同
 一个访问链接，所以决定iptable限制下，控制单个IP的最大30并发连接数。</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo iptables -I INPUT -p tcp --dport 443 -m connlimit --connlimit-above 30 -j REJECT
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo iptables -I INPUT -p tcp --dport 443 -m connlimit --connlimit-above 30 -j REJECT
 sudo iptables -I INPUT -p tcp --dport 80 -m connlimit --connlimit-above 30 -j REJECT
 </code></pre></div></div>
 
@@ -335,7 +335,7 @@ sudo iptables -I INPUT -p tcp --dport 80 -m connlimit --connlimit-above 30 -j RE
 
                     
                     <li>
-                        <a href="https://twitter.com/zzhpeng">
+                        <a href="https://twitter.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
@@ -346,7 +346,7 @@ sudo iptables -I INPUT -p tcp --dport 80 -m connlimit --connlimit-above 30 -j RE
 
                     
                     <li>
-                        <a href="https://github.com/fromChinaBoy">
+                        <a href="https://github.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-github fa-stack-1x fa-inverse"></i>
@@ -358,7 +358,7 @@ sudo iptables -I INPUT -p tcp --dport 80 -m connlimit --connlimit-above 30 -j RE
                     <!--
                     
                     <li>
-                        <a href="http://www.douban.com/people/zzhpeng">
+                        <a href="http://www.douban.com/people/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-douban fa-stack-1x fa-inverse"></i>
@@ -371,7 +371,7 @@ sudo iptables -I INPUT -p tcp --dport 80 -m connlimit --connlimit-above 30 -j RE
                     <!--
                     
                     <li>
-                        <a href="https://www.facebook.com/zzhpeng">
+                        <a href="https://www.facebook.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
@@ -383,7 +383,7 @@ sudo iptables -I INPUT -p tcp --dport 80 -m connlimit --connlimit-above 30 -j RE
 
                     
                     <li>
-                        <a target="_blank" href="https://www.zhihu.com/people/zzhpeng">
+                        <a target="_blank" href="https://www.zhihu.com/people/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa  fa-stack-1x fa-inverse">知</i>
@@ -395,7 +395,7 @@ sudo iptables -I INPUT -p tcp --dport 80 -m connlimit --connlimit-above 30 -j RE
                     <!--
                     
                     <li>
-                        <a target="_blank" href="http://weibo.com/zzhpeng">
+                        <a target="_blank" href="http://weibo.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>

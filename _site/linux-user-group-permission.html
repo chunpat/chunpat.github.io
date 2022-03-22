@@ -6,7 +6,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="fromChinaBoy">
+    <meta name="description" content="chunpat">
 
     <title>gitlab出现502问题 - Blog</title>
 
@@ -125,24 +125,24 @@
 nginx，所以不用gitlab自带的nginx服务，修改过程如下。</p>
 
 <p>1、修改配置文件，禁用内嵌 nginx</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo vim /etc/gitlab/gitlab.rb
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo vim /etc/gitlab/gitlab.rb
 </code></pre></div></div>
 
 <p>修改一下配置</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code># 关闭nginx服务
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code># 关闭nginx服务
 nginx['enable'] = false
 </code></pre></div></div>
 
 <p>应用修改的配置</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code># 重新加载配置
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code># 重新加载配置
 sudo gitlab-ctl reconfigure
 # 重新启动
 sudo gitlab-ctl restart
 </code></pre></div></div>
 
 <p>2、设置宝塔的nginx代理转发,如下</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code># 添加upstream指向gitlab
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code># 添加upstream指向gitlab
 upstream gitlab-workhorse {
   server unix:/var/opt/gitlab/gitlab-workhorse/socket  fail_timeout=0;
 }
@@ -202,7 +202,7 @@ server
 <img src="http://img.zzhpeng.cn/Fp5IQkW4PcGC4O_-kF_oelDWhQJF" alt="" /></p>
 
 <p>应用修改的配置</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code># 重新加载配置
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code># 重新加载配置
 sudo gitlab-ctl reconfigure
 # 重新启动
 sudo gitlab-ctl restart
@@ -213,7 +213,7 @@ sudo gitlab-ctl restart
 <p>这里涉及到了socket文件通讯的问题，一旦建立连接就会一直连接，原权限之类的还是原来的。</p>
 
 <p>nginx代理流，文件socket服务转发</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>upstream gitlab-workhorse {
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>upstream gitlab-workhorse {
   server unix:/var/opt/gitlab/gitlab-workhorse/socket  fail_timeout=0;
 }
 </code></pre></div></div>
@@ -225,7 +225,7 @@ sudo gitlab-ctl restart
 </blockquote>
 
 <p>如何查看系统组情况和修改</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cat /etc/group
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cat /etc/group
 </code></pre></div></div>
 
 <p>查看socket文件权限</p>
@@ -325,7 +325,7 @@ sudo gitlab-ctl restart
 
                     
                     <li>
-                        <a href="https://twitter.com/zzhpeng">
+                        <a href="https://twitter.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
@@ -336,7 +336,7 @@ sudo gitlab-ctl restart
 
                     
                     <li>
-                        <a href="https://github.com/fromChinaBoy">
+                        <a href="https://github.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-github fa-stack-1x fa-inverse"></i>
@@ -348,7 +348,7 @@ sudo gitlab-ctl restart
                     <!--
                     
                     <li>
-                        <a href="http://www.douban.com/people/zzhpeng">
+                        <a href="http://www.douban.com/people/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-douban fa-stack-1x fa-inverse"></i>
@@ -361,7 +361,7 @@ sudo gitlab-ctl restart
                     <!--
                     
                     <li>
-                        <a href="https://www.facebook.com/zzhpeng">
+                        <a href="https://www.facebook.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
@@ -373,7 +373,7 @@ sudo gitlab-ctl restart
 
                     
                     <li>
-                        <a target="_blank" href="https://www.zhihu.com/people/zzhpeng">
+                        <a target="_blank" href="https://www.zhihu.com/people/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa  fa-stack-1x fa-inverse">知</i>
@@ -385,7 +385,7 @@ sudo gitlab-ctl restart
                     <!--
                     
                     <li>
-                        <a target="_blank" href="http://weibo.com/zzhpeng">
+                        <a target="_blank" href="http://weibo.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>

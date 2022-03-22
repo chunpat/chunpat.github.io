@@ -6,7 +6,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="fromChinaBoy">
+    <meta name="description" content="chunpat">
 
     <title>Redis的原子性解决并发问题 - Blog</title>
 
@@ -136,7 +136,7 @@
 
 <p>然后根据这个特性，用SETNX的value设置过期时间，结合Redis DEL key [key …]，用过期时间和程序
 是否执行完成，去判断是否可以删除这个key来实现原子性控制。伪代码如下：</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>if 获取锁成功
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>if 获取锁成功
     1、执行程序
     2、解锁
 else 
@@ -164,7 +164,7 @@ else
 
 <p>不过官方给了替换方案，原话为</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Anyway even assuming a single-instance locking primitive, starting with 2.6.12
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Anyway even assuming a single-instance locking primitive, starting with 2.6.12
 it is possible to create a much simpler locking primitive, equivalent to the 
 one discussed here, using the SET command to acquire the lock, and a simple 
 Lua script to release the lock. The pattern is documented in the SET command 
@@ -178,7 +178,7 @@ page.
 </blockquote>
 
 <p>用了set之后程序就不用去判断是否过期去程序解锁了，也实现了原子性。伪代码变为：</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>if 获取锁成功
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>if 获取锁成功
     1、执行程序
     2、解锁
 else 
@@ -195,7 +195,7 @@ else
 </blockquote>
 
 <p>订单表</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>DROP TABLE IF EXISTS `order`;
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>DROP TABLE IF EXISTS `order`;
 CREATE TABLE `order` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `num` int(11) NOT NULL DEFAULT '0' COMMENT '销售商品数量',
@@ -209,7 +209,7 @@ CREATE TABLE `order` (
 </code></pre></div></div>
 
 <p>门店仓库批次表</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>DROP TABLE IF EXISTS `depot_store_depot_batch`;
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>DROP TABLE IF EXISTS `depot_store_depot_batch`;
 CREATE TABLE `depot_store_depot_batch` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `num` int(11) NOT NULL DEFAULT '0' COMMENT '总数量，有效数量=总数-冻结数量',
@@ -225,7 +225,7 @@ INSERT INTO `depot_store_depot_batch` VALUES(1,10,0,NOW(),NOW(),NULL);
 </code></pre></div></div>
 
 <p>门店仓库批次冻结操作表</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>DROP TABLE IF EXISTS `depot_store_depot_batch_frozen_record`;
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>DROP TABLE IF EXISTS `depot_store_depot_batch_frozen_record`;
 CREATE TABLE `depot_store_depot_batch_frozen_record` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `depot_store_depot_batch_id` int(11) NOT NULL COMMENT '门店仓库批次管理id',
@@ -245,63 +245,63 @@ CREATE TABLE `depot_store_depot_batch_frozen_record` (
 </blockquote>
 
 <h4 id="没有加redis锁的代码">没有加redis锁的代码</h4>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;?php</span>
-<span class="sd">/**
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;?php
+/**
  * Created by PhpStorm.
  * User: zzhpeng
  * Date: 2019/11/2
  * Time: 11:32 AM
- */</span>
+ */
 
-<span class="nv">$pdo</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">PDO</span><span class="p">(</span><span class="s1">'mysql:host=127.0.0.1;dbname=store'</span><span class="p">,</span> <span class="s1">'root'</span><span class="p">,</span> <span class="s1">'123456789'</span><span class="p">);</span>
+$pdo = new PDO('mysql:host=127.0.0.1;dbname=store', 'root', '123456789');
 
-<span class="c1">//销售数量</span>
-<span class="nv">$num</span> <span class="o">=</span> <span class="nv">$_GET</span><span class="p">[</span><span class="s1">'num'</span><span class="p">]</span> <span class="o">??</span> <span class="mi">1</span><span class="p">;</span>
+//销售数量
+$num = $_GET['num'] ?? 1;
 
-<span class="k">try</span><span class="p">{</span>
-    <span class="c1">//查询门店仓库批次信息</span>
-    <span class="nv">$depotStoreDepotBatchSql</span><span class="o">=</span><span class="s2">"select * from  `depot_store_depot_batch` where id =1 limit 1"</span><span class="p">;</span>
-    <span class="nv">$depotStoreDepotBatchRes</span> <span class="o">=</span> <span class="nv">$pdo</span><span class="o">-&gt;</span><span class="na">query</span><span class="p">(</span><span class="nv">$depotStoreDepotBatchSql</span><span class="p">)</span><span class="o">-&gt;</span><span class="na">fetch</span><span class="p">();</span>
+try{
+    //查询门店仓库批次信息
+    $depotStoreDepotBatchSql="select * from  `depot_store_depot_batch` where id =1 limit 1";
+    $depotStoreDepotBatchRes = $pdo-&gt;query($depotStoreDepotBatchSql)-&gt;fetch();
 
-    <span class="c1">//操作后冻结数量</span>
-    <span class="nv">$afterFrozenNum</span> <span class="o">=</span>  <span class="nv">$num</span> <span class="o">+</span> <span class="nv">$depotStoreDepotBatchRes</span><span class="p">[</span><span class="s1">'frozen_num'</span><span class="p">];</span>
-    <span class="nv">$activeNumber</span> <span class="o">=</span> <span class="nv">$depotStoreDepotBatchRes</span><span class="p">[</span><span class="s1">'num'</span><span class="p">]</span> <span class="o">-</span> <span class="nv">$afterFrozenNum</span><span class="p">;</span>
+    //操作后冻结数量
+    $afterFrozenNum =  $num + $depotStoreDepotBatchRes['frozen_num'];
+    $activeNumber = $depotStoreDepotBatchRes['num'] - $afterFrozenNum;
 
-    <span class="c1">//开启事务</span>
-    <span class="nv">$pdo</span><span class="o">-&gt;</span><span class="na">beginTransaction</span><span class="p">();</span>
+    //开启事务
+    $pdo-&gt;beginTransaction();
 
-    <span class="k">if</span><span class="p">(</span><span class="nv">$activeNumber</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">){</span>
-        <span class="k">throw</span> <span class="k">new</span> <span class="nx">Exception</span><span class="p">(</span><span class="s1">'商品已售罄了'</span><span class="p">);</span>
-    <span class="p">}</span>
+    if($activeNumber &lt; 0){
+        throw new Exception('商品已售罄了');
+    }
 
-    <span class="c1">//下单主表</span>
-    <span class="nv">$orderSql</span> <span class="o">=</span><span class="s2">"insert into `order` VALUES (null,</span><span class="si">{</span><span class="nv">$num</span><span class="si">}</span><span class="s2">,1,NOW(),NOW(),null)"</span><span class="p">;</span>
-    <span class="nv">$pdo</span><span class="o">-&gt;</span><span class="na">query</span><span class="p">(</span><span class="nv">$orderSql</span><span class="p">);</span>
-    <span class="nv">$orderId</span> <span class="o">=</span> <span class="nv">$pdo</span><span class="o">-&gt;</span><span class="na">lastInsertId</span><span class="p">();</span>
-    <span class="k">if</span><span class="p">(</span><span class="nv">$orderId</span><span class="p">)</span>
-    <span class="p">{</span>
-        <span class="nv">$depotStoreDepotBatchUpdateSql</span><span class="o">=</span><span class="s2">"update `depot_store_depot_batch` set `frozen_num`=</span><span class="si">{</span><span class="nv">$afterFrozenNum</span><span class="si">}</span><span class="s2"> WHERE id=1"</span><span class="p">;</span>
-        <span class="nv">$pdo</span><span class="o">-&gt;</span><span class="na">query</span><span class="p">(</span><span class="nv">$depotStoreDepotBatchUpdateSql</span><span class="p">);</span>
+    //下单主表
+    $orderSql ="insert into `order` VALUES (null,{$num},1,NOW(),NOW(),null)";
+    $pdo-&gt;query($orderSql);
+    $orderId = $pdo-&gt;lastInsertId();
+    if($orderId)
+    {
+        $depotStoreDepotBatchUpdateSql="update `depot_store_depot_batch` set `frozen_num`={$afterFrozenNum} WHERE id=1";
+        $pdo-&gt;query($depotStoreDepotBatchUpdateSql);
 
-        <span class="c1">//冻结记录操作sql</span>
-        <span class="nv">$actionSql</span> <span class="o">=</span><span class="s2">"insert into `depot_store_depot_batch_frozen_record` VALUES (null,1,</span><span class="si">{</span><span class="nv">$depotStoreDepotBatchRes</span><span class="p">[</span><span class="s1">'frozen_num'</span><span class="p">]</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="nv">$afterFrozenNum</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="nv">$num</span><span class="si">}</span><span class="s2">,'并发测试',NOW(),NOW())"</span><span class="p">;</span>
-        <span class="nv">$pdo</span><span class="o">-&gt;</span><span class="na">query</span><span class="p">(</span><span class="nv">$actionSql</span><span class="p">);</span>
+        //冻结记录操作sql
+        $actionSql ="insert into `depot_store_depot_batch_frozen_record` VALUES (null,1,{$depotStoreDepotBatchRes['frozen_num']},{$afterFrozenNum},{$num},'并发测试',NOW(),NOW())";
+        $pdo-&gt;query($actionSql);
 
-        <span class="c1">//提交事务</span>
-        <span class="nv">$pdo</span><span class="o">-&gt;</span><span class="na">commit</span><span class="p">();</span>
-    <span class="p">}</span>
-    <span class="k">echo</span> <span class="s1">'下单成功,订单id为'</span> <span class="o">.</span> <span class="nv">$orderId</span><span class="p">;</span>
-<span class="p">}</span><span class="k">catch</span> <span class="p">(</span><span class="nx">\Exception</span> <span class="nv">$e</span><span class="p">){</span>
-    <span class="c1">//回滚事务</span>
-    <span class="nv">$pdo</span><span class="o">-&gt;</span><span class="na">rollBack</span><span class="p">();</span>
-    <span class="k">echo</span> <span class="nv">$e</span><span class="o">-&gt;</span><span class="na">getMessage</span><span class="p">();</span>
-<span class="p">}</span>
+        //提交事务
+        $pdo-&gt;commit();
+    }
+    echo '下单成功,订单id为' . $orderId;
+}catch (\Exception $e){
+    //回滚事务
+    $pdo-&gt;rollBack();
+    echo $e-&gt;getMessage();
+}
 </code></pre></div></div>
 
 <p>ab压力测试，ab -n 100 -c 10 http://127.0.0.1:83/redis.php,然后查看三个表mysql记录。</p>
 
 <p>查看Order表情况，显示了35row order。</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mysql&gt; select * from `order`;
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mysql&gt; select * from `order`;
 +----+-----+----------------------+---------------------+---------------------+-------------+
 | id | num | store_depot_batch_id | create_time         | update_time         | delete_time |
 +----+-----+----------------------+---------------------+---------------------+-------------+
@@ -344,7 +344,7 @@ CREATE TABLE `depot_store_depot_batch_frozen_record` (
 35 rows in set (0.00 sec)
 </code></pre></div></div>
 <p>查看depot_store_depot_batch表情况，确实冻结了10个。</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mysql&gt; select * from `depot_store_depot_batch`;
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mysql&gt; select * from `depot_store_depot_batch`;
 +----+-----+------------+---------------------+---------------------+-------------+
 | id | num | frozen_num | create_time         | update_time         | delete_time |
 +----+-----+------------+---------------------+---------------------+-------------+
@@ -355,7 +355,7 @@ CREATE TABLE `depot_store_depot_batch_frozen_record` (
 
 <p>查看depot_store_depot_batch_frozen_record表情况，35row记录。</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mysql&gt; select * from depot_store_depot_batch_frozen_record;
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mysql&gt; select * from depot_store_depot_batch_frozen_record;
 +------+----------------------------+-------------------+------------------+------------+------+---------------------+---------------------+
 | id   | depot_store_depot_batch_id | before_frozen_num | after_frozen_num | frozen_num | desc | create_time         | update_time         |
 +------+----------------------------+-------------------+------------------+------------+------+---------------------+---------------------+
@@ -401,33 +401,33 @@ CREATE TABLE `depot_store_depot_batch_frozen_record` (
 <p><strong>结论就是，虽然冻结数是对了，但是出了很多超卖的订单</strong></p>
 
 <h4 id="加redis锁的代码">加redis锁的代码</h4>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;?php</span>
-<span class="sd">/**
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;?php
+/**
  * Created by PhpStorm.
  * User: zzhpeng
  * Date: 2019/11/2
  * Time: 11:32 AM
- */</span>
+ */
 
-<span class="k">class</span> <span class="nc">Lock</span>
-<span class="p">{</span>
-    <span class="k">private</span> <span class="k">static</span> <span class="nv">$_instance</span> <span class="p">;</span>
-    <span class="k">private</span>   <span class="nv">$_redis</span><span class="p">;</span>
-    <span class="k">private</span> <span class="k">function</span> <span class="nf">__construct</span><span class="p">()</span>
-    <span class="p">{</span>
-        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">_redis</span> <span class="o">=</span>  <span class="k">new</span> <span class="nx">\Redis</span><span class="p">();</span>
-        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">_redis</span> <span class="o">-&gt;</span><span class="na">connect</span><span class="p">(</span><span class="s1">'127.0.0.1'</span><span class="p">);</span>
-    <span class="p">}</span>
-    <span class="k">public</span> <span class="k">static</span> <span class="k">function</span> <span class="nf">getInstance</span><span class="p">()</span>
-    <span class="p">{</span>
-        <span class="k">if</span><span class="p">(</span><span class="nx">self</span><span class="o">::</span><span class="nv">$_instance</span> <span class="nx">instanceof</span> <span class="nx">self</span><span class="p">)</span>
-        <span class="p">{</span>
-            <span class="k">return</span> <span class="nx">self</span><span class="o">::</span><span class="nv">$_instance</span><span class="p">;</span>
-        <span class="p">}</span>
-        <span class="k">return</span> <span class="nx">self</span><span class="o">::</span><span class="nv">$_instance</span> <span class="o">=</span> <span class="k">new</span>  <span class="nx">self</span><span class="p">();</span>
-    <span class="p">}</span>
+class Lock
+{
+    private static $_instance ;
+    private   $_redis;
+    private function __construct()
+    {
+        $this-&gt;_redis =  new \Redis();
+        $this-&gt;_redis -&gt;connect('127.0.0.1');
+    }
+    public static function getInstance()
+    {
+        if(self::$_instance instanceof self)
+        {
+            return self::$_instance;
+        }
+        return self::$_instance = new  self();
+    }
 
-    <span class="sd">/**
+    /**
      * 加锁
      * @author: zzhpeng
      * Date: 2019/11/2
@@ -435,99 +435,99 @@ CREATE TABLE `depot_store_depot_batch_frozen_record` (
      * @param $expTTL int 多久过期，秒单位
      *
      * @return bool
-     */</span>
-    <span class="k">public</span> <span class="k">function</span> <span class="nf">set</span><span class="p">(</span><span class="nv">$key</span><span class="p">,</span><span class="nv">$expTTL</span><span class="p">)</span>
-    <span class="p">{</span>
-        <span class="c1">//set 实现setnx 和 expire()的效果</span>
-        <span class="nv">$isLock</span> <span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">_redis</span><span class="o">-&gt;</span><span class="na">set</span><span class="p">(</span><span class="nv">$key</span><span class="p">,</span><span class="nb">time</span><span class="p">()</span> <span class="o">+</span> <span class="nv">$expTTL</span> <span class="p">,[</span><span class="s1">'nx'</span><span class="p">,</span> <span class="s1">'ex'</span><span class="o">=&gt;</span><span class="nv">$expTTL</span><span class="p">]);</span>
-        <span class="k">if</span><span class="p">(</span><span class="nv">$isLock</span><span class="p">)</span>
-        <span class="p">{</span>
-            <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
-        <span class="p">}</span>
-        <span class="k">return</span>  <span class="kc">false</span><span class="p">;</span>
-    <span class="p">}</span>
+     */
+    public function set($key,$expTTL)
+    {
+        //set 实现setnx 和 expire()的效果
+        $isLock = $this-&gt;_redis-&gt;set($key,time() + $expTTL ,['nx', 'ex'=&gt;$expTTL]);
+        if($isLock)
+        {
+            return true;
+        }
+        return  false;
+    }
 
-    <span class="sd">/**
+    /**
      * @param $key string 解锁
-     */</span>
-    <span class="k">public</span> <span class="k">function</span> <span class="nf">del</span><span class="p">(</span><span class="nv">$key</span><span class="p">)</span>
-    <span class="p">{</span>
-        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">_redis</span><span class="o">-&gt;</span><span class="na">del</span><span class="p">(</span><span class="nv">$key</span><span class="p">);</span>
-    <span class="p">}</span>
-<span class="p">}</span>
+     */
+    public function del($key)
+    {
+        $this-&gt;_redis-&gt;del($key);
+    }
+}
 
-<span class="nv">$pdo</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">PDO</span><span class="p">(</span><span class="s1">'mysql:host=127.0.0.1;dbname=store'</span><span class="p">,</span> <span class="s1">'root'</span><span class="p">,</span> <span class="s1">'123456789'</span><span class="p">);</span>
+$pdo = new PDO('mysql:host=127.0.0.1;dbname=store', 'root', '123456789');
 
-<span class="c1">//销售数量</span>
-<span class="nv">$num</span> <span class="o">=</span> <span class="nv">$_GET</span><span class="p">[</span><span class="s1">'num'</span><span class="p">]</span> <span class="o">??</span> <span class="mi">1</span><span class="p">;</span>
-<span class="c1">//锁名</span>
-<span class="nv">$lockName</span> <span class="o">=</span> <span class="s1">'store_depot_batch_lock'</span><span class="p">;</span>
+//销售数量
+$num = $_GET['num'] ?? 1;
+//锁名
+$lockName = 'store_depot_batch_lock';
 
-<span class="k">try</span><span class="p">{</span>
-    <span class="c1">//加锁</span>
-    <span class="nv">$lock</span> <span class="o">=</span> <span class="nx">Lock</span><span class="o">::</span><span class="na">getInstance</span><span class="p">();</span>
+try{
+    //加锁
+    $lock = Lock::getInstance();
 
-    <span class="c1">//加锁失败抛出网络异常错误</span>
-    <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="nv">$lock</span><span class="o">-&gt;</span><span class="na">set</span><span class="p">(</span><span class="nv">$lockName</span><span class="p">,</span><span class="mi">10</span><span class="p">)){</span>
-        <span class="k">throw</span> <span class="k">new</span> <span class="nx">RedisException</span><span class="p">(</span><span class="s1">'网络异常,请稍后再试'</span><span class="p">);</span>
-    <span class="p">}</span>
+    //加锁失败抛出网络异常错误
+    if(!$lock-&gt;set($lockName,10)){
+        throw new RedisException('网络异常,请稍后再试');
+    }
 
-    <span class="c1">//开启事务</span>
-    <span class="nv">$pdo</span><span class="o">-&gt;</span><span class="na">beginTransaction</span><span class="p">();</span>
+    //开启事务
+    $pdo-&gt;beginTransaction();
 
-    <span class="c1">//查询门店仓库批次信息</span>
-    <span class="nv">$depotStoreDepotBatchSql</span><span class="o">=</span><span class="s2">"select * from  `depot_store_depot_batch` where id =1 limit 1"</span><span class="p">;</span>
-    <span class="nv">$depotStoreDepotBatchRes</span> <span class="o">=</span> <span class="nv">$pdo</span><span class="o">-&gt;</span><span class="na">query</span><span class="p">(</span><span class="nv">$depotStoreDepotBatchSql</span><span class="p">)</span><span class="o">-&gt;</span><span class="na">fetch</span><span class="p">();</span>
+    //查询门店仓库批次信息
+    $depotStoreDepotBatchSql="select * from  `depot_store_depot_batch` where id =1 limit 1";
+    $depotStoreDepotBatchRes = $pdo-&gt;query($depotStoreDepotBatchSql)-&gt;fetch();
 
-    <span class="c1">//操作后冻结数量</span>
-    <span class="nv">$afterFrozenNum</span> <span class="o">=</span>  <span class="nv">$num</span> <span class="o">+</span> <span class="nv">$depotStoreDepotBatchRes</span><span class="p">[</span><span class="s1">'frozen_num'</span><span class="p">];</span>
-    <span class="nv">$activeNumber</span> <span class="o">=</span> <span class="nv">$depotStoreDepotBatchRes</span><span class="p">[</span><span class="s1">'num'</span><span class="p">]</span> <span class="o">-</span> <span class="nv">$afterFrozenNum</span><span class="p">;</span>
+    //操作后冻结数量
+    $afterFrozenNum =  $num + $depotStoreDepotBatchRes['frozen_num'];
+    $activeNumber = $depotStoreDepotBatchRes['num'] - $afterFrozenNum;
 
-    <span class="k">if</span><span class="p">(</span><span class="nv">$activeNumber</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">){</span>
-        <span class="k">throw</span> <span class="k">new</span> <span class="nx">Exception</span><span class="p">(</span><span class="s1">'商品已售罄了'</span><span class="p">);</span>
-    <span class="p">}</span>
+    if($activeNumber &lt; 0){
+        throw new Exception('商品已售罄了');
+    }
 
-    <span class="c1">//下单主表</span>
-    <span class="nv">$orderSql</span> <span class="o">=</span><span class="s2">"insert into `order` VALUES (null,</span><span class="si">{</span><span class="nv">$num</span><span class="si">}</span><span class="s2">,1,NOW(),NOW(),null)"</span><span class="p">;</span>
-    <span class="nv">$pdo</span><span class="o">-&gt;</span><span class="na">query</span><span class="p">(</span><span class="nv">$orderSql</span><span class="p">);</span>
-    <span class="nv">$orderId</span> <span class="o">=</span> <span class="nv">$pdo</span><span class="o">-&gt;</span><span class="na">lastInsertId</span><span class="p">();</span>
+    //下单主表
+    $orderSql ="insert into `order` VALUES (null,{$num},1,NOW(),NOW(),null)";
+    $pdo-&gt;query($orderSql);
+    $orderId = $pdo-&gt;lastInsertId();
 
-    <span class="c1">//下单是否成功判断</span>
-    <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="nv">$orderId</span><span class="p">){</span>
-        <span class="k">throw</span> <span class="k">new</span> <span class="nx">Exception</span><span class="p">(</span><span class="s1">'下单失败,请稍后再试'</span><span class="p">);</span>
-    <span class="p">}</span>
+    //下单是否成功判断
+    if(!$orderId){
+        throw new Exception('下单失败,请稍后再试');
+    }
 
-    <span class="c1">//更新仓库</span>
-    <span class="nv">$depotStoreDepotBatchUpdateSql</span><span class="o">=</span><span class="s2">"update `depot_store_depot_batch` set `frozen_num`=</span><span class="si">{</span><span class="nv">$afterFrozenNum</span><span class="si">}</span><span class="s2"> WHERE id=1"</span><span class="p">;</span>
-    <span class="nv">$pdo</span><span class="o">-&gt;</span><span class="na">query</span><span class="p">(</span><span class="nv">$depotStoreDepotBatchUpdateSql</span><span class="p">);</span>
+    //更新仓库
+    $depotStoreDepotBatchUpdateSql="update `depot_store_depot_batch` set `frozen_num`={$afterFrozenNum} WHERE id=1";
+    $pdo-&gt;query($depotStoreDepotBatchUpdateSql);
 
-    <span class="c1">//冻结记录操作sql</span>
-    <span class="nv">$actionSql</span> <span class="o">=</span><span class="s2">"insert into `depot_store_depot_batch_frozen_record` VALUES (null,1,</span><span class="si">{</span><span class="nv">$depotStoreDepotBatchRes</span><span class="p">[</span><span class="s1">'frozen_num'</span><span class="p">]</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="nv">$afterFrozenNum</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="nv">$num</span><span class="si">}</span><span class="s2">,'并发测试',NOW(),NOW())"</span><span class="p">;</span>
-    <span class="nv">$pdo</span><span class="o">-&gt;</span><span class="na">query</span><span class="p">(</span><span class="nv">$actionSql</span><span class="p">);</span>
+    //冻结记录操作sql
+    $actionSql ="insert into `depot_store_depot_batch_frozen_record` VALUES (null,1,{$depotStoreDepotBatchRes['frozen_num']},{$afterFrozenNum},{$num},'并发测试',NOW(),NOW())";
+    $pdo-&gt;query($actionSql);
 
-    <span class="c1">//提交事务</span>
-    <span class="nv">$pdo</span><span class="o">-&gt;</span><span class="na">commit</span><span class="p">();</span>
+    //提交事务
+    $pdo-&gt;commit();
 
-    <span class="c1">//解锁</span>
-    <span class="nv">$lock</span><span class="o">-&gt;</span><span class="na">del</span><span class="p">(</span><span class="nv">$lockName</span><span class="p">);</span>
+    //解锁
+    $lock-&gt;del($lockName);
 
-    <span class="k">echo</span> <span class="s1">'下单成功,订单id为'</span> <span class="o">.</span> <span class="nv">$orderId</span><span class="p">;</span>
-<span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="nx">\RedisException</span> <span class="nv">$e</span><span class="p">){</span>
-    <span class="k">echo</span> <span class="nv">$e</span><span class="o">-&gt;</span><span class="na">getMessage</span><span class="p">();</span>
-<span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="nx">\Exception</span> <span class="nv">$e</span><span class="p">){</span>
-    <span class="c1">//回滚事务</span>
-    <span class="k">if</span><span class="p">(</span><span class="nv">$pdo</span><span class="o">-&gt;</span><span class="na">inTransaction</span><span class="p">()){</span>
-        <span class="nv">$pdo</span><span class="o">-&gt;</span><span class="na">rollBack</span><span class="p">();</span>
-    <span class="p">}</span>
-   <span class="c1">//解锁</span>
-    <span class="nv">$lock</span><span class="o">-&gt;</span><span class="na">del</span><span class="p">(</span><span class="nv">$lockName</span><span class="p">);</span>
-    <span class="k">echo</span> <span class="nv">$e</span><span class="o">-&gt;</span><span class="na">getMessage</span><span class="p">();</span>
-<span class="p">}</span>
+    echo '下单成功,订单id为' . $orderId;
+} catch (\RedisException $e){
+    echo $e-&gt;getMessage();
+} catch (\Exception $e){
+    //回滚事务
+    if($pdo-&gt;inTransaction()){
+        $pdo-&gt;rollBack();
+    }
+   //解锁
+    $lock-&gt;del($lockName);
+    echo $e-&gt;getMessage();
+}
 
 </code></pre></div></div>
 
 <p>ab压力测试，ab -n 1000 -c 100 http://127.0.0.1:83/redis.php</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code> ~ ab -n 1000 -c 100 http://127.0.0.1:83/redis.php
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code> ~ ab -n 1000 -c 100 http://127.0.0.1:83/redis.php
 This is ApacheBench, Version 2.3 &lt;$Revision: 1826891 $&gt;
 Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
 Licensed to The Apache Software Foundation, http://www.apache.org/
@@ -585,7 +585,7 @@ Percentage of the requests served within a certain time (ms)
 </code></pre></div></div>
 
 <p>查看Order表情况，显示了10row order。</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mysql&gt; select * from `order`;
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mysql&gt; select * from `order`;
 +----+-----+----------------------+---------------------+---------------------+-------------+
 | id | num | store_depot_batch_id | create_time         | update_time         | delete_time |
 +----+-----+----------------------+---------------------+---------------------+-------------+
@@ -604,7 +604,7 @@ Percentage of the requests served within a certain time (ms)
 </code></pre></div></div>
 
 <p>查看depot_store_depot_batch表情况，确实冻结了10个。</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mysql&gt; select * from `depot_store_depot_batch`;
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mysql&gt; select * from `depot_store_depot_batch`;
 +----+-----+------------+---------------------+---------------------+-------------+
 | id | num | frozen_num | create_time         | update_time         | delete_time |
 +----+-----+------------+---------------------+---------------------+-------------+
@@ -615,7 +615,7 @@ Percentage of the requests served within a certain time (ms)
 
 <p>查看depot_store_depot_batch_frozen_record表情况，10row记录。</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mysql&gt; select * from depot_store_depot_batch_frozen_record;
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mysql&gt; select * from depot_store_depot_batch_frozen_record;
 +----+----------------------------+-------------------+------------------+------------+------+---------------------+---------------------+
 | id | depot_store_depot_batch_id | before_frozen_num | after_frozen_num | frozen_num | desc | create_time         | update_time         |
 +----+----------------------------+-------------------+------------------+------------+------+---------------------+---------------------+
@@ -753,7 +753,7 @@ Percentage of the requests served within a certain time (ms)
 
                     
                     <li>
-                        <a href="https://twitter.com/zzhpeng">
+                        <a href="https://twitter.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
@@ -764,7 +764,7 @@ Percentage of the requests served within a certain time (ms)
 
                     
                     <li>
-                        <a href="https://github.com/fromChinaBoy">
+                        <a href="https://github.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-github fa-stack-1x fa-inverse"></i>
@@ -776,7 +776,7 @@ Percentage of the requests served within a certain time (ms)
                     <!--
                     
                     <li>
-                        <a href="http://www.douban.com/people/zzhpeng">
+                        <a href="http://www.douban.com/people/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-douban fa-stack-1x fa-inverse"></i>
@@ -789,7 +789,7 @@ Percentage of the requests served within a certain time (ms)
                     <!--
                     
                     <li>
-                        <a href="https://www.facebook.com/zzhpeng">
+                        <a href="https://www.facebook.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
@@ -801,7 +801,7 @@ Percentage of the requests served within a certain time (ms)
 
                     
                     <li>
-                        <a target="_blank" href="https://www.zhihu.com/people/zzhpeng">
+                        <a target="_blank" href="https://www.zhihu.com/people/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa  fa-stack-1x fa-inverse">知</i>
@@ -813,7 +813,7 @@ Percentage of the requests served within a certain time (ms)
                     <!--
                     
                     <li>
-                        <a target="_blank" href="http://weibo.com/zzhpeng">
+                        <a target="_blank" href="http://weibo.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>

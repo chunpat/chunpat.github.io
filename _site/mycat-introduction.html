@@ -6,7 +6,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="fromChinaBoy">
+    <meta name="description" content="chunpat">
 
     <title>mycat 数据库分库分表中间件学习 - Blog</title>
 
@@ -122,7 +122,7 @@
 <p>官网：http://www.mycat.io/，我下载的是mac版本http://dl.mycat.io/1.6.5/Mycat-server-1.6.5-release-20180122220033-mac.tar.gz</p>
 
 <p>mycat是基于java的，需要环境依赖，我安装了openjdk1.8的</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>➜  mycat java -version
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>➜  mycat java -version
 java version "1.8.0_221"
 Java(TM) SE Runtime Environment (build 1.8.0_221-b11)
 Java HotSpot(TM) 64-Bit Server VM (build 25.221-b11, mixed mode)
@@ -135,16 +135,16 @@ Java HotSpot(TM) 64-Bit Server VM (build 25.221-b11, mixed mode)
 </blockquote>
 
 <p>进入文件夹内</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cd mycat
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cd mycat
 </code></pre></div></div>
 
 <p>启动</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>➜  mycat bin/mycat start
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>➜  mycat bin/mycat start
 Starting Mycat-server...
 </code></pre></div></div>
 
 <p>查看启动是否成功</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>➜  mycat more logs/wrapper.log
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>➜  mycat more logs/wrapper.log
 STATUS | wrapper  | 2020/01/11 15:21:51 | --&gt; Wrapper Started as Daemon
 STATUS | wrapper  | 2020/01/11 15:21:51 | Launching a JVM...
 INFO   | jvm 1    | 2020/01/11 15:21:51 | Java HotSpot(TM) 64-Bit Server VM warning: ignoring option MaxPermSize=64M; support was removed in 8.0
@@ -160,12 +160,12 @@ INFO   | jvm 1    | 2020/01/11 15:21:55 | MyCAT Server startup successfully. see
   <p>server.xml</p>
 </blockquote>
 
-<p><code class="highlighter-rouge">作用：</code></p>
+<p><code class="language-plaintext highlighter-rouge">作用：</code></p>
 
 <p>1、配置系统相关参数</p>
 
 <p>2、配置用户访问权限</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    &lt;user name="root" defaultAccount="true"&gt;
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    &lt;user name="root" defaultAccount="true"&gt;
             &lt;property name="password"&gt;123456&lt;/property&gt;
             &lt;property name="schemas"&gt;TESTDB&lt;/property&gt;
 
@@ -193,7 +193,7 @@ INFO   | jvm 1    | 2020/01/11 15:21:55 | MyCAT Server startup successfully. see
   <p>log4j2.xml</p>
 </blockquote>
 
-<p><code class="highlighter-rouge">作用：</code></p>
+<p><code class="language-plaintext highlighter-rouge">作用：</code></p>
 
 <p>1、配置输出日志的格式</p>
 
@@ -203,7 +203,7 @@ INFO   | jvm 1    | 2020/01/11 15:21:55 | MyCAT Server startup successfully. see
   <p>rule.xml</p>
 </blockquote>
 
-<p><code class="highlighter-rouge">作用：</code></p>
+<p><code class="language-plaintext highlighter-rouge">作用：</code></p>
 
 <p>1、配置水平分片的分片规则</p>
 
@@ -220,11 +220,11 @@ INFO   | jvm 1    | 2020/01/11 15:21:55 | MyCAT Server startup successfully. see
 </blockquote>
 
 <p>定义逻辑库具体配置</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code> &lt;table name="company" primaryKey="ID" type="global" dataNode="dn1,dn2,dn3" /&gt;
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code> &lt;table name="company" primaryKey="ID" type="global" dataNode="dn1,dn2,dn3" /&gt;
 </code></pre></div></div>
 <p>primaryKey如果分片的分片规则不是定义的值，会另外建立主键索引。</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;dataHost name="localhost1" maxCon="1000" minCon="10" balance="0"
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;dataHost name="localhost1" maxCon="1000" minCon="10" balance="0"
                   writeType="0" dbType="mysql" dbDriver="native" switchType="1"  slaveThreshold="100"&gt;
         &lt;heartbeat&gt;select user()&lt;/heartbeat&gt;
         &lt;!-- can have multi write hosts --&gt;
@@ -460,7 +460,7 @@ INFO   | jvm 1    | 2020/01/11 15:21:55 | MyCAT Server startup successfully. see
 
                     
                     <li>
-                        <a href="https://twitter.com/zzhpeng">
+                        <a href="https://twitter.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
@@ -471,7 +471,7 @@ INFO   | jvm 1    | 2020/01/11 15:21:55 | MyCAT Server startup successfully. see
 
                     
                     <li>
-                        <a href="https://github.com/fromChinaBoy">
+                        <a href="https://github.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-github fa-stack-1x fa-inverse"></i>
@@ -483,7 +483,7 @@ INFO   | jvm 1    | 2020/01/11 15:21:55 | MyCAT Server startup successfully. see
                     <!--
                     
                     <li>
-                        <a href="http://www.douban.com/people/zzhpeng">
+                        <a href="http://www.douban.com/people/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-douban fa-stack-1x fa-inverse"></i>
@@ -496,7 +496,7 @@ INFO   | jvm 1    | 2020/01/11 15:21:55 | MyCAT Server startup successfully. see
                     <!--
                     
                     <li>
-                        <a href="https://www.facebook.com/zzhpeng">
+                        <a href="https://www.facebook.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
@@ -508,7 +508,7 @@ INFO   | jvm 1    | 2020/01/11 15:21:55 | MyCAT Server startup successfully. see
 
                     
                     <li>
-                        <a target="_blank" href="https://www.zhihu.com/people/zzhpeng">
+                        <a target="_blank" href="https://www.zhihu.com/people/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa  fa-stack-1x fa-inverse">知</i>
@@ -520,7 +520,7 @@ INFO   | jvm 1    | 2020/01/11 15:21:55 | MyCAT Server startup successfully. see
                     <!--
                     
                     <li>
-                        <a target="_blank" href="http://weibo.com/zzhpeng">
+                        <a target="_blank" href="http://weibo.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>

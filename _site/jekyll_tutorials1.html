@@ -6,7 +6,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="fromChinaBoy">
+    <meta name="description" content="chunpat">
 
     <title>Jekyll搭建个人博客 - Blog</title>
 
@@ -131,22 +131,22 @@
 
 <p>安装 jekyll</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ gem install jekyll     
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ gem install jekyll     
 </code></pre></div></div>
 
 <p>创建博客</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ jekyll new myBlog    
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ jekyll new myBlog    
 </code></pre></div></div>
 
 <p>进入博客目录</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ cd myBlog  
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ cd myBlog  
 </code></pre></div></div>
 
 <p>启动本地服务</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ jekyll serve
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ jekyll serve
 </code></pre></div></div>
 
 <p>在浏览器里输入： <a href="http://localhost:4000">http://localhost:4000</a>，就可以看到你的博客效果了。</p>
@@ -161,7 +161,7 @@
 
 <p>一个基本的 Jekyll 网站的目录结构一般是像这样的：</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>.
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>.
 ├── _config.yml
 ├── _includes
 |   ├── footer.html
@@ -198,9 +198,9 @@
 
 <p>　　所有的文章都是 _posts 目录下面，文章格式为 mardown 格式，文章文件名可以是 .mardown 或者 .md。</p>
 
-<p>　　编写一篇新文章很简单，你可以直接从 _posts/ 目录下复制一份出来 <code class="highlighter-rouge">2016-10-16-welcome-to-jekyll副本.markdown</code> ，修改名字为 2016-10-16-article1.markdown ，注意：文章名的格式前面必须为 2016-10-16- ，日期可以修改，但必须为 年-月-日- 格式，后面的 article1 是整个文章的连接 URL，如果文章名为中文，那么文章的连接URL就会变成这样的：http://baixin.io/2015/08/%E6%90%AD%E5/ ， 所以建议文章名最好是英文的或者阿拉伯数字。 双击 2016-10-16-article1.markdown 打开</p>
+<p>　　编写一篇新文章很简单，你可以直接从 _posts/ 目录下复制一份出来 <code class="language-plaintext highlighter-rouge">2016-10-16-welcome-to-jekyll副本.markdown</code> ，修改名字为 2016-10-16-article1.markdown ，注意：文章名的格式前面必须为 2016-10-16- ，日期可以修改，但必须为 年-月-日- 格式，后面的 article1 是整个文章的连接 URL，如果文章名为中文，那么文章的连接URL就会变成这样的：http://baixin.io/2015/08/%E6%90%AD%E5/ ， 所以建议文章名最好是英文的或者阿拉伯数字。 双击 2016-10-16-article1.markdown 打开</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
 ---
 layout: post
 title:  "Welcome to Jekyll!"
@@ -226,12 +226,12 @@ categories: tag标签的分类，如：categories: 随笔</p>
 
 <p>首先你要获取的我博客，<a href="https://github.com/leopardpan/leopardpan.github.io.git">Github项目地址</a>，你可以直接<a href="https://github.com/leopardpan/leopardpan.github.io/archive/master.zip">点击下载博客</a>，进去leopardpan.github.io/ 目录下， 使用命令部署本地服务</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ jekyll server   
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ jekyll server   
 </code></pre></div></div>
 
 <h3 id="如果你本机没配置过任何jekyll的环境可能会报错">如果你本机没配置过任何jekyll的环境，可能会报错</h3>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/Users/xxxxxxxx/.rvm/rubies/ruby-2.2.2/lib/ruby/site_ruby/2.2.0/rubygems/core_ext/kernel_require.rb:54:in `require': cannot load such file -- bundler (LoadError)
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/Users/xxxxxxxx/.rvm/rubies/ruby-2.2.2/lib/ruby/site_ruby/2.2.0/rubygems/core_ext/kernel_require.rb:54:in `require': cannot load such file -- bundler (LoadError)
 	from /Users/xxxxxxxx/.rvm/rubies/ruby-2.2.2/lib/ruby/site_ruby/2.2.0/rubygems/core_ext/kernel_require.rb:54:in `require'
 	from /Users/xxxxxxxx/.rvm/gems/ruby-2.2.2/gems/jekyll-3.3.0/lib/jekyll/plugin_manager.rb:34:in `require_from_bundler'
 	from /Users/xxxxxxxx/.rvm/gems/ruby-2.2.2/gems/jekyll-3.3.0/exe/jekyll:9:in `&lt;top (required)&gt;'
@@ -244,14 +244,14 @@ categories: tag标签的分类，如：categories: 随笔</p>
 
 <p>原因： 没有安装 bundler ，执行安装 bundler 命令</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
 $ gem install bundler
 
 </code></pre></div></div>
 
 <p>提示：</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Fetching: bundler-1.13.5.gem (100%)
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Fetching: bundler-1.13.5.gem (100%)
 Successfully installed bundler-1.13.5
 Parsing documentation for bundler-1.13.5
 Installing ri documentation for bundler-1.13.5
@@ -262,7 +262,7 @@ Done installing documentation for bundler after 5 seconds
 
 <p>再次执行 $ jekyll server  ，提示</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
 Could not find proper version of jekyll (3.1.1) in any of the sources
 Run `bundle install` to install missing gems.
 
@@ -270,14 +270,14 @@ Run `bundle install` to install missing gems.
 
 <p>跟着提示运行命令</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ bundle install
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ bundle install
 </code></pre></div></div>
 
 <p>这个时候你可能会发现 bundle install 运行卡主不动了。</p>
 
 <p>如果很长时间都没任何提示的话，你可以尝试修改 gem 的 source</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ gem sources --remove https://rubygems.org/
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ gem sources --remove https://rubygems.org/
 $ gem sources -a http://ruby.taobao.org/
 $ gem sources -l
 *** CURRENT SOURCES ***
@@ -288,7 +288,7 @@ http://ruby.taobao.org
 
 <p>再次执行命令 $ bundle install，发现开始有动静了</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Fetching gem metadata from https://rubygems.org/...........
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Fetching gem metadata from https://rubygems.org/...........
 Fetching version metadata from https://rubygems.org/..
 Fetching dependency metadata from https://rubygems.org/.
 。。。
@@ -301,13 +301,13 @@ Use `bundle show [gemname]` to see where a bundled gem is installed.
 
 <p>bundler安装完成，后再次启动本地服务</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ jekyll server
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ jekyll server
 
 </code></pre></div></div>
 
 <p>继续报错</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Configuration file: /Users/tendcloud-Caroline/Desktop/leopardpan.github.io/_config.yml
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Configuration file: /Users/tendcloud-Caroline/Desktop/leopardpan.github.io/_config.yml
   Dependency Error: Yikes! It looks like you don't have jekyll-sitemap or one of its dependencies installed. In order to use Jekyll as currently configured, you'll need to install this gem. The full error message from Ruby is: 'cannot load such file -- jekyll-sitemap' If you run into trouble, you can find helpful resources at http://jekyllrb.com/help/! 
 jekyll 3.1.1 | Error:  jekyll-sitemap
 
@@ -326,12 +326,12 @@ jekyll 3.1.1 | Error:  jekyll-sitemap
 
 <p>修改完成后保存配置，再次执行</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ jekyll server
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ jekyll server
 
 </code></pre></div></div>
 <p>提示</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Configuration file: /Users/baixinpan/Desktop/OpenSource/Mine/Page-Blog/leopardpan.github.io-github/_config.yml
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Configuration file: /Users/baixinpan/Desktop/OpenSource/Mine/Page-Blog/leopardpan.github.io-github/_config.yml
             Source: /Users/baixinpan/Desktop/OpenSource/Mine/Page-Blog/leopardpan.github.io-github
        Destination: /Users/baixinpan/Desktop/OpenSource/Mine/Page-Blog/leopardpan.github.io-github/_site
  Incremental build: disabled. Enable with --incremental
@@ -372,7 +372,7 @@ Configuration file: /Users/baixinpan/Desktop/OpenSource/Mine/Page-Blog/leopardpa
 <h3 id="qa">Q&amp;A</h3>
 
 <blockquote>
-  <p>问题：最近很多朋友使用我的模板报警告：The CNAME <code class="highlighter-rouge">baixin.io</code> is already taken 
+  <p>问题：最近很多朋友使用我的模板报警告：The CNAME <code class="language-plaintext highlighter-rouge">baixin.io</code> is already taken 
 解决：把CNAME里面的baixin.io修改成你自己的域名，如果你暂时没有域名，CNAME里面就什么都不用谢。（之前没人反馈过这个问题，应该是github page最近才最的限制。）</p>
 </blockquote>
 
@@ -470,7 +470,7 @@ Configuration file: /Users/baixinpan/Desktop/OpenSource/Mine/Page-Blog/leopardpa
 
                     
                     <li>
-                        <a href="https://twitter.com/zzhpeng">
+                        <a href="https://twitter.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
@@ -481,7 +481,7 @@ Configuration file: /Users/baixinpan/Desktop/OpenSource/Mine/Page-Blog/leopardpa
 
                     
                     <li>
-                        <a href="https://github.com/fromChinaBoy">
+                        <a href="https://github.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-github fa-stack-1x fa-inverse"></i>
@@ -493,7 +493,7 @@ Configuration file: /Users/baixinpan/Desktop/OpenSource/Mine/Page-Blog/leopardpa
                     <!--
                     
                     <li>
-                        <a href="http://www.douban.com/people/zzhpeng">
+                        <a href="http://www.douban.com/people/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-douban fa-stack-1x fa-inverse"></i>
@@ -506,7 +506,7 @@ Configuration file: /Users/baixinpan/Desktop/OpenSource/Mine/Page-Blog/leopardpa
                     <!--
                     
                     <li>
-                        <a href="https://www.facebook.com/zzhpeng">
+                        <a href="https://www.facebook.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
@@ -518,7 +518,7 @@ Configuration file: /Users/baixinpan/Desktop/OpenSource/Mine/Page-Blog/leopardpa
 
                     
                     <li>
-                        <a target="_blank" href="https://www.zhihu.com/people/zzhpeng">
+                        <a target="_blank" href="https://www.zhihu.com/people/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa  fa-stack-1x fa-inverse">知</i>
@@ -530,7 +530,7 @@ Configuration file: /Users/baixinpan/Desktop/OpenSource/Mine/Page-Blog/leopardpa
                     <!--
                     
                     <li>
-                        <a target="_blank" href="http://weibo.com/zzhpeng">
+                        <a target="_blank" href="http://weibo.com/chunpat">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>

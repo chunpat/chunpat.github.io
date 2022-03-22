@@ -2,9 +2,502 @@
 <rss version="2.0" xmlns:atom="https://www.w3.org/2005/Atom">
 	<channel>
 		<title>Blog</title>
-		<description>fromChinaBoy</description>
+		<description>chunpat</description>
 		<link>/</link>
 		<atom:link href="/" rel="self" type="application/rss+xml" />
+		
+			<item>
+				<title>PHP 异常处理</title>
+				<description>&lt;h2 id=&quot;php-错误处理&quot;&gt;PHP 错误处理&lt;/h2&gt;
+
+&lt;p&gt;PHP因为便捷灵活，入门门槛低，严谨包容性大，如果使用不当，就容易写出很多难以入目与维护的代码。至此，如果想项目长久发展。
+配置好相应的设置，加强把控至关重要。&lt;/p&gt;
+
+&lt;h2 id=&quot;php-的错误级别种类&quot;&gt;PHP 的错误级别种类&lt;/h2&gt;
+
+&lt;p&gt;摘取了宝塔管理软件下的php.ini 配置下关于错误处理与记录的描述。&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Error handling and logging ;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; This directive informs PHP of which errors, warnings and notices you would like
+; it to take action for. The recommended way of setting values for this
+; directive is through the use of the error level constants and bitwise
+; operators. The error level constants are below here for convenience as well as
+; some common settings and their meanings.
+; By default, PHP is set to take action on all errors, notices and warnings EXCEPT
+; those related to E_NOTICE and E_STRICT, which together cover best practices and
+; recommended coding standards in PHP. For performance reasons, this is the
+; recommend error reporting setting. Your production server shouldn't be wasting
+; resources complaining about best practices and coding standards. That's what
+; development servers and development settings are for.
+; Note: The php.ini-development file has this setting as E_ALL. This
+; means it pretty much reports everything which is exactly what you want during
+; development and early testing.
+;
+; Error Level Constants:
+; E_ALL             - All errors and warnings (includes E_STRICT as of PHP 5.4.0)
+; E_ERROR           - fatal run-time errors
+; E_RECOVERABLE_ERROR  - almost fatal run-time errors
+; E_WARNING         - run-time warnings (non-fatal errors)
+; E_PARSE           - compile-time parse errors
+; E_NOTICE          - run-time notices (these are warnings which often result
+;                     from a bug in your code, but it's possible that it was
+;                     intentional (e.g., using an uninitialized variable and
+;                     relying on the fact it is automatically initialized to an
+;                     empty string)
+; E_STRICT          - run-time notices, enable to have PHP suggest changes
+;                     to your code which will ensure the best interoperability
+;                     and forward compatibility of your code
+; E_CORE_ERROR      - fatal errors that occur during PHP's initial startup
+; E_CORE_WARNING    - warnings (non-fatal errors) that occur during PHP's
+;                     initial startup
+; E_COMPILE_ERROR   - fatal compile-time errors
+; E_COMPILE_WARNING - compile-time warnings (non-fatal errors)
+; E_USER_ERROR      - user-generated error message
+; E_USER_WARNING    - user-generated warning message
+; E_USER_NOTICE     - user-generated notice message
+; E_DEPRECATED      - warn about code that will not work in future versions
+;                     of PHP
+; E_USER_DEPRECATED - user-generated deprecation warnings
+;
+; Common Values:
+;   E_ALL (Show all errors, warnings and notices including coding standards.)
+;   E_ALL &amp;amp; ~E_NOTICE  (Show all errors, except for notices)
+;   E_ALL &amp;amp; ~E_NOTICE &amp;amp; ~E_STRICT  (Show all errors, except for notices and coding standards warnings.)
+;   E_COMPILE_ERROR|E_RECOVERABLE_ERROR|E_ERROR|E_CORE_ERROR  (Show only errors)
+; Default Value: E_ALL &amp;amp; ~E_NOTICE &amp;amp; ~E_STRICT &amp;amp; ~E_DEPRECATED
+; Development Value: E_ALL
+; Production Value: E_ALL &amp;amp; ~E_DEPRECATED &amp;amp; ~E_STRICT
+; http://php.net/error-reporting
+error_reporting = E_ALL &amp;amp; ~E_NOTICE
+
+; This directive controls whether or not and where PHP will output errors,
+; notices and warnings too. Error output is very useful during development, but
+; it could be very dangerous in production environments. Depending on the code
+; which is triggering the error, sensitive information could potentially leak
+; out of your application such as database usernames and passwords or worse.
+; For production environments, we recommend logging errors rather than
+; sending them to STDOUT.
+; Possible Values:
+;   Off = Do not display any errors
+;   stderr = Display errors to STDERR (affects only CGI/CLI binaries!)
+;   On or stdout = Display errors to STDOUT
+; Default Value: On
+; Development Value: On
+; Production Value: Off
+; http://php.net/display-errors
+display_errors = On
+
+; The display of errors which occur during PHP's startup sequence are handled
+; separately from display_errors. PHP's default behavior is to suppress those
+; errors from clients. Turning the display of startup errors on can be useful in
+; debugging configuration problems. We strongly recommend you
+; set this to 'off' for production servers.
+; Default Value: Off
+; Development Value: On
+; Production Value: Off
+; http://php.net/display-startup-errors
+display_startup_errors = Off
+
+; Besides displaying errors, PHP can also log errors to locations such as a
+; server-specific log, STDERR, or a location specified by the error_log
+; directive found below. While errors should not be displayed on productions
+; servers they should still be monitored and logging is a great way to do that.
+; Default Value: Off
+; Development Value: On
+; Production Value: On
+; http://php.net/log-errors
+log_errors = On
+
+; Set maximum length of log_errors. In error_log information about the source is
+; added. The default is 1024 and 0 allows to not apply any maximum length at all.
+; http://php.net/log-errors-max-len
+log_errors_max_len = 1024
+
+; Do not log repeated messages. Repeated errors must occur in same file on same
+; line unless ignore_repeated_source is set true.
+; http://php.net/ignore-repeated-errors
+ignore_repeated_errors = Off
+
+; Ignore source of message when ignoring repeated messages. When this setting
+; is On you will not log errors with repeated messages from different files or
+; source lines.
+; http://php.net/ignore-repeated-source
+ignore_repeated_source = Off
+
+; If this parameter is set to Off, then memory leaks will not be shown (on
+; stdout or in the log). This has only effect in a debug compile, and if
+; error reporting includes E_WARNING in the allowed list
+; http://php.net/report-memleaks
+report_memleaks = On
+
+; This setting is on by default.
+;report_zend_debug = 0
+
+; Store the last error/warning message in $php_errormsg (boolean). Setting this value
+; to On can assist in debugging and is appropriate for development servers. It should
+; however be disabled on production servers.
+; This directive is DEPRECATED.
+; Default Value: Off
+; Development Value: Off
+; Production Value: Off
+; http://php.net/track-errors
+;track_errors = Off
+
+; Turn off normal error reporting and emit XML-RPC error XML
+; http://php.net/xmlrpc-errors
+;xmlrpc_errors = 0
+
+; An XML-RPC faultCode
+;xmlrpc_error_number = 0
+
+; When PHP displays or logs an error, it has the capability of formatting the
+; error message as HTML for easier reading. This directive controls whether
+; the error message is formatted as HTML or not.
+; Note: This directive is hardcoded to Off for the CLI SAPI
+; Default Value: On
+; Development Value: On
+; Production value: On
+; http://php.net/html-errors
+html_errors = On
+
+; If html_errors is set to On *and* docref_root is not empty, then PHP
+; produces clickable error messages that direct to a page describing the error
+; or function causing the error in detail.
+; You can download a copy of the PHP manual from http://php.net/docs
+; and change docref_root to the base URL of your local copy including the
+; leading '/'. You must also specify the file extension being used including
+; the dot. PHP's default behavior is to leave these settings empty, in which
+; case no links to documentation are generated.
+; Note: Never use this feature for production boxes.
+; http://php.net/docref-root
+; Examples
+;docref_root = &quot;/phpmanual/&quot;
+
+; http://php.net/docref-ext
+;docref_ext = .html
+
+; String to output before an error message. PHP's default behavior is to leave
+; this setting blank.
+; http://php.net/error-prepend-string
+; Example:
+;error_prepend_string = &quot;&amp;lt;span style='color: #ff0000'&amp;gt;&quot;
+
+; String to output after an error message. PHP's default behavior is to leave
+; this setting blank.
+; http://php.net/error-append-string
+; Example:
+;error_append_string = &quot;&amp;lt;/span&amp;gt;&quot;
+
+; Log errors to specified file. PHP's default behavior is to leave this value
+; empty.
+; http://php.net/error-log
+; Example:
+error_log = /tmp/php_errors.log
+; Log errors to syslog (Event Log on Windows).
+;error_log = syslog
+
+;windows.show_crt_warning
+; Default value: 0
+; Development value: 0
+; Production value: 0
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;下面是官方中文版的解释，链接：&lt;a href=&quot;https://www.php.net/manual/zh/errorfunc.constants.php&quot;&gt;https://www.php.net/manual/zh/errorfunc.constants.php&lt;/a&gt;&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;值&lt;/th&gt;
+      &lt;th&gt;常量&lt;/th&gt;
+      &lt;th&gt;说明&lt;/th&gt;
+      &lt;th&gt;备注&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;1&lt;/td&gt;
+      &lt;td&gt;E_ERROR (int)&lt;/td&gt;
+      &lt;td&gt;致命的运行时错误。这类错误一般是不可恢复的情况，例如内存分配导致的问题。后果是导致脚本终止不再继续运行。&lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;2&lt;/td&gt;
+      &lt;td&gt;E_WARNING (int)&lt;/td&gt;
+      &lt;td&gt;运行时警告 (非致命错误)。仅给出提示信息，但是脚本不会终止运行。&lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;4&lt;/td&gt;
+      &lt;td&gt;E_PARSE (int)&lt;/td&gt;
+      &lt;td&gt;编译时语法解析错误。解析错误仅仅由分析器产生。&lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;8&lt;/td&gt;
+      &lt;td&gt;E_NOTICE (int)&lt;/td&gt;
+      &lt;td&gt;运行时通知。表示脚本遇到可能会表现为错误的情况，但是在可以正常运行的脚本里面也可能会有类似的通知。&lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;16&lt;/td&gt;
+      &lt;td&gt;E_CORE_ERROR (int)&lt;/td&gt;
+      &lt;td&gt;在 PHP 初始化启动过程中发生的致命错误。该错误类似 E_ERROR，但是是由 PHP 引擎核心产生的。&lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;32&lt;/td&gt;
+      &lt;td&gt;E_CORE_WARNING (int)&lt;/td&gt;
+      &lt;td&gt;PHP 初始化启动过程中发生的警告 (非致命错误) 。类似 E_WARNING，但是是由 PHP 引擎核心产生的。&lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;64&lt;/td&gt;
+      &lt;td&gt;E_COMPILE_ERROR (int)&lt;/td&gt;
+      &lt;td&gt;致命编译时错误。类似 E_ERROR，但是是由 Zend 脚本引擎产生的。&lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;128&lt;/td&gt;
+      &lt;td&gt;E_COMPILE_WARNING (int)&lt;/td&gt;
+      &lt;td&gt;编译时警告 (非致命错误)。类似 E_WARNING，但是是由 Zend 脚本引擎产生的。&lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;256&lt;/td&gt;
+      &lt;td&gt;E_USER_ERROR (int)&lt;/td&gt;
+      &lt;td&gt;用户产生的错误信息。类似 E_ERROR，但是是由用户自己在代码中使用 PHP 函数 trigger_error()来产生的。&lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;512&lt;/td&gt;
+      &lt;td&gt;E_USER_WARNING (int)&lt;/td&gt;
+      &lt;td&gt;用户产生的警告信息。类似 E_WARNING，但是是由用户自己在代码中使用 PHP 函数 trigger_error()来产生的。&lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;1024&lt;/td&gt;
+      &lt;td&gt;E_USER_NOTICE (int)&lt;/td&gt;
+      &lt;td&gt;用户产生的通知信息。类似 E_NOTICE，但是是由用户自己在代码中使用 PHP 函数 trigger_error()来产生的。&lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;2048&lt;/td&gt;
+      &lt;td&gt;E_STRICT (int)&lt;/td&gt;
+      &lt;td&gt;启用 PHP 对代码的修改建议，以确保代码具有最佳的互操作性和向前兼容性。&lt;/td&gt;
+      &lt;td&gt;PHP 5.4.0 之前的版本中不包含 E_ALL&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;4096&lt;/td&gt;
+      &lt;td&gt;E_RECOVERABLE_ERROR&lt;/td&gt;
+      &lt;td&gt;(int)    可被捕捉的致命错误。 它表示发生了一个可能非常危险的错误，但是还没有导致PHP引擎处于不稳定的状态。 如果该错误没有被用户自定义句柄捕获 (参见 set_error_handler())，将成为一个 E_ERROR　从而脚本会终止运行。&lt;/td&gt;
+      &lt;td&gt;自 PHP 5.2.0 起&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;8192&lt;/td&gt;
+      &lt;td&gt;E_DEPRECATED (int)&lt;/td&gt;
+      &lt;td&gt;运行时通知。启用后将会对在未来版本中可能无法正常工作的代码给出警告。&lt;/td&gt;
+      &lt;td&gt;自 PHP 5.3.0 起&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;16384&lt;/td&gt;
+      &lt;td&gt;E_USER_DEPRECATED&lt;/td&gt;
+      &lt;td&gt;(int)    用户产生的警告信息。 类似 E_DEPRECATED, 但是是由用户自己在代码中使用PHP函数 trigger_error()来产生的。&lt;/td&gt;
+      &lt;td&gt;自 PHP 5.3.0 起&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;32767&lt;/td&gt;
+      &lt;td&gt;E_ALL (int)&lt;/td&gt;
+      &lt;td&gt;PHP 5.4.0 之前为 E_STRICT 除外的所有错误和警告信息。 PHP 5.4.x 中为 32767, PHP 5.3.x 中为 30719, PHP 5.2.x 中为 6143, 更早之前的 PHP 版本中为 2047。&lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;我截取配置，把注释去掉，并在对应下方加上自己的理解，来源：https://www.php.net/manual/zh/errorfunc.configuration.php&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;error_reporting = E_ALL &amp;amp; ~E_NOTICE
+//错误显示级别
+display_errors = On
+//错误显示开关
+display_startup_errors = Off
+//启动php显示错误，这个在开发环境是开启，生产关闭。
+log_errors = On
+//错误日志记录开关
+log_errors_max_len = 1024
+//不记录重复的信息。重复的错误必须出现在同一个文件中的同一行代码上，除非 ignore_repeated_source 设置为true。
+ignore_repeated_errors = Off
+//忽略重复消息时，也忽略消息的来源。当该设置开启时，重复信息将不会记录它是由不同的文件还是不同的源代码行产生的。
+ignore_repeated_source = Off
+忽略重复消息时，也忽略消息的来源。当该设置开启时，重复信息将不会记录它是由不同的文件还是不同的源代码行产生的。
+report_memleaks = On
+如果这个参数设置为Off，则内存泄露信息不会显示 (在 stdout 或者日志中)。
+html_errors = On
+在错误信息中关闭HTML标签。这种新的HTML格式的错误信息是可以点击，它引导用户前往描述该错误或者导致该错误发生的函数的参考信息页面。 
+error_log = /tmp/php_errors.log
+设置脚本错误将被记录到的文件。该文件必须是web服务器用户可写的。
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;原生代码演示&quot;&gt;原生代码演示&lt;/h2&gt;
+
+&lt;p&gt;这里演示日常开发常常遇到的，分别是&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;1、E_NOTICE (int)&lt;/li&gt;
+  &lt;li&gt;2、E_PARSE (int)&lt;/li&gt;
+  &lt;li&gt;3、E_STRICT (int)&lt;/li&gt;
+  &lt;li&gt;4、E_DEPRECATED (int)&lt;/li&gt;
+  &lt;li&gt;5、E_WARNING (int)&lt;/li&gt;
+  &lt;li&gt;6、E_ERROR (int)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;首先默认配置如下，error_reporting = E_ALL &amp;amp; ~E_NOTICE，表示所有错误都显示出来，除了E_NOTICE，这里为了测试
+E_NOTICE是什么错误，我配置修改为如下：&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;error_reporting = E_ALL
+//错误显示级别
+display_errors = On
+//错误显示开关
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;针对上面日常遇到的错误，进行代码实操：&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;E_NOTICE&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;实例代码&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&amp;lt;?php
+echo $aa;
+
+// Notice: Undefined variable: aa in /Volumes/work/www/onehour/onehour_docker/www/sima2/test.php on line 3
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;E_WARNING&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;实例代码&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&amp;lt;?php
+echo aa;
+
+// Warning: Use of undefined constant aa - assumed 'aa' (this will throw an Error in a future version of PHP) in /Volumes/work/www/onehour/onehour_docker/www/sima2/test.php on line 2
+string(1) &quot;a&quot;
+
+&amp;lt;?php
+$person-&amp;gt;name = 'Rasmus Lerdorf';
+//Warning: Creating default object from empty value in /Volumes/work/www/onehour/onehour_docker/www/sima2/test.php on line 2
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;E_PARSE (int)&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;实例代码&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;z = 1;
+// Parse error: syntax error, unexpected '=' in /Volumes/work/www/onehour/onehour_docker/www/sima2/test.php on line 2
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;E_DEPRECATED (int)&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;实例代码&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&amp;lt;?php
+$size = mcrypt_get_block_size(MCRYPT_RIJNDAEL_128, MCRYPT_MODE_ECB);
+
+// Deprecated: Function mcrypt_get_block_size() is deprecated in /Volumes/work/www/onehour/onehour_docker/www/sima2/test.php on line 2
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;E_STRICT (int)&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;&lt;strong&gt;抱歉，PHP7.0以后就没有这个分类了，合并到其他分类去了&lt;/strong&gt; ，来源链接: &lt;a href=&quot;https://wiki.php.net/rfc/reclassify_e_strict&quot;&gt;https://wiki.php.net/rfc/reclassify_e_strict&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;下面演示的是旧版本，PHP7.0前版本。&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&amp;lt;?php
+class Person {
+    var $name;
+
+    function __construct($name) {
+        $this-&amp;gt;name = $name;
+    }
+
+    function Person($name) {
+        $this-&amp;gt;name = $name;
+    }
+}
+
+//PHP Strict Standards:  var: Deprecated. Please use the public/private/protected modifiers
+                  PHP Strict Standards:  Redefining already defined constructor for class Person
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;E_ERROR (int)&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;实例代码&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&amp;lt;?php
+$aa = null;
+var_dump( $aa-&amp;gt;toArray());  //这操作在ORM 对象操作经常遇到
+// Fatal error: Uncaught Error: Call to a member function toArray() on null in /Volumes/work/www/onehour/onehour_docker/www/sima2/test.php:3 Stack trace: #0 {main} thrown in /Volumes/work/www/onehour/onehour_docker/www/sima2/test.php on line 3
+
+class Person {
+    var $name;
+
+    function __construct($name) {
+        $this-&amp;gt;name = $name;
+    }
+
+    function Person($name) {
+        $this-&amp;gt;name = $name;
+    }
+}
+
+Person::Person();
+
+// Fatal error: Uncaught Error: Non-static method Person::Person() cannot be called statically in /Volumes/work/www/onehour/onehour_docker/www/sima2/test.php:14 Stack trace: #0 {main} thrown in /Volumes/work/www/onehour/onehour_docker/www/sima2/test.php on line 14
+
+function test($test){
+}
+test();
+
+//Fatal error: Uncaught ArgumentCountError: Too few arguments to function test(), 0 passed in /Volumes/work/www/onehour/onehour_docker/www/sima2/test.php on line 6 and exactly 1 expected in /Volumes/work/www/onehour/onehour_docker/www/sima2/test.php:2 Stack trace: #0 /Volumes/work/www/onehour/onehour_docker/www/sima2/test.php(6): test() #1 {main} thrown in /Volumes/work/www/onehour/onehour_docker/www/sima2/test.php on line 2
+
+throw new \Exception('aaa');
+//Fatal error: Uncaught Exception: aaa in /Volumes/work/www/onehour/onehour_docker/www/sima2/test.php:2 Stack trace: #0 {main} thrown in /Volumes/work/www/onehour/onehour_docker/www/sima2/test.php on line 2
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;处理异常&quot;&gt;处理异常&lt;/h2&gt;
+
+&lt;p&gt;日常开发中可以直接抛出错误，但是在生产环境中，有些警告类非中断的错误是不能影响正常业务流程的。如除了E_ERROR会中断。
+那怎么办呢？可以使用set_error_handler处理并且记录异常，而不影响正常业务。 set_error_handler 不会捕抓 E_ERROR,
+E_PARSE, E_CORE_ERROR, E_CORE_WARNING, E_COMPILE_ERROR, E_COMPILE_WARNING。下面是原文：&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;//https://www.php.net/manual/en/function.set-error-handler
+The following error types cannot be handled with a user defined function: E_ERROR, E_PARSE,
+E_CORE_ERROR, E_CORE_WARNING, E_COMPILE_ERROR, E_COMPILE_WARNING independent of where they
+were raised, and most of E_STRICT raised in the file where set_error_handler() is called.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;thinkphp异常处理&quot;&gt;ThinkPHP异常处理&lt;/h2&gt;
+
+&lt;h2 id=&quot;laravel异常处理&quot;&gt;Laravel异常处理&lt;/h2&gt;
+
+&lt;h2 id=&quot;迭代&quot;&gt;迭代&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;2022年03月18日 23:59:59 初稿&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;参考&quot;&gt;参考&lt;/h2&gt;
+
+&lt;p&gt;1、&lt;/p&gt;
+</description>
+				<pubDate>Fri, 18 Mar 2022 00:00:00 +0800</pubDate>
+				<link>/php-exception.html</link>
+				<guid isPermaLink="true">/php-exception.html</guid>
+			</item>
 		
 			<item>
 				<title>Self-host Gitlab的相关操作</title>
@@ -13,11 +506,11 @@
 &lt;h2 id=&quot;apt-get-直接安装&quot;&gt;apt-get 直接安装&lt;/h2&gt;
 
 &lt;p&gt;更新gitlab源&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;curl -s https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.deb.sh | sudo bash
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;curl -s https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.deb.sh | sudo bash
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;安装，默认最新版&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo apt-get install gitlab-ce
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo apt-get install gitlab-ce
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;h1 id=&quot;进阶debian-系列系统为例&quot;&gt;进阶（Debian 系列系统为例）&lt;/h1&gt;
@@ -33,7 +526,7 @@
 &lt;p&gt;&lt;img src=&quot;../img/2022-01-08-gitlab/advanced_1.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;修改完，重新加载配置&amp;amp;重启即可。&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;#重新加载配置
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;#重新加载配置
 sudo gitlab-ctl reconfigure
 
 #重启
@@ -50,22 +543,22 @@ sudo gitlab-ctl restart
 &lt;/blockquote&gt;
 
 &lt;p&gt;sudo vim /var/opt/gitlab/backups/remove.sh&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;#!/bin/bash&lt;/span&gt;
-0 0 &lt;span class=&quot;k&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;*&lt;/span&gt; sh /var/opt/gitlab/backups/backup.sh &lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt; /var/opt/gitlab/backups/backup.log
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;#!/bin/bash
+0 0 * * * sh /var/opt/gitlab/backups/backup.sh &amp;gt;&amp;gt; /var/opt/gitlab/backups/backup.log
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;blockquote&gt;
   &lt;p&gt;2、更改用户组(当前操作的是onehour用户)&lt;/p&gt;
 &lt;/blockquote&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo chown -R git:git /var/opt/gitlab/backups/backup.sh
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo chown -R git:git /var/opt/gitlab/backups/backup.sh
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;blockquote&gt;
   &lt;p&gt;3、测试&lt;/p&gt;
 &lt;/blockquote&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo sh /var/opt/gitlab/backups/backup.sh &amp;gt;&amp;gt; /var/opt/gitlab/backups/backup.log
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo sh /var/opt/gitlab/backups/backup.sh &amp;gt;&amp;gt; /var/opt/gitlab/backups/backup.log
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;blockquote&gt;
@@ -74,12 +567,12 @@ sudo gitlab-ctl restart
 
 &lt;p&gt;切换到root用户执行contab&lt;/p&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;contab -e
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;contab -e
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;用nano操作&lt;/p&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;0 0 * * * sh /var/opt/gitlab/backups/backup.sh &amp;gt;&amp;gt; /var/opt/gitlab/backups/backup.log
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;0 0 * * * sh /var/opt/gitlab/backups/backup.sh &amp;gt;&amp;gt; /var/opt/gitlab/backups/backup.log
 
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
@@ -92,22 +585,22 @@ sudo gitlab-ctl restart
 &lt;/blockquote&gt;
 
 &lt;p&gt;sudo vim /var/opt/gitlab/backups/remove.sh&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;#!/bin/bash&lt;/span&gt;
-find &lt;span class=&quot;s2&quot;&gt;&quot;/var/opt/gitlab/backups/&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-name&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;*.tar&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-ctime&lt;/span&gt; +15  &lt;span class=&quot;nt&quot;&gt;-exec&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;rm&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-rf&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{}&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\;&lt;/span&gt;  
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;#!/bin/bash
+find &quot;/var/opt/gitlab/backups/&quot; -name &quot;*.tar&quot; -ctime +15  -exec rm -rf {} \;  
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;blockquote&gt;
   &lt;p&gt;2、更改用户组(当前操作的是onehour用户)&lt;/p&gt;
 &lt;/blockquote&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo chown -R git:git /var/opt/gitlab/backups/remove.sh
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo chown -R git:git /var/opt/gitlab/backups/remove.sh
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;blockquote&gt;
   &lt;p&gt;3、测试&lt;/p&gt;
 &lt;/blockquote&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo sh /var/opt/gitlab/backups/remove.sh
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo sh /var/opt/gitlab/backups/remove.sh
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;blockquote&gt;
@@ -116,12 +609,12 @@ find &lt;span class=&quot;s2&quot;&gt;&quot;/var/opt/gitlab/backups/&quot;&lt;/s
 
 &lt;p&gt;切换到root用户执行contab&lt;/p&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;contab -e
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;contab -e
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;用nano操作&lt;/p&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;45 10 * * * sh /var/opt/gitlab/backups/remove.sh  &amp;gt;&amp;gt; /var/opt/gitlab/backups/remove.log
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;45 10 * * * sh /var/opt/gitlab/backups/remove.sh  &amp;gt;&amp;gt; /var/opt/gitlab/backups/remove.log
 
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
@@ -140,7 +633,7 @@ find &lt;span class=&quot;s2&quot;&gt;&quot;/var/opt/gitlab/backups/&quot;&lt;/s
 &lt;h3 id=&quot;查看版本&quot;&gt;查看版本&lt;/h3&gt;
 
 &lt;p&gt;查看详细的版本信息&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; sudo gitlab-rake gitlab:env:info
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; sudo gitlab-rake gitlab:env:info
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;h3 id=&quot;到官方包库寻找对应版本&quot;&gt;到官方包库寻找对应版本&lt;/h3&gt;
@@ -149,26 +642,26 @@ find &lt;span class=&quot;s2&quot;&gt;&quot;/var/opt/gitlab/backups/&quot;&lt;/s
 &lt;a href=&quot;https://packages.gitlab.com/gitlab/gitlab-ce/&quot;&gt;https://packages.gitlab.com/gitlab/gitlab-ce/&lt;/a&gt;&lt;/p&gt;
 
 &lt;p&gt;操作前，先更新gitlab资源路径&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;curl -s https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.deb.sh | sudo bash
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;curl -s https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.deb.sh | sudo bash
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;查找对应的包，点击进去能看到详情，可以看到apt怎么操作之类的，例如安装12.1.17版本&lt;/p&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo apt-get install gitlab-ce=12.1.17-ce.0
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo apt-get install gitlab-ce=12.1.17-ce.0
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;&lt;strong&gt;这里的安装即是安装也是更新，会把你的数据也一起迁移了&lt;/strong&gt;&lt;/p&gt;
 
 &lt;p&gt;然后重启gitlab&lt;/p&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo gitlab-ctl restart
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo gitlab-ctl restart
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;重启nginx，我这里用的是外部的nginx，而且用的TCP连接，所以需要重启，重新连接socket。&lt;/p&gt;
 
 &lt;p&gt;&lt;strong&gt;注意，升级到13.5.1-ce.0后，要修改nginx 转发代理的路劲&lt;/strong&gt;&lt;/p&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;#原来
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;#原来
 upstream gitlab-workhorse {
   server unix:/var/opt/gitlab/gitlab-workhorse/socket  fail_timeout=0;
 }
@@ -295,7 +788,7 @@ https://academy.binance.com/zh/articles/connecting-metamask-to-binance-smart-cha
 
 &lt;p&gt;tp5.1日志，出现了REPLACE&lt;/p&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[ sql ] [ SQL ] REPLACE INTO `store_system_depot_goods_detail` 
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[ sql ] [ SQL ] REPLACE INTO `store_system_depot_goods_detail` 
 (`goods_name` , `classify_type_id` , `skus_json` , `store_id` , 
 `account_id` , `goods_sn` , `classify_id` , `goods_id` , `create_time` ,
  `update_time`) VALUES ('定义商品编码' , 1 , '{\&quot;\\u5c0f\\u7c73\\u673a\\u578b\&quot;:\&quot;HM-\\u7ea2\\u7c73NOTE5\&quot;}' , 
@@ -305,7 +798,7 @@ https://academy.binance.com/zh/articles/connecting-metamask-to-binance-smart-cha
 
 &lt;h2 id=&quot;怎么实现&quot;&gt;怎么实现&lt;/h2&gt;
 &lt;p&gt;tp5.1，php代码,路径thinkphp/library/think/model/relation/HasMany.php，一对多关联的时候使用&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;    /**
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;    /**
      * 保存（新增）当前关联数据对象
      * @access public
      * @param  mixed    $data       数据 可以使用数组 关联模型对象 和 关联对象的主键
@@ -328,7 +821,7 @@ https://academy.binance.com/zh/articles/connecting-metamask-to-binance-smart-cha
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;tp5.1 最终Sql转换code，thinkphp/library/think/db/Builder.php&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;     /**
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;     /**
       * 生成Insert SQL
       * @access public
       * @param  Query     $query   查询对象
@@ -418,7 +911,7 @@ https://academy.binance.com/zh/articles/connecting-metamask-to-binance-smart-cha
 &lt;p&gt;客户端第三次ACK不发送，半连接backlog满了&lt;/p&gt;
 
 &lt;p&gt;&lt;strong&gt;查看backlog满，服务端阻塞&lt;/strong&gt;&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;netstat -s |grep ‘times the listen queue of a socket overflowed’
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;netstat -s |grep ‘times the listen queue of a socket overflowed’
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;h2 id=&quot;tcp-四次挥手常见的问题&quot;&gt;TCP 四次挥手常见的问题&lt;/h2&gt;
@@ -448,7 +941,7 @@ https://academy.binance.com/zh/articles/connecting-metamask-to-binance-smart-cha
 &lt;p&gt;重启服务，客户端TIME WAIT占用端口。解决：设置so REUSEADDR （swoole 默认开启）&lt;/p&gt;
 
 &lt;p&gt;其他解决办法&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;net.ipv4.tcp_timestamps=1
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;net.ipv4.tcp_timestamps=1
 net.ipv4.tcp_tw_reuse=1
 net.ipv4.ip_local_port_range调大
 不要开启net.ipv4.tcp_tw_recycle=1
@@ -465,7 +958,7 @@ net.ipv4.ip_local_port_range调大
 &lt;p&gt;swoole server SWOOLE_PROCESS模式close方法决定是否释放close
 swoole server SWOOLE_BASE模式 会自动调用底层FIN close释放，不会存在大量close wait&lt;/p&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$serv = new Swoole\Server(&quot;0.0.0.0&quot;, 9501, SWOOLE_BASE); //SWOOLE_PROCESS
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$serv = new Swoole\Server(&quot;0.0.0.0&quot;, 9501, SWOOLE_BASE); //SWOOLE_PROCESS
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;h2 id=&quot;tcp-短连接问题&quot;&gt;TCP 短连接问题&lt;/h2&gt;
@@ -531,7 +1024,7 @@ swoole server SWOOLE_BASE模式 会自动调用底层FIN close释放，不会存
 &lt;p&gt;举例：以上图为例，服务端超时没收到东西，发送FIN到php客户端，php 底层tcp回ACK确认收到。但是长连接处于被动状态不发FIN到服务端主动关闭链接。
 这样服务端就处于在FIN_WAIT2、客户端在CLOSE_WAIT状态。
 客户端就一直处于CLOSE_WAIT，相反服务端由于有系统设置服务端自动断开连接（os系统超时时间）&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;net.ipv4.tcp_fin_timesout = 30
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;net.ipv4.tcp_fin_timesout = 30
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;p&gt;所以服务端不会保持在FIN_WAIT2状态。&lt;/p&gt;
 
@@ -561,7 +1054,7 @@ swoole server SWOOLE_BASE模式 会自动调用底层FIN close释放，不会存
 
 &lt;p&gt;2、swoole tcp_keepalive&lt;/p&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$serv = new Swoole\Server(&quot;192.168.2.194&quot;, 6666, SWOOLE_PROCESS);
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$serv = new Swoole\Server(&quot;192.168.2.194&quot;, 6666, SWOOLE_PROCESS);
 $serv-&amp;gt;set(array(
     'worker_num' =&amp;gt; 1,
     'open_tcp_keepalive' =&amp;gt; true,
@@ -576,7 +1069,7 @@ $serv-&amp;gt;set(array(
 
 &lt;p&gt;上面两个keepalive的缺点就是无法检测死链接，死链接会自动回ping检测。&lt;/p&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;array(
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;array(
     'heartbeat_idle_time'      =&amp;gt; 600, // 表示一个连接如果600秒内未向服务器发送任何数据，此连接将被强制关闭
     'heartbeat_check_interval' =&amp;gt; 60,  // 表示每60秒遍历一次
 );
@@ -628,14 +1121,14 @@ $serv-&amp;gt;set(array(
 
 &lt;h2 id=&quot;数据库逻辑恢复&quot;&gt;数据库逻辑恢复&lt;/h2&gt;
 
-&lt;p&gt;解压下载后压缩文件，然后选择对应要恢复的数据库。&lt;code class=&quot;highlighter-rouge&quot;&gt;注意：➜ source 是目录&lt;/code&gt;&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;➜ source gunzip -c sima_datafull_202009291740_1601372414.sql.gz|mysql -uroot -p sima
+&lt;p&gt;解压下载后压缩文件，然后选择对应要恢复的数据库。&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;注意：➜ source 是目录&lt;/code&gt;&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;➜ source gunzip -c sima_datafull_202009291740_1601372414.sql.gz|mysql -uroot -p sima
 Enter password: 
 ERROR 1840 (HY000) at line 24: @@GLOBAL.GTID_PURGED can only be set when @@GLOBAL.GTID_EXECUTED is empty.
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;上面出现error&lt;/code&gt;，度娘下，提示集群迁移到单实例的设置问题，操作：&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;➜  source mysql -uroot -p 
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;上面出现error&lt;/code&gt;，度娘下，提示集群迁移到单实例的设置问题，操作：&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;➜  source mysql -uroot -p 
 Enter password: 
 mysql&amp;gt; reset master;
 Query OK, 0 rows affected (0.01 sec)
@@ -676,27 +1169,27 @@ Query OK, 0 rows affected (0.01 sec)
 &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;c1&quot;&gt;----------------------+---------------------+------+-----+---------+----------------+&lt;/span&gt;
 &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Field&lt;/span&gt;                &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;Type&lt;/span&gt;                &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;Null&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;Key&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;Default&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Extra&lt;/span&gt;          &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;
 &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;c1&quot;&gt;----------------------+---------------------+------+-----+---------+----------------+&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;id&lt;/span&gt;                   &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;int&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;11&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;             &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NO&lt;/span&gt;   &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;PRI&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NULL&lt;/span&gt;    &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;auto_increment&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sn&lt;/span&gt;                   &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;varchar&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;30&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;         &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;YES&lt;/span&gt;  &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;UNI&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NULL&lt;/span&gt;    &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;                &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;store_id&lt;/span&gt;             &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;int&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;11&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;             &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NO&lt;/span&gt;   &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;MUL&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;       &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;                &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;source_id&lt;/span&gt;            &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;int&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;11&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;             &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NO&lt;/span&gt;   &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;MUL&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NULL&lt;/span&gt;    &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;                &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;source_type&lt;/span&gt;          &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tinyint&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;          &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NO&lt;/span&gt;   &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;     &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NULL&lt;/span&gt;    &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;                &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;bill_type&lt;/span&gt;            &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tinyint&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;          &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NO&lt;/span&gt;   &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;     &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NULL&lt;/span&gt;    &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;                &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;money&lt;/span&gt;                &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;decimal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;       &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NO&lt;/span&gt;   &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;     &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;00&lt;/span&gt;    &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;                &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;income_money&lt;/span&gt;         &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;decimal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;       &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NO&lt;/span&gt;   &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;     &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;00&lt;/span&gt;    &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;                &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;user_commission&lt;/span&gt;      &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;decimal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;       &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NO&lt;/span&gt;   &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;     &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;00&lt;/span&gt;    &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;                &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;poundage&lt;/span&gt;             &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;decimal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;       &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NO&lt;/span&gt;   &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;     &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;00&lt;/span&gt;    &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;                &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;platform_commission&lt;/span&gt;  &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;decimal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;       &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NO&lt;/span&gt;   &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;     &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;00&lt;/span&gt;    &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;                &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;wallet_money_before&lt;/span&gt;  &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;decimal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;       &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NO&lt;/span&gt;   &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;     &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;00&lt;/span&gt;    &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;                &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;wallet_money_after&lt;/span&gt;   &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;decimal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;       &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NO&lt;/span&gt;   &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;     &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;00&lt;/span&gt;    &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;                &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;desc&lt;/span&gt;                 &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;varchar&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;255&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;        &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;YES&lt;/span&gt;  &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;     &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NULL&lt;/span&gt;    &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;                &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;remark&lt;/span&gt;               &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;varchar&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;255&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;        &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;YES&lt;/span&gt;  &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;     &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NULL&lt;/span&gt;    &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;                &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;create_time&lt;/span&gt;          &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;timestamp&lt;/span&gt;           &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;YES&lt;/span&gt;  &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;     &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NULL&lt;/span&gt;    &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;                &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;update_time&lt;/span&gt;          &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;timestamp&lt;/span&gt;           &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;YES&lt;/span&gt;  &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;     &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NULL&lt;/span&gt;    &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;                &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;delete_time&lt;/span&gt;          &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;timestamp&lt;/span&gt;           &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;YES&lt;/span&gt;  &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;     &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NULL&lt;/span&gt;    &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;                &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;account_type&lt;/span&gt;         &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tinyint&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NO&lt;/span&gt;   &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;     &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;       &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;                &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;source_payment_model&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;varchar&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;20&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;         &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;YES&lt;/span&gt;  &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;     &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NULL&lt;/span&gt;    &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;                &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;is_virtual&lt;/span&gt;           &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tinyint&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;          &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NO&lt;/span&gt;   &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;     &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;       &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;                &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;id&lt;/span&gt;                   &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;int&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;11&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;             &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NO&lt;/span&gt;   &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;PRI&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NULL&lt;/span&gt;    &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;auto_increment&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sn&lt;/span&gt;                   &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;varchar&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;30&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;         &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;YES&lt;/span&gt;  &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;UNI&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NULL&lt;/span&gt;    &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;                &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;store_id&lt;/span&gt;             &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;int&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;11&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;             &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NO&lt;/span&gt;   &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;MUL&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;       &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;                &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;source_id&lt;/span&gt;            &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;int&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;11&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;             &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NO&lt;/span&gt;   &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;MUL&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NULL&lt;/span&gt;    &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;                &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;source_type&lt;/span&gt;          &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;tinyint&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;          &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NO&lt;/span&gt;   &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;     &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NULL&lt;/span&gt;    &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;                &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;bill_type&lt;/span&gt;            &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;tinyint&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;          &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NO&lt;/span&gt;   &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;     &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NULL&lt;/span&gt;    &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;                &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;money&lt;/span&gt;                &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;decimal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;       &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NO&lt;/span&gt;   &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;     &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;00&lt;/span&gt;    &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;                &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;income_money&lt;/span&gt;         &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;decimal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;       &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NO&lt;/span&gt;   &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;     &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;00&lt;/span&gt;    &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;                &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;user_commission&lt;/span&gt;      &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;decimal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;       &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NO&lt;/span&gt;   &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;     &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;00&lt;/span&gt;    &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;                &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;poundage&lt;/span&gt;             &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;decimal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;       &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NO&lt;/span&gt;   &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;     &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;00&lt;/span&gt;    &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;                &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;platform_commission&lt;/span&gt;  &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;decimal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;       &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NO&lt;/span&gt;   &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;     &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;00&lt;/span&gt;    &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;                &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;wallet_money_before&lt;/span&gt;  &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;decimal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;       &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NO&lt;/span&gt;   &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;     &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;00&lt;/span&gt;    &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;                &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;wallet_money_after&lt;/span&gt;   &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;decimal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;       &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NO&lt;/span&gt;   &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;     &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;00&lt;/span&gt;    &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;                &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;desc&lt;/span&gt;                 &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;varchar&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;255&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;        &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;YES&lt;/span&gt;  &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;     &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NULL&lt;/span&gt;    &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;                &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;remark&lt;/span&gt;               &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;varchar&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;255&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;        &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;YES&lt;/span&gt;  &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;     &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NULL&lt;/span&gt;    &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;                &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;create_time&lt;/span&gt;          &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;timestamp&lt;/span&gt;           &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;YES&lt;/span&gt;  &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;     &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NULL&lt;/span&gt;    &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;                &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;update_time&lt;/span&gt;          &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;timestamp&lt;/span&gt;           &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;YES&lt;/span&gt;  &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;     &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NULL&lt;/span&gt;    &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;                &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;delete_time&lt;/span&gt;          &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;timestamp&lt;/span&gt;           &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;YES&lt;/span&gt;  &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;     &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NULL&lt;/span&gt;    &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;                &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;account_type&lt;/span&gt;         &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;tinyint&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NO&lt;/span&gt;   &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;     &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;       &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;                &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;source_payment_model&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;varchar&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;20&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;         &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;YES&lt;/span&gt;  &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;     &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NULL&lt;/span&gt;    &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;                &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;is_virtual&lt;/span&gt;           &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;tinyint&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;          &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NO&lt;/span&gt;   &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;     &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;       &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;                &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;
 &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;c1&quot;&gt;----------------------+---------------------+------+-----+---------+----------------+&lt;/span&gt;
 &lt;span class=&quot;mi&quot;&gt;21&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;rows&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;set&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;00&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sec&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
@@ -822,7 +1315,7 @@ Query OK, 0 rows affected (0.01 sec)
 &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;row&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;set&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;warning&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;00&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sec&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;总结：这个表的索引idx_storeid_isvirtual_deletetime_createtime 有问题。
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;总结：这个表的索引idx_storeid_isvirtual_deletetime_createtime 有问题。
 第一，isvirtual的值只有1，0，而多数查询的时候只需isvirtual = 0和所有，所以没必要建立索引；
 第二，delete_time软删除字段，一般都是`delete_time` IS NULL，故不需要加索引，所以修改索引字段idx_storeid_createtime&lt;/code&gt;&lt;/p&gt;
 
@@ -968,7 +1461,7 @@ Query OK, 0 rows affected (0.01 sec)
   &lt;/tbody&gt;
 &lt;/table&gt;
 
-&lt;p&gt;除了上面的表之外，我又加了另一张表 &lt;code class=&quot;highlighter-rouge&quot;&gt;关联关系冗余表 product_spu_sku_attr_map&lt;/code&gt;，为什么呢？顾名思义，冗余用的，有了这张表，我们可以很高效的得到：&lt;/p&gt;
+&lt;p&gt;除了上面的表之外，我又加了另一张表 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;关联关系冗余表 product_spu_sku_attr_map&lt;/code&gt;，为什么呢？顾名思义，冗余用的，有了这张表，我们可以很高效的得到：&lt;/p&gt;
 
 &lt;ol&gt;
   &lt;li&gt;spu下 有哪些sku&lt;/li&gt;
@@ -1016,9 +1509,9 @@ Query OK, 0 rows affected (0.01 sec)
 &lt;span class=&quot;c1&quot;&gt;-- ----------------------------&lt;/span&gt;
 &lt;span class=&quot;k&quot;&gt;DROP&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;TABLE&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;IF&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;EXISTS&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;`store`&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
 &lt;span class=&quot;k&quot;&gt;CREATE&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;TABLE&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;`store`&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
-  &lt;span class=&quot;nv&quot;&gt;`id`&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;int&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;11&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NOT&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NULL&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;AUTO_INCREMENT&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
-  &lt;span class=&quot;nv&quot;&gt;`name`&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;varchar&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;100&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;COLLATE&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;utf8mb4_unicode_ci&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;DEFAULT&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NULL&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;COMMENT&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'门店名称'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
-  &lt;span class=&quot;nv&quot;&gt;`business_type`&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tinyint&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;255&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;DEFAULT&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NULL&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;COMMENT&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'门店类型:1直营2加盟'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+  &lt;span class=&quot;nv&quot;&gt;`id`&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;int&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;11&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NOT&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NULL&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;AUTO_INCREMENT&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+  &lt;span class=&quot;nv&quot;&gt;`name`&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;varchar&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;100&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;COLLATE&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;utf8mb4_unicode_ci&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;DEFAULT&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NULL&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;COMMENT&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'门店名称'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+  &lt;span class=&quot;nv&quot;&gt;`business_type`&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;tinyint&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;255&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;DEFAULT&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NULL&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;COMMENT&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'门店类型:1直营2加盟'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
   &lt;span class=&quot;k&quot;&gt;PRIMARY&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;KEY&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;`id`&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
 &lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ENGINE&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;InnoDB&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;AUTO_INCREMENT&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;DEFAULT&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;CHARSET&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;utf8mb4&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;COLLATE&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;utf8mb4_unicode_ci&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
 
@@ -1037,10 +1530,10 @@ Query OK, 0 rows affected (0.01 sec)
 &lt;span class=&quot;c1&quot;&gt;-- ----------------------------&lt;/span&gt;
 &lt;span class=&quot;k&quot;&gt;DROP&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;TABLE&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;IF&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;EXISTS&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;`store_wallet_bill`&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
 &lt;span class=&quot;k&quot;&gt;CREATE&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;TABLE&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;`store_wallet_bill`&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
-  &lt;span class=&quot;nv&quot;&gt;`id`&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;int&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;11&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NOT&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NULL&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;AUTO_INCREMENT&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
-  &lt;span class=&quot;nv&quot;&gt;`bill`&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;decimal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;DEFAULT&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NULL&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;COMMENT&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'流水'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
-  &lt;span class=&quot;nv&quot;&gt;`store_id`&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;int&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;11&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;DEFAULT&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NULL&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;COMMENT&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'门店id'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
-  &lt;span class=&quot;nv&quot;&gt;`create_time`&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;datetime&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;DEFAULT&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NULL&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;COMMENT&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'生成时间'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+  &lt;span class=&quot;nv&quot;&gt;`id`&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;int&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;11&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NOT&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NULL&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;AUTO_INCREMENT&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+  &lt;span class=&quot;nv&quot;&gt;`bill`&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;decimal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;DEFAULT&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NULL&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;COMMENT&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'流水'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+  &lt;span class=&quot;nv&quot;&gt;`store_id`&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;int&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;11&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;DEFAULT&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NULL&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;COMMENT&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'门店id'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+  &lt;span class=&quot;nv&quot;&gt;`create_time`&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;datetime&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;DEFAULT&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NULL&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;COMMENT&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'生成时间'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
   &lt;span class=&quot;k&quot;&gt;PRIMARY&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;KEY&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;`id`&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
 &lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ENGINE&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;InnoDB&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;AUTO_INCREMENT&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;7&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;DEFAULT&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;CHARSET&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;utf8mb4&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;COLLATE&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;utf8mb4_unicode_ci&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
 
@@ -1112,7 +1605,7 @@ Query OK, 0 rows affected (0.01 sec)
 &lt;/table&gt;
 
 &lt;blockquote&gt;
-  &lt;p&gt;2、第二条Sql，将第一条Sql的where后面的&lt;code class=&quot;highlighter-rouge&quot;&gt;store&lt;/code&gt;.business_type = 1移到left join的on后面。&lt;/p&gt;
+  &lt;p&gt;2、第二条Sql，将第一条Sql的where后面的&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;store&lt;/code&gt;.business_type = 1移到left join的on后面。&lt;/p&gt;
 &lt;/blockquote&gt;
 
 &lt;div class=&quot;language-sql highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt;
@@ -1166,7 +1659,7 @@ Query OK, 0 rows affected (0.01 sec)
 &lt;div class=&quot;language-sql highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;FROM&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;LT&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;LEFT&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;JOIN&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;RT&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;ON&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;P1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;LT&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;RT&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;WHERE&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;P2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;LT&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;RT&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;p&gt;其中P1是on过滤条件，缺失则认为是TRUE，P2是where过滤条件，缺失也认为是TRUE，该语句的执行逻辑伪代码大概如下：&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;FOR each row lt in LT {   // 遍历左表的每一行
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;FOR each row lt in LT {   // 遍历左表的每一行
   BOOL b = FALSE;
   FOR each row rt in RT such that P1(lt, rt) {// 遍历右表每一行，找到满足join条件的行 !!!!注意这里，这就是on后面加上`store`.business_type = 1但是还是会出现business_type=2的原因
     IF P2(lt, rt) {//满足 where 过滤条件
@@ -1198,7 +1691,7 @@ Query OK, 0 rows affected (0.01 sec)
   &lt;p&gt;2、第二条Sql&lt;/p&gt;
 &lt;/blockquote&gt;
 
-&lt;p&gt;从上面的伪代码可以看到，on后面加上&lt;code class=&quot;highlighter-rouge&quot;&gt;store&lt;/code&gt;.business_type = 1 。左边store表的name=’门店D’ 满足第二个遍历条件，不满足IF P2(lt, rt) ，
+&lt;p&gt;从上面的伪代码可以看到，on后面加上&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;store&lt;/code&gt;.business_type = 1 。左边store表的name=’门店D’ 满足第二个遍历条件，不满足IF P2(lt, rt) ，
 所以一条都没。左边store表的name=’门店B’,不满足第二个遍历条件，所以右边是null。&lt;/p&gt;
 
 &lt;h2 id=&quot;豁然开朗&quot;&gt;豁然开朗&lt;/h2&gt;
@@ -1210,18 +1703,18 @@ Query OK, 0 rows affected (0.01 sec)
 &lt;h2 id=&quot;注意&quot;&gt;注意&lt;/h2&gt;
 
 &lt;p&gt;Mysql5.7+版本限制使用GROUP BY 的select 筛选元素，报错大概如下&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;SELECT list is not in GROUP BY clause and contains nonaggregated column 'userinfo.t_long.user_name' which is not functionally dependent on columns in GROUP BY clause; this is incompatible with sql_mode=only_full_group_by
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;SELECT list is not in GROUP BY clause and contains nonaggregated column 'userinfo.t_long.user_name' which is not functionally dependent on columns in GROUP BY clause; this is incompatible with sql_mode=only_full_group_by
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;blockquote&gt;
   &lt;p&gt;1、临时性解决方案&lt;/p&gt;
 &lt;/blockquote&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;select @@sql_mode; //会显示一些sql_mode属性
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;select @@sql_mode; //会显示一些sql_mode属性
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;然后去掉 ONLY_FULL_GROUP_BY，重新设置&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;set global sql_mode='STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;set global sql_mode='STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
 set session sql_mode='STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
@@ -1251,7 +1744,7 @@ set session sql_mode='STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR
 				<description>&lt;p&gt;系统版本：CentOS Linux release 7.6.1810 (Core)&lt;/p&gt;
 
 &lt;h2 id=&quot;1创建一个专门的用户&quot;&gt;1、创建一个专门的用户&lt;/h2&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;useradd coin
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;useradd coin
 passwd coin
 visudo //给sudo权限，你懂得
 su coin
@@ -1263,7 +1756,7 @@ su coin
   &lt;p&gt;安装依赖&lt;/p&gt;
 &lt;/blockquote&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo yum install -y centos-release-scl epel-release
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo yum install -y centos-release-scl epel-release
 sudo yum install -y cmake3 devtoolset-4-gcc* hwloc-devel libmicrohttpd-devel openssl-devel make git
 //临时使用devtoolset-4
 scl enable devtoolset-4 bash
@@ -1275,7 +1768,7 @@ git clone https://github.com/fireice-uk/xmr-stak.git
 &lt;/blockquote&gt;
 
 &lt;p&gt;因为master分支去掉了Monero币，而且剩下的都是些无名币。&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;cd xmr-stak
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;cd xmr-stak
 git fetch origin xmr-stak-rx
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
@@ -1283,14 +1776,14 @@ git fetch origin xmr-stak-rx
   &lt;p&gt;编译安装，只使用CPU进行挖矿&lt;/p&gt;
 &lt;/blockquote&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;mkdir build
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;mkdir build
 cd build
 sudo cmake3 -DCUDA_ENABLE=OFF -DOpenCL_ENABLE=OFF ..
 sudo make install
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;h2 id=&quot;3启动程序填写币钱包地址矿池ip等&quot;&gt;3、启动程序，填写币钱包地址、矿池ip等&lt;/h2&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;./bin/xmr-stak-rx //之后有提示填写钱包地址和矿池ip地址，其他信息都是次要的
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;./bin/xmr-stak-rx //之后有提示填写钱包地址和矿池ip地址，其他信息都是次要的
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;p&gt;&lt;strong&gt;./bin/xmr-stak-rx 可以先看看配置是否正确，然后在nohup ./bin/xmr-stak-rx &amp;amp; 挂载在后台&lt;/strong&gt;&lt;/p&gt;
 
@@ -1322,149 +1815,6 @@ sudo make install
 				<pubDate>Thu, 09 Apr 2020 00:00:00 +0800</pubDate>
 				<link>/xmr-mining.html</link>
 				<guid isPermaLink="true">/xmr-mining.html</guid>
-			</item>
-		
-			<item>
-				<title>局域网Web服务配置frp穿透与SSL证书</title>
-				<description>&lt;h2 id=&quot;搭建frp穿透结构图与ssl思路&quot;&gt;搭建frp穿透结构图与ssl思路&lt;/h2&gt;
-&lt;blockquote&gt;
-  &lt;p&gt;结构图&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;&lt;img src=&quot;https://img.zzhpeng.cn/FmRqrie4RVbiI2K2S_LporMhjaCH&quot; alt=&quot;Fu0ZUUtbHNQ0b4nh7d2QN4_LJvtB&quot; /&gt;&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;SSL思路&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;&lt;strong&gt;Frp&lt;/strong&gt;(https://github.com/fatedier/frp)有提供ssl设置。但是为了方便管理，把证书设置都放在nginx中。然后外网frp server到局域网都是用的是http type服务而不是https type，然后我们只需要在外网的nginx配置就可以了。&lt;/p&gt;
-
-&lt;h2 id=&quot;配置&quot;&gt;配置&lt;/h2&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;1、局域网服务器frpc.ini&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;frps.ini 设置:
-[common]
-bind_port = 7000
-token = jq666
-vhost_http_port = 8000
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;2、外网服务器frps.ini设置&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[common]
-server_addr = xxx.xx.188.48//外网ip
-server_port = 7000
-token = jq666
-
-[web1]
-type = http
-local_ip = 127.0.0.1
-local_port = 80
-custom_domains = gitlab.xxx.com
-
-[web2]
-type = http
-local_ip = 127.0.0.1
-local_port = 80
-custom_domains = packagist.xxx.com
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;3、公网服务器nginx配置&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;server {
-    listen 80;
-	listen 443 ssl http2;
-    server_name gitlab.xxx.com;
-    
-    #SSL-START SSL相关配置，请勿删除或修改下一行带注释的404规则
-    #error_page 404/404.html;
-    ssl_certificate    /etc/letsencrypt/live/gitlab.xxx.com/fullchain.pem;
-    ssl_certificate_key    /etc/letsencrypt/live/gitlab.xxx.com/privkey.pem;
-    ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
-    ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:HIGH:!aNULL:!MD5:!RC4:!DHE;
-    ssl_prefer_server_ciphers on;
-    ssl_session_cache shared:SSL:10m;
-    ssl_session_timeout 10m;
-    error_page 497  https://$host$request_uri;
-    #SSL-END
-    
-    #ERROR-PAGE-START  错误页配置，可以注释、删除或修改
-    error_page 404 /404.html;
-    error_page 502 /502.html;
-    #ERROR-PAGE-END
-    
-    #PHP-INFO-START  PHP引用配置，可以注释或修改
-    include enable-php-00.conf;
-    #PHP-INFO-END
-    
-    #REWRITE-START URL重写规则引用,修改后将导致面板设置的伪静态规则失效
-    include /www/server/panel/vhost/rewrite/gitlab.xxx.com.conf;
-    #REWRITE-END
-    
-    location / {
-      client_max_body_size 0;
-      gzip off;
-
-      proxy_read_timeout      300;
-      proxy_connect_timeout   300;
-      proxy_redirect          off;
-
-      proxy_http_version 1.1;
-
-      proxy_set_header    Host                $http_host;
-      #proxy_set_header	Host 				$host:$server_port;
-      proxy_set_header    X-Real-IP           $remote_addr;
-      proxy_set_header    X-Forwarded-Ssl     on;
-      proxy_set_header    X-Forwarded-For     $proxy_add_x_forwarded_for;
-      proxy_set_header    X-Forwarded-Proto   $scheme;
-      proxy_pass http://127.0.0.1:8000;
- 	}
-    
-    access_log  /www/wwwlogs/gitlab.xxx.com.log;
-    error_log  /www/wwwlogs/gitlab.xxx.com.error.log;
- }
-
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;4、内网服务器nginx配置&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;上面的举例，去掉ssl设置即是&lt;/p&gt;
-
-&lt;h2 id=&quot;宝塔证书申请&quot;&gt;宝塔证书申请&lt;/h2&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;1、到宝塔管理后台，申请ssl证书&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;1.1、申请域名，dns验证&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;https://img.zzhpeng.cn/FuAgURKSUppIzRm4OJOv4LPemWAN&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;1.2、如下图，点击&lt;strong&gt;详情&lt;/strong&gt;可以看到要在域名解析里加多条TXT解析,添加后点击&lt;strong&gt;验证域名&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;https://img.zzhpeng.cn/Fr-ZQCVz520OpUGgvNPhqVbCRWA9&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;1.3、阿里云域名解析&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;https://img.zzhpeng.cn/FtHdG_-WRGQ1GDd3HLgpsNIhvPos&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;h2 id=&quot;迭代&quot;&gt;迭代&lt;/h2&gt;
-&lt;ul&gt;
-  &lt;li&gt;2020年02月11日 21:54:00 初稿&lt;/li&gt;
-&lt;/ul&gt;
-</description>
-				<pubDate>Tue, 11 Feb 2020 00:00:00 +0800</pubDate>
-				<link>/frp-ssl.html</link>
-				<guid isPermaLink="true">/frp-ssl.html</guid>
 			</item>
 		
 	</channel>
