@@ -588,7 +588,156 @@ were raised, and most of E_STRICT raised in the file where set_error_handler() i
 
 <h2 id="thinkphp异常处理">ThinkPHP异常处理</h2>
 
+<p>这里演示的是ThinkPhp5.1版本的异常处理
+入口文件./public/index.php，加载了基础/../thinkphp/base.php</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>// ./public/index.php
+&lt;?php
+// [ 应用入口文件 ]
+namespace think;
+
+// 加载基础文件  15行
+require __DIR__ . '/../thinkphp/base.php';
+</code></pre></div></div>
+
+<p>在/../thinkphp/base.php，加载各类基础服务</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>// ./public/index.php
+&lt;?php
+// 注册错误和异常处理机制 19行
+Error::register();
+</code></pre></div></div>
+
+<p>在/../thinkphp/library/think/Error.php，注册异常服务，写异常handle处理方法</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    // /../thinkphp/library/think/Error.php 32行
+    /**
+     * 注册异常处理
+     * @access public
+     * @return void
+     */
+    public static function register()
+    {
+        error_reporting(E_ALL);
+        set_error_handler([__CLASS__, 'appError']);
+        set_exception_handler([__CLASS__, 'appException']);
+        register_shutdown_function([__CLASS__, 'appShutdown']);
+    }
+    
+    /**
+     * Error Handler
+     * @access public
+     * @param  integer $errno   错误编号
+     * @param  integer $errstr  详细错误信息
+     * @param  string  $errfile 出错的文件
+     * @param  integer $errline 出错行号
+     * @throws ErrorException
+     */
+    public static function appError($errno, $errstr, $errfile = '', $errline = 0)
+    {
+        $exception = new ErrorException($errno, $errstr, $errfile, $errline); //这里重写异常
+        if (error_reporting() &amp; $errno) {
+            // 将错误信息托管至 think\exception\ErrorException
+            throw $exception;  //这里抛出异常
+        }
+
+        self::getExceptionHandler()-&gt;report($exception); // 这里写日志
+    }
+</code></pre></div></div>
+
+<p>在/../thinkphp/library/think/exception/Error.php， 封装重写\Exception。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;?php
+namespace think\exception;
+
+use think\Exception;
+
+/**
+ * ThinkPHP错误异常
+ * 主要用于封装 set_error_handler 和 register_shutdown_function 得到的错误
+ * 除开从 think\Exception 继承的功能
+ * 其他和PHP系统\ErrorException功能基本一样
+ */
+class ErrorException extends Exception
+{
+    /**
+     * 用于保存错误级别
+     * @var integer
+     */
+    protected $severity;
+
+    /**
+     * 错误异常构造函数
+     * @access public
+     * @param  integer $severity 错误级别
+     * @param  string  $message  错误详细信息
+     * @param  string  $file     出错文件路径
+     * @param  integer $line     出错行号
+     */
+    public function __construct($severity, $message, $file, $line)
+    {
+        $this-&gt;severity = $severity;
+        $this-&gt;message  = $message;  //这里重写内核\Exception的变量message、file、line、code
+        $this-&gt;file     = $file;
+        $this-&gt;line     = $line;
+        $this-&gt;code     = 0;
+    }
+
+    /**
+     * 获取错误级别
+     * @access public
+     * @return integer 错误级别
+     */
+    final public function getSeverity()
+    {
+        return $this-&gt;severity;
+    }
+}
+</code></pre></div></div>
+
+<p>总结：<strong>ThinkPHP把所有错误级别都抛出，这里需要改造成警告类的错误在生产环境写入日志而不抛出</strong></p>
+
+<p>举例： 在application/common.php 写入。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>function myErrorHandler($errno, $errstr, $errfile, $errline)
+{
+    if (!(error_reporting() &amp; $errno)) {
+        // This error code is not included in error_reporting, so let it fall
+        // through to the standard PHP error handler
+        return false;
+    }
+
+    // $errstr may need to be escaped:
+    $errstr = htmlspecialchars($errstr);
+
+    switch ($errno) {
+        case E_DEPRECATED:
+            //记录日志
+            trace("&lt;b&gt;DEPRECATED&lt;/b&gt; [$errno] $errstr");
+            return true;
+        case E_NOTICE:
+            //记录日志
+            trace("&lt;b&gt;NOTICE&lt;/b&gt; : [$errno] $errstr");
+            return true;
+        case E_WARNING:
+            //记录日志
+            trace("&lt;b&gt;WARNING&lt;/b&gt; : [$errno] $errstr");
+            return true;
+        default:
+           //记录日志
+            trace("Unknown error type: [$errno] $errstr");
+            return true;
+    }
+    /* Don't execute PHP internal error handler */
+    return true;
+}
+// set to the user defined error handler
+set_error_handler("myErrorHandler");
+</code></pre></div></div>
+
 <h2 id="laravel异常处理">Laravel异常处理</h2>
+
+<p>查看laravel 版本</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>➜  laravel git:(master) ✗ php artisan --version
+Laravel Framework 8.83.3
+</code></pre></div></div>
 
 <h2 id="迭代">迭代</h2>
 
