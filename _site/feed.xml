@@ -633,6 +633,74 @@ set_error_handler(&quot;myErrorHandler&quot;);
 Laravel Framework 8.83.3
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
+&lt;p&gt;composer.json文件&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;//composer.json 35行
+&quot;scripts&quot;: {
+    &quot;post-autoload-dump&quot;: [
+        &quot;Illuminate\\Foundation\\ComposerScripts::postAutoloadDump&quot;,  
+        &quot;@php artisan package:discover --ansi&quot;
+    ],
+    &quot;post-update-cmd&quot;: [
+        &quot;@php artisan vendor:publish --tag=laravel-assets --ansi --force&quot;
+    ],
+    &quot;post-root-package-install&quot;: [
+        &quot;@php -r \&quot;file_exists('.env') || copy('.env.example', '.env');\&quot;&quot;
+    ],
+    &quot;post-create-project-cmd&quot;: [
+        &quot;@php artisan key:generate --ansi&quot;
+    ]
+},
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Illuminate\Foundation\ComposerScripts::postAutoloadDump 这个静态方法，composer update 产生
+/../vendor/autoload.php，加载所有核心。&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;//Illuminate\\Foundation\\ComposerScripts::postAutoloadDump 41行
+public static function postAutoloadDump(Event $event)
+{
+    require_once $event-&amp;gt;getComposer()-&amp;gt;getConfig()-&amp;gt;get('vendor-dir').'/autoload.php';
+
+    static::clearCompiled();
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;然后错误处理在这里Illuminate\Foundation\Bootstrap&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;// Illuminate\Foundation\Bootstrap 37行
+public function bootstrap(Application $app)
+{
+    self::$reservedMemory = str_repeat('x', 10240);
+
+    $this-&amp;gt;app = $app;
+
+    error_reporting(-1);
+
+    set_error_handler([$this, 'handleError']);
+
+    set_exception_handler([$this, 'handleException']);
+
+    register_shutdown_function([$this, 'handleShutdown']);
+
+    //这里关闭了
+    if (! $app-&amp;gt;environment('testing')) {
+        ini_set('display_errors', 'Off');
+    }
+}
+
+public function handleError($level, $message, $file = '', $line = 0, $context = [])
+{
+    if ($this-&amp;gt;isDeprecation($level)) {
+        return $this-&amp;gt;handleDeprecation($message, $file, $line);
+    }
+
+    if (error_reporting() &amp;amp; $level) {
+        //这里是错误封装
+        throw new ErrorException($message, 0, $level, $file, $line);
+    }
+}
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
 &lt;h2 id=&quot;迭代&quot;&gt;迭代&lt;/h2&gt;
 
 &lt;ul&gt;

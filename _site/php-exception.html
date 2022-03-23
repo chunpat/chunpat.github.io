@@ -739,6 +739,74 @@ set_error_handler("myErrorHandler");
 Laravel Framework 8.83.3
 </code></pre></div></div>
 
+<p>composer.json文件</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>//composer.json 35行
+"scripts": {
+    "post-autoload-dump": [
+        "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",  
+        "@php artisan package:discover --ansi"
+    ],
+    "post-update-cmd": [
+        "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
+    ],
+    "post-root-package-install": [
+        "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
+    ],
+    "post-create-project-cmd": [
+        "@php artisan key:generate --ansi"
+    ]
+},
+</code></pre></div></div>
+
+<p>Illuminate\Foundation\ComposerScripts::postAutoloadDump 这个静态方法，composer update 产生
+/../vendor/autoload.php，加载所有核心。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>//Illuminate\\Foundation\\ComposerScripts::postAutoloadDump 41行
+public static function postAutoloadDump(Event $event)
+{
+    require_once $event-&gt;getComposer()-&gt;getConfig()-&gt;get('vendor-dir').'/autoload.php';
+
+    static::clearCompiled();
+}
+</code></pre></div></div>
+
+<p>然后错误处理在这里Illuminate\Foundation\Bootstrap</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>// Illuminate\Foundation\Bootstrap 37行
+public function bootstrap(Application $app)
+{
+    self::$reservedMemory = str_repeat('x', 10240);
+
+    $this-&gt;app = $app;
+
+    error_reporting(-1);
+
+    set_error_handler([$this, 'handleError']);
+
+    set_exception_handler([$this, 'handleException']);
+
+    register_shutdown_function([$this, 'handleShutdown']);
+
+    //这里关闭了
+    if (! $app-&gt;environment('testing')) {
+        ini_set('display_errors', 'Off');
+    }
+}
+
+public function handleError($level, $message, $file = '', $line = 0, $context = [])
+{
+    if ($this-&gt;isDeprecation($level)) {
+        return $this-&gt;handleDeprecation($message, $file, $line);
+    }
+
+    if (error_reporting() &amp; $level) {
+        //这里是错误封装
+        throw new ErrorException($message, 0, $level, $file, $line);
+    }
+}
+
+</code></pre></div></div>
+
 <h2 id="迭代">迭代</h2>
 
 <ul>

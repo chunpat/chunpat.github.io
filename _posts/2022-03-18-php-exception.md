@@ -542,6 +542,79 @@ set_error_handler("myErrorHandler");
 Laravel Framework 8.83.3
 ```
 
+composer.json文件
+```
+//composer.json 35行
+"scripts": {
+    "post-autoload-dump": [
+        "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",  
+        "@php artisan package:discover --ansi"
+    ],
+    "post-update-cmd": [
+        "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
+    ],
+    "post-root-package-install": [
+        "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
+    ],
+    "post-create-project-cmd": [
+        "@php artisan key:generate --ansi"
+    ]
+},
+```
+
+Illuminate\\Foundation\\ComposerScripts::postAutoloadDump 这个静态方法，composer update 产生
+/../vendor/autoload.php，加载所有核心。
+
+```
+//Illuminate\\Foundation\\ComposerScripts::postAutoloadDump 41行
+public static function postAutoloadDump(Event $event)
+{
+    require_once $event->getComposer()->getConfig()->get('vendor-dir').'/autoload.php';
+
+    static::clearCompiled();
+}
+```
+
+然后错误处理在这里Illuminate\Foundation\Bootstrap
+
+```
+// Illuminate\Foundation\Bootstrap 37行
+public function bootstrap(Application $app)
+{
+    self::$reservedMemory = str_repeat('x', 10240);
+
+    $this->app = $app;
+
+    error_reporting(-1);
+
+    set_error_handler([$this, 'handleError']);
+
+    set_exception_handler([$this, 'handleException']);
+
+    register_shutdown_function([$this, 'handleShutdown']);
+
+    //这里关闭了
+    if (! $app->environment('testing')) {
+        ini_set('display_errors', 'Off');
+    }
+}
+
+public function handleError($level, $message, $file = '', $line = 0, $context = [])
+{
+    if ($this->isDeprecation($level)) {
+        return $this->handleDeprecation($message, $file, $line);
+    }
+
+    if (error_reporting() & $level) {
+        //这里是错误封装
+        throw new ErrorException($message, 0, $level, $file, $line);
+    }
+}
+
+```
+
+
+
 
 
 
