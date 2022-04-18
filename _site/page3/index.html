@@ -104,6 +104,44 @@
 		<div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
 			
 <div class="post-preview">
+    <a href="/nginx502_1.html">
+        <h2 class="post-title">            
+            生产环境出现nginx502,导致十来分钟系统奔溃（Tp5.1的session bug）
+        </h2>
+        
+        <div class="post-content-preview">
+            问题概述
+使用PHP的ThinkPHP5.1开发框架，生产环境使用宝塔管理，其中nginx直接报错502，继续时间10来分钟。而且通过观察，一段时间又会出现，特别是复杂频繁的操作。
+
+排查数据
+nginx抛出502,证明是它的反向代理出错，这个代理php-cgi挂掉了，我用的是php-fpm，...
+        </div>
+    </a>
+    <p class="post-meta">Posted by zzhpeng on November 25, 2019</p>
+</div>
+
+<hr>
+
+<div class="post-preview">
+    <a href="/redis-set.html">
+        <h2 class="post-title">            
+            Redis的原子性解决并发问题
+        </h2>
+        
+        <div class="post-content-preview">
+            问题概述
+
+最近根据运营那边提供BUG反馈信息提示，出现了仓库商品冻结数量少了，导致出库异常现象。仓库商品库存信息
+表设计是库存num，冻结数frozen_num。当下订单的时候，frozen_num + 1。订单结束，商品库存num - 
+出库数量，冻结数frozen_num - 出库数量。...
+        </div>
+    </a>
+    <p class="post-meta">Posted by zzhpeng on November 2, 2019</p>
+</div>
+
+<hr>
+
+<div class="post-preview">
     <a href="/mysql-in.html">
         <h2 class="post-title">            
             Mysql使用IN功能相关与性能对比
@@ -251,52 +289,6 @@ sudo mkfs.ext3 /dev/vdb5  //扩展分区，然后分逻辑分区
         </div>
     </a>
     <p class="post-meta">Posted by zzhpeng on September 10, 2019</p>
-</div>
-
-<hr>
-
-<div class="post-preview">
-    <a href="/elasticsearch-production.html">
-        <h2 class="post-title">            
-            elasticsearch生产部署
-        </h2>
-        
-        <div class="post-content-preview">
-            Ubuntu 系统下直接安装
-1、安装OpenSdk
-sudo apt-get install openjdk-8-jdk
-
-配置Java环境变量
-sudo vim /etc/profile
-在profile末尾添加以下内容:
-export JAVA_HOME=/usr/lib/jvm/jav...
-        </div>
-    </a>
-    <p class="post-meta">Posted by zzhpeng on September 9, 2019</p>
-</div>
-
-<hr>
-
-<div class="post-preview">
-    <a href="/php-ob-flush.html">
-        <h2 class="post-title">            
-            PHP缓冲区
-        </h2>
-        
-        <div class="post-content-preview">
-            事由
-上一篇文章中，写了关于nginx和php-fpm组合 请求超时的解决方案,
-设置了保持长时间请求不断。但是，又遇到个问题就是缓冲区，需要边保持请求连接边打印东西
-到浏览器。
-
-解决
-涉及php.ini属性概念与修改
-output_buffering
-implicit_flush
-outp...
-        </div>
-    </a>
-    <p class="post-meta">Posted by zzhpeng on September 7, 2019</p>
 </div>
 
 <hr>
