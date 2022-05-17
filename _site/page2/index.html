@@ -104,6 +104,31 @@
 		<div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
 			
 <div class="post-preview">
+    <a href="/mysql-recovery.html">
+        <h2 class="post-title">            
+            Mysql 逻辑数据恢复
+        </h2>
+        
+        <div class="post-content-preview">
+            起因
+有时候线上出了问题，而原本地数据不好操作，所以想把生产的数据弄一份到本地环境测试。操作步骤：1、阿里云RDS导出逻辑。2、导入本地mysql。
+
+阿里云RDS生成逻辑
+
+
+点击确认后，就会生成，然后下载即可。
+
+数据库逻辑恢复
+
+解压下载后压缩文件，然后选择对应要恢复的数据库。注意：➜ ...
+        </div>
+    </a>
+    <p class="post-meta">Posted by zzhpeng on October 10, 2020</p>
+</div>
+
+<hr>
+
+<div class="post-preview">
     <a href="/mysql-indexes.html">
         <h2 class="post-title">            
             Mysql 索引问题
@@ -256,29 +281,6 @@ sudo iptables -I INPUT -p tcp --dport 443 -m connlimit --conn...
         </div>
     </a>
     <p class="post-meta">Posted by zzhpeng on January 6, 2020</p>
-</div>
-
-<hr>
-
-<div class="post-preview">
-    <a href="/nginx502_2.html">
-        <h2 class="post-title">            
-            生产环境又出现nginx502了！！
-        </h2>
-        
-        <div class="post-content-preview">
-            问题概述
-在某段时间段，网站出现nginx 502，通过宝塔查看，负载状态是100%，查看监控，磁盘IO飙高，如下为近7日IO磁盘图：
-
-
-
-排查数据
-
-nginx抛出502，证明是它的反向代理出错，这个代理php-cgi出了问题，我用的是php-fpm，出了问题。
-查看php-fpm 日志，...
-        </div>
-    </a>
-    <p class="post-meta">Posted by zzhpeng on December 26, 2019</p>
 </div>
 
 <hr>

@@ -104,6 +104,31 @@
 		<div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
 			
 <div class="post-preview">
+    <a href="/mysql-slow-log.html">
+        <h2 class="post-title">            
+            处理 Mysql Show Query 实际案例
+        </h2>
+        
+        <div class="post-content-preview">
+            TP5.1 SQL日志
+
+
+
+总耗时6.983733s, 主要划线的两条sql合计5.5s占据。
+
+分析
+
+优先处理store_system_depot_exchange表 索引查看
+mysql&gt; SHOW INDEX FROM store_system_depot_exchange;
+...
+        </div>
+    </a>
+    <p class="post-meta">Posted by zzhpeng on May 17, 2022</p>
+</div>
+
+<hr>
+
+<div class="post-preview">
     <a href="/phpunit-test.html">
         <h2 class="post-title">            
             PHP 单元测试 与 Gitlab-CI
@@ -154,6 +179,9 @@ composer requir...
   介绍
 
 
+这里有几个概念，项目project，日志存储Logstore，集器logtail，机器组。
+
+
 
   计费
 
@@ -164,16 +192,17 @@ composer requir...
 
 生产者规范
 
-迭代
+应用案例
 
 
-  2022年03月26日 23:59:59 初稿
+  nginx 统计pv pu
 
 
-参考
 
-1、
+  项目异常处理
 
+
+error 外其他级别处理，汇中...
         </div>
     </a>
     <p class="post-meta">Posted by zzhpeng on March 26, 2022</p>
@@ -291,31 +320,6 @@ TCP 三次握手常见的问题
         </div>
     </a>
     <p class="post-meta">Posted by zzhpeng on November 29, 2020</p>
-</div>
-
-<hr>
-
-<div class="post-preview">
-    <a href="/mysql-recovery.html">
-        <h2 class="post-title">            
-            Mysql 逻辑数据恢复
-        </h2>
-        
-        <div class="post-content-preview">
-            起因
-有时候线上出了问题，而原本地数据不好操作，所以想把生产的数据弄一份到本地环境测试。操作步骤：1、阿里云RDS导出逻辑。2、导入本地mysql。
-
-阿里云RDS生成逻辑
-
-
-点击确认后，就会生成，然后下载即可。
-
-数据库逻辑恢复
-
-解压下载后压缩文件，然后选择对应要恢复的数据库。注意：➜ ...
-        </div>
-    </a>
-    <p class="post-meta">Posted by zzhpeng on October 10, 2020</p>
 </div>
 
 <hr>

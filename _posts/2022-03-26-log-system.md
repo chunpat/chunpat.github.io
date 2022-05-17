@@ -9,6 +9,10 @@ tags: log json
 
 > 介绍
 
+这里有几个概念，项目project，日志存储Logstore，集器logtail，机器组。
+![](../img/log-system/log-system_1.jpg)
+
+
 > 计费
 
 **为什么用**
@@ -17,6 +21,17 @@ tags: log json
 
 
 ## 生产者规范
+
+## 应用案例
+
+> nginx 统计pv pu
+
+> 项目异常处理
+
+error 外其他级别处理，汇中统计
+
+error 等级别，立即报警
+
 
 
 ## 迭代

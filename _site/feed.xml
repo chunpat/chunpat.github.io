@@ -7,6 +7,147 @@
 		<atom:link href="/" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>处理 Mysql Show Query 实际案例</title>
+				<description>&lt;h2 id=&quot;tp51-sql日志&quot;&gt;TP5.1 SQL日志&lt;/h2&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/20220517mysql-show-log/1.jpeg&quot; alt=&quot;../img/20220517mysql-show-log/1.jpeg&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;总耗时6.983733s, 主要划线的两条sql合计5.5s占据。&lt;/p&gt;
+
+&lt;h2 id=&quot;分析&quot;&gt;分析&lt;/h2&gt;
+
+&lt;p&gt;优先处理store_system_depot_exchange表 索引查看&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;mysql&amp;gt; SHOW INDEX FROM store_system_depot_exchange;
++-----------------------------+------------+--------------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+---------------+
+| Table                       | Non_unique | Key_name     | Seq_in_index | Column_name | Collation | Cardinality | Sub_part | Packed | Null | Index_type | Comment | Index_comment |
++-----------------------------+------------+--------------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+---------------+
+| store_system_depot_exchange |          0 | PRIMARY      |            1 | id          | A         |     2794646 |     NULL | NULL   |      | BTREE      |         |               |
+| store_system_depot_exchange |          1 | storeId_type |            1 | store_id    | A         |         975 |     NULL | NULL   |      | BTREE      |         |               |
+| store_system_depot_exchange |          1 | storeId_type |            2 | type        | A         |        3965 |     NULL | NULL   | YES  | BTREE      |         |               |
++-----------------------------+------------+--------------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+---------------+
+3 rows in set (0.00 sec)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;数据查看，0.35s，这里复现不出生产环境&lt;strong&gt;秒&lt;/strong&gt;级查询。&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;mysql&amp;gt; SELECT *   FROM `store_system_depot_exchange`  WHERE(`store_id`= 52    AND `create_time`&amp;gt;= '2019-09-01 00:00:00'    AND `create_time`&amp;lt;= '2019-10-17 23:59:59'    AND `type` IN('sale_output', 'repair_output', 'repair_correct_input', 'repair_correct_output')    AND `is_virtual`= 0)  AND `store_system_depot_exchange`.`delete_time` IS NULL;
+...省略
+:28 | 2019-10-17 09:55:28 | NULL        |          0 |
+| 1607603 |    407375 |        0 |       3644 |            7609 | NULL         |        715 |   1 |       714 |       3.00 |       40.00 | sale_output           |       52 | 2019101753505152 | 2019-10-17 10:33:20 | 2019-10-17 10:33:20 | NULL        |          0 |
+| 1607896 |    407475 |        0 |       2922 |          209508 | NULL         |          5 |   2 |         3 |       5.00 |       60.00 | sale_output           |       52 | 2019101710154509 | 2019-10-17 11:46:26 | 2019-10-17 11:46:26 | NULL        |          0 |
+| 1608514 |    407651 |        0 |       3644 |          209547 | NULL         |          5 |   1 |         4 |       2.50 |       10.00 | sale_output           |       52 | 2019101710056511 | 2019-10-17 14:11:29 | 2019-10-17 14:11:29 | NULL        |          0 |
++---------+-----------+----------+------------+-----------------+--------------+------------+-----+-----------+------------+-------------+-----------------------+----------+------------------+---------------------+---------------------+-------------+------------+
+999 rows in set (0.35 sec)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;explain 分析&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;mysql&amp;gt; explain SELECT *   FROM `store_system_depot_exchange`  WHERE(`store_id`= 52    AND `create_time`&amp;gt;= '2019-09-01 00:00:00'    AND `create_time`&amp;lt;= '2019-10-17 23:59:59'    AND `type` IN('sale_output', 'repair_output', 'repair_correct_input', 'repair_correct_output')    AND `is_virtual`= 0)  AND `store_system_depot_exchange`.`delete_time` IS NULL;
++----+-------------+-----------------------------+------------+-------+---------------+--------------+---------+------+-------+----------+------------------------------------+
+| id | select_type | table                       | partitions | type  | possible_keys | key          | key_len | ref  | rows  | filtered | Extra                              |
++----+-------------+-----------------------------+------------+-------+---------------+--------------+---------+------+-------+----------+------------------------------------+
+|  1 | SIMPLE      | store_system_depot_exchange | NULL       | range | storeId_type  | storeId_type | 97      | NULL | 60632 |     0.11 | Using index condition; Using where |
++----+-------------+-----------------------------+------------+-------+---------------+--------------+---------+------+-------+----------+------------------------------------+
+1 row in set, 1 warning (0.00 sec)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;更改索引idx_storeId_createtime ，丢弃idx_storeId_type，type重复率高，放入索引没啥效果，选create_time高变动的数据。&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;mysql&amp;gt; CREATE INDEX idx_storeId_createtime ON store_system_depot_exchange (store_id,create_time);
+Query OK, 0 rows affected (13.80 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql&amp;gt;  DROP INDEX idx_storeId_type ON store_system_depot_exchange; 
+ Query OK, 0 rows affected (0.05 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;再次查询&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;mysql&amp;gt; SELECT *   FROM `store_system_depot_exchange`  WHERE(`store_id`= 52    AND `create_time`&amp;gt;= '2019-09-01 00:00:00'    AND `create_time`&amp;lt;= '2019-10-17 23:59:59'    AND `type` IN('sale_output', 'repair_output', 'repair_correct_input', 'repair_correct_output')    AND `is_virtual`= 0)  AND `store_system_depot_exchange`.`delete_time` IS NULL;
+....省略
+----+---------------------+-------------+------------+
+999 rows in set (0.02 sec)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;有关-mysql-select-qc缓存&quot;&gt;有关 Mysql Select QC缓存&lt;/h2&gt;
+
+&lt;p&gt;在阿里云的云数据库RDS中，语句第一次查询可以复现，但是第二次就快很多倍。想到的是缓存，就查了相关资料，了解到是Select Query Cache如下。&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;查询缓存使用情况&lt;/p&gt;
+  &lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;mysql&amp;gt; SHOW STATUS LIKE 'Qcache%';
++-------------------------+--------+
+| Variable_name           | Value  |
++-------------------------+--------+
+| Qcache_free_blocks      | 0      |
+| Qcache_free_memory      | 0      |
+| Qcache_hits             | 0      |
+| Qcache_inserts          | 0      |
+| Qcache_lowmem_prunes    | 0      |
+| Qcache_not_cached       | 668762 |
+| Qcache_queries_in_cache | 0      |
+| Qcache_total_blocks     | 0      |
++-------------------------+--------+
+8 rows in set (0.00 sec)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;  &lt;/div&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;相关解释：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Qcache_free_blocks: 查询缓存的可用内存量 如果该值非常大，则表明缓冲区中碎片很多。&lt;/li&gt;
+  &lt;li&gt;Qcache_free_memory: 查询缓存的可用内存量 Query Cache 中目前剩余的内存大小。通过这个参数我们可以较为准确的观察出当前系统中的Query Cache 内存大小是否足够，是需要增加还是过多了；&lt;/li&gt;
+  &lt;li&gt;Qcache_hits: 查询缓存命中数 多少次命中。通过这个参数我们可以查看到Query Cache 的基本效果；&lt;/li&gt;
+  &lt;li&gt;Qcache_inserts: 添加到查询缓存的查询数 多少次未命中然后插入。通过“Qcache_hits”和“Qcache_inserts”两个参数我们就可以算出Query Cache 的命中率了：Query Cache 命中率= Qcache_hits / ( Qcache_hits + Qcache_inserts )；&lt;/li&gt;
+  &lt;li&gt;Qcache_lowmem_prunes: 由于内存不足而从查询缓存中删除的查询数 值非常大，则表明经常出现缓冲不够的情况;&lt;/li&gt;
+  &lt;li&gt;Qcache_not_cached: 非缓存查询的数量（由于 query_cache_type 设置而无法缓存或未缓存） 因为query_cache_type 的设置或者不能被cache 的Query 的数量；&lt;/li&gt;
+  &lt;li&gt;Qcache_queries_in_cache: 查询缓存中注册的查询数 当前Query Cache 中cache 的Query 数量；&lt;/li&gt;
+  &lt;li&gt;Qcache_total_blocks: 查询缓存中的块总数 表示当前查询缓存占用的内存的block数量&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;查找缓存开启情况&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;查询&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;mysql&amp;gt; SHOW  variables LIKE 'query_cache_type';
++------------------+-------+
+| Variable_name    | Value |
++------------------+-------+
+| query_cache_type | OFF   |
++------------------+-------+
+1 row in set (0.00 sec)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;strong&gt;注意：即使是OFF, ALIYUN MYSQL在短时间内查询还是会使用缓存&lt;/strong&gt;&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;缓存关闭与开启&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;1、临时的直接再命令行执行&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;set global query_cache_size=0
+set global query_cache_type=0
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;2、永久&lt;/p&gt;
+
+&lt;p&gt;my.cnf修改query_cache_size=0、query_cache_type=0&lt;/p&gt;
+
+&lt;h2 id=&quot;迭代&quot;&gt;迭代&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;2022年05月17日 23:59:59 初稿&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;参考&quot;&gt;参考&lt;/h2&gt;
+
+&lt;p&gt;1、&lt;a href=&quot;https://www.cnblogs.com/WangXianSCU/p/14490217.html&quot;&gt;MySQL查询缓存简单使用 - pedro7 - 博客园&lt;/a&gt;&lt;/p&gt;
+</description>
+				<pubDate>Tue, 17 May 2022 00:00:00 +0800</pubDate>
+				<link>/mysql-slow-log.html</link>
+				<guid isPermaLink="true">/mysql-slow-log.html</guid>
+			</item>
+		
+			<item>
 				<title>PHP 单元测试 与 Gitlab-CI</title>
 				<description>&lt;h2 id=&quot;简介&quot;&gt;简介&lt;/h2&gt;
 
@@ -181,6 +322,9 @@ Process finished with exit code 0
   &lt;p&gt;介绍&lt;/p&gt;
 &lt;/blockquote&gt;
 
+&lt;p&gt;这里有几个概念，项目project，日志存储Logstore，集器logtail，机器组。
+&lt;img src=&quot;../img/log-system/log-system_1.jpg&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
 &lt;blockquote&gt;
   &lt;p&gt;计费&lt;/p&gt;
 &lt;/blockquote&gt;
@@ -190,6 +334,20 @@ Process finished with exit code 0
 &lt;h2 id=&quot;采集&quot;&gt;采集&lt;/h2&gt;
 
 &lt;h2 id=&quot;生产者规范&quot;&gt;生产者规范&lt;/h2&gt;
+
+&lt;h2 id=&quot;应用案例&quot;&gt;应用案例&lt;/h2&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;nginx 统计pv pu&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;项目异常处理&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;error 外其他级别处理，汇中统计&lt;/p&gt;
+
+&lt;p&gt;error 等级别，立即报警&lt;/p&gt;
 
 &lt;h2 id=&quot;迭代&quot;&gt;迭代&lt;/h2&gt;
 
@@ -1773,139 +1931,6 @@ Query OK, 0 rows affected (0.01 sec)
 				<pubDate>Thu, 06 Aug 2020 00:00:00 +0800</pubDate>
 				<link>/mysql-indexes.html</link>
 				<guid isPermaLink="true">/mysql-indexes.html</guid>
-			</item>
-		
-			<item>
-				<title>SPU & SKU</title>
-				<description>&lt;h2 id=&quot;概念&quot;&gt;概念&lt;/h2&gt;
-
-&lt;table&gt;
-  &lt;thead&gt;
-    &lt;tr&gt;
-      &lt;th&gt;名词&lt;/th&gt;
-      &lt;th&gt;全称&lt;/th&gt;
-      &lt;th&gt;描述&lt;/th&gt;
-    &lt;/tr&gt;
-  &lt;/thead&gt;
-  &lt;tbody&gt;
-    &lt;tr&gt;
-      &lt;td&gt;SPU&lt;/td&gt;
-      &lt;td&gt;Standard Product Unit  标准化产品单元&lt;/td&gt;
-      &lt;td&gt;是商品信息聚合的最小单位，是一组可复用、易检索的标准化信息的集合，该集合描述了一个产品的特性。通俗点讲，属性值、特性相同的商品就可以称为一个SPU。&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;SKU&lt;/td&gt;
-      &lt;td&gt;Stock Keeping Unit 库存量单位&lt;/td&gt;
-      &lt;td&gt;即库存进出计量的单位， 可以是以件、盒、托盘等为单位。SKU是物理上不可分割的最小存货单元。在使用时要根据不同业态，不同管理模式来处理。&lt;/td&gt;
-    &lt;/tr&gt;
-  &lt;/tbody&gt;
-&lt;/table&gt;
-
-&lt;h2 id=&quot;大白话&quot;&gt;大白话&lt;/h2&gt;
-
-&lt;table&gt;
-  &lt;thead&gt;
-    &lt;tr&gt;
-      &lt;th&gt;产品名&lt;/th&gt;
-      &lt;th&gt;分类&lt;/th&gt;
-      &lt;th&gt;SPU&lt;/th&gt;
-      &lt;th&gt;SKU&lt;/th&gt;
-    &lt;/tr&gt;
-  &lt;/thead&gt;
-  &lt;tbody&gt;
-    &lt;tr&gt;
-      &lt;td&gt;Apple iPhone 11 (A2223) 128GB 黑色 移动联通电信4G手机 双卡双待&lt;/td&gt;
-      &lt;td&gt;手机&lt;/td&gt;
-      &lt;td&gt;iPhone 11 (A2223)&lt;/td&gt;
-      &lt;td&gt;128GB 黑色 移动联通电信4G手机 双卡双待&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;外星人Alienware m15 2020版 15.6英寸轻薄游戏本(十代i7-10750H 16G 1TBSSD RTX2070 8G独显)白&lt;/td&gt;
-      &lt;td&gt;电脑&lt;/td&gt;
-      &lt;td&gt;外星人Alienware m15&lt;/td&gt;
-      &lt;td&gt;15.6英寸轻薄游戏本(十代i7-10750H 16G 1TBSSD RTX2070 8G独显)白&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;安德玛官方UA Spawn 2男子篮球鞋Under Armour3022626 灰色106 46&lt;/td&gt;
-      &lt;td&gt;篮球鞋&lt;/td&gt;
-      &lt;td&gt;安德玛官方UA Spawn 2男子篮球鞋Under Armour3022626&lt;/td&gt;
-      &lt;td&gt;灰色106 46&lt;/td&gt;
-    &lt;/tr&gt;
-  &lt;/tbody&gt;
-&lt;/table&gt;
-
-&lt;h3 id=&quot;数据模型设计&quot;&gt;数据模型设计&lt;/h3&gt;
-
-&lt;p&gt;&lt;strong&gt;SPU表&lt;/strong&gt;一般会有两个上级相关属性表&lt;strong&gt;brands表&lt;/strong&gt;和&lt;strong&gt;category表&lt;/strong&gt;。为了方便创建&lt;strong&gt;SKU表&lt;/strong&gt;数据，会有延伸出可复用的&lt;strong&gt;销售属性表&lt;/strong&gt;和&lt;strong&gt;销售属性值表&lt;/strong&gt;。
-除此之外我们应该还有&lt;strong&gt;SKU库存表&lt;/strong&gt;&lt;/p&gt;
-
-&lt;table&gt;
-  &lt;thead&gt;
-    &lt;tr&gt;
-      &lt;th&gt;表名称&lt;/th&gt;
-      &lt;th&gt;表名&lt;/th&gt;
-    &lt;/tr&gt;
-  &lt;/thead&gt;
-  &lt;tbody&gt;
-    &lt;tr&gt;
-      &lt;td&gt;品牌表&lt;/td&gt;
-      &lt;td&gt;product_brands&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;类别表&lt;/td&gt;
-      &lt;td&gt;product_category&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;spu表&lt;/td&gt;
-      &lt;td&gt;product_spu&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;sku表&lt;/td&gt;
-      &lt;td&gt;product_sku&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;销售属性表&lt;/td&gt;
-      &lt;td&gt;product_attr&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;销售属性值&lt;/td&gt;
-      &lt;td&gt;product_attr_value&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;sku库存表&lt;/td&gt;
-      &lt;td&gt;product_sku_stock&lt;/td&gt;
-    &lt;/tr&gt;
-  &lt;/tbody&gt;
-&lt;/table&gt;
-
-&lt;p&gt;除了上面的表之外，我又加了另一张表 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;关联关系冗余表 product_spu_sku_attr_map&lt;/code&gt;，为什么呢？顾名思义，冗余用的，有了这张表，我们可以很高效的得到：&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;spu下 有哪些sku&lt;/li&gt;
-  &lt;li&gt;spu下 有那些销售属性&lt;/li&gt;
-  &lt;li&gt;spu下 每个销售属性对应的销售属性值(一对多)&lt;/li&gt;
-  &lt;li&gt;spu下 每个销售属性值对应的sku(一对多)&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;简易E-R关系图&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://img.zzhpeng.cn/FoUZKUxivUTVSLV4bF8YK293hrsM&quot; alt=&quot;FoUZKUxivUTVSLV4bF8YK293hrsM&quot; /&gt;&lt;/p&gt;
-
-&lt;h2 id=&quot;迭代&quot;&gt;迭代&lt;/h2&gt;
-&lt;ul&gt;
-  &lt;li&gt;2020年05月24日 13:39:44 初稿&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&quot;参考&quot;&gt;参考：&lt;/h2&gt;
-&lt;ul&gt;
-  &lt;li&gt;1、&lt;a href=&quot;https://github.com/skr-shop/manuals&quot;&gt;GitHub - skr-shop/manuals: Do design No code 💻📱🛒📚&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-</description>
-				<pubDate>Sun, 24 May 2020 00:00:00 +0800</pubDate>
-				<link>/spu-sku.html</link>
-				<guid isPermaLink="true">/spu-sku.html</guid>
 			</item>
 		
 	</channel>
