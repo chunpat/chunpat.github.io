@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="https://www.w3.org/2005/Atom">
 	<channel>
-		<title>Blog</title>
+		<title>小p的成长历程</title>
 		<description>chunpat</description>
 		<link>/</link>
 		<atom:link href="/" rel="self" type="application/rss+xml" />
@@ -1117,7 +1117,12 @@ sudo gitlab-ctl restart
   &lt;p&gt;1、创建备份脚本，每天00自动备份&lt;/p&gt;
 &lt;/blockquote&gt;
 
-&lt;p&gt;sudo vim /var/opt/gitlab/backups/remove.sh&lt;/p&gt;
+&lt;p&gt;sudo vim /var/opt/gitlab/backups/backup.sh&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;#!/bin/bash
+/opt/gitlab/bin/gitlab-rake gitlab:backup:create
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;crontab -e&lt;/p&gt;
 &lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;#!/bin/bash
 0 0 * * * sh /var/opt/gitlab/backups/backup.sh &amp;gt;&amp;gt; /var/opt/gitlab/backups/backup.log
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
@@ -1190,7 +1195,6 @@ find &quot;/var/opt/gitlab/backups/&quot; -name &quot;*.tar&quot; -ctime +15  -e
 &lt;p&gt;用nano操作&lt;/p&gt;
 
 &lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;45 10 * * * sh /var/opt/gitlab/backups/remove.sh  &amp;gt;&amp;gt; /var/opt/gitlab/backups/remove.log
-
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;Ctrl+X，按Y保存&lt;/p&gt;
