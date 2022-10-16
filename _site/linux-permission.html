@@ -8,9 +8,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="chunpat">
 
-    <title>基于阿里云日志服务（SLS）做日志处理方案 - 小p的成长历程</title>
+    <title>Linux角色，目录权限(含实际案例) - 小p的成长历程</title>
 
-    <link rel="canonical" href="http://localhost:4000/log-system.html">
+    <link rel="canonical" href="http://localhost:4000/linux-permission.html">
 
     <!-- Icons -->
   <link rel="shortcut icon" href="img/favicon.ico">
@@ -96,14 +96,12 @@
                 <div class="post-heading">
                     <div class="Tags">
                         
-                        <a class="tag" href="/Tags/#log" title="log">log</a>
-                        
-                        <a class="tag" href="/Tags/#json" title="json">json</a>
+                        <a class="tag" href="/Tags/#Linux" title="Linux">Linux</a>
                         
                     </div>
-                    <h1>基于阿里云日志服务（SLS）做日志处理方案</h1>
+                    <h1>Linux角色，目录权限(含实际案例)</h1>
                     
-                    <span class="meta">Posted by zzhpeng on March 26, 2022</span>
+                    <span class="meta">Posted by zzhpeng on October 15, 2022</span>
                 </div>
             </div>
         </div>
@@ -116,54 +114,242 @@
         <div class="row">
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 post-container">
 
-                <h2 id="关于日志服务sls">关于日志服务（SLS）</h2>
+                <h2 id="起因">起因</h2>
+
+<p>有时候程序写入内容、创建文件目录无权限问题导致程序异常。这大部分是没有搞清权限
+和角色的问题。今天就结合实际案例去复习并整理下。</p>
+
+<h2 id="知识储备">知识储备</h2>
+
+<h3 id="基础">基础</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>权限</th>
+      <th>解释</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>读取（r）</td>
+      <td>允许查看文件内容，显示目录列表，对应数字4</td>
+    </tr>
+    <tr>
+      <td>写入（w）</td>
+      <td>允许修改文件内容，允许在目录中新建、删除、移动文件或者子目录，对应数字2</td>
+    </tr>
+    <tr>
+      <td>可执行（x）</td>
+      <td>允许运行程序，切换目录，对应数字1</td>
+    </tr>
+    <tr>
+      <td>无权限（-）</td>
+      <td>没有权限</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>在某个项目下，操作如下：</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>onehour@iZwz9at7o13nmv1vs5ps94Z:/www/wwwroot/dev.xxx.com$ ls -la
+total 892
+...//省略
+-rw-r--r--  1 onehour onehour    146 Mar 10  2022 apidoc.json
+...//省略
+</code></pre></div></div>
+
+<p>表格解析如下：</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>-rw-r–r–</th>
+      <th>1</th>
+      <th>onehour onehour</th>
+      <th>146</th>
+      <th>Mar 10  2022</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>文件类型与权限</td>
+      <td>如果是目录，表示下面文件个数</td>
+      <td>归属，第一个onehour是属主，第二个是属主的分组</td>
+      <td>文件大小，默认普通文件才直接显示大小，单位字节B。</td>
+      <td>修改日期</td>
+    </tr>
+  </tbody>
+</table>
 
 <blockquote>
-  <p>介绍</p>
+  <p>文件类型与权限</p>
 </blockquote>
 
-<p>这里有几个概念，项目project，日志存储Logstore，集器logtail，机器组。
-<img src="../img/log-system/log-system_1.jpg" alt="" /></p>
+<p>可以拆开四个组件 -、rw-、r–、r–, 对应 文件类型、属主权限 、属组权限 、其他人权限。</p>
+
+<p>其中文件类型有常用的四种，如下表。</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>文件类型符号</th>
+      <th>代表</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>-</td>
+      <td>普通文件</td>
+    </tr>
+    <tr>
+      <td>d</td>
+      <td>代表目录</td>
+    </tr>
+    <tr>
+      <td>c</td>
+      <td>代表字符型文件</td>
+    </tr>
+    <tr>
+      <td>l</td>
+      <td>代表链接文件</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="操作">操作</h3>
 
 <blockquote>
-  <p>计费</p>
+  <p>权限修改 <strong>chmod</strong> 原本权限是644-》777</p>
 </blockquote>
 
-<p><strong>为什么用</strong></p>
+<p>我是用权限对应的数字去修改， 如下</p>
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>onehour@iZwz9at7o13nmv1vs5ps94Z:/www/wwwroot/dev.xxx.com<span class="nv">$ </span><span class="nb">ls</span> <span class="nt">-la</span> apidoc.json           
+<span class="nt">-rw-r--r--</span> 1 onehour onehour 146 Mar 10  2022 apidoc.json
+onehour@iZwz9at7o13nmv1vs5ps94Z:/www/wwwroot/dev.xxx.com<span class="nv">$ </span><span class="nb">sudo chmod</span> <span class="nt">-R</span> 777 apidoc.json
+onehour@iZwz9at7o13nmv1vs5ps94Z:/www/wwwroot/dev.xxx.com<span class="nv">$ </span><span class="nb">ls</span> <span class="nt">-la</span> apidoc.json 
+<span class="nt">-rwxrwxrwx</span> 1 onehour onehour 146 Mar 10  2022 apidoc.json
+</code></pre></div></div>
 
-<h2 id="采集">采集</h2>
+<p>操作解释</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>chmod</th>
+      <th>-R</th>
+      <th>777</th>
+      <th>apidoc.json</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>权限修改</td>
+      <td>下面有目录，继承</td>
+      <td>属主权限 、属组权限 、其他人权限 都是满权限</td>
+      <td>文件</td>
+    </tr>
+  </tbody>
+</table>
 
 <blockquote>
-  <p>认证</p>
+  <p>归属（所有权）<strong>chown</strong> 原本归属是onehour onehour -》www www</p>
 </blockquote>
 
-<p>如果同一ECS账号下,不用身份认证</p>
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>onehour@iZwz9at7o13nmv1vs5ps94Z:/www/wwwroot/dev.xxx.com<span class="nv">$ </span><span class="nb">ls</span> <span class="nt">-la</span> apidoc.json 
+<span class="nt">-rwxrwxrwx</span> 1 onehour onehour 146 Mar 10  2022 apidoc.json
+onehour@iZwz9at7o13nmv1vs5ps94Z:/www/wwwroot/dev.xxx.com<span class="nv">$ </span><span class="nb">sudo chown</span> <span class="nt">-R</span> www:www apidoc.json 
+onehour@iZwz9at7o13nmv1vs5ps94Z:/www/wwwroot/dev.xxx.com<span class="nv">$ </span><span class="nb">ls</span> <span class="nt">-la</span> apidoc.json 
+<span class="nt">-rw-r--r--</span> 1 www www 146 Mar 10  2022 apidoc.json
 
-<h2 id="生产者规范">生产者规范</h2>
+</code></pre></div></div>
 
-<h2 id="应用案例">应用案例</h2>
+<h2 id="实战">实战</h2>
 
-<blockquote>
-  <p>nginx 统计pv pu</p>
-</blockquote>
+<p>假设用的是宝塔管理服务器，用的nginx代理服务，执行的用户www:www，默认配置如下：</p>
 
-<blockquote>
-  <p>项目异常处理</p>
-</blockquote>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>user  www www;  //执行用户
+worker_processes auto;
+error_log  /www/wwwlogs/nginx_error.log  crit;
+pid        /www/server/nginx/logs/nginx.pid;
+worker_rlimit_nofile 51200;
+</code></pre></div></div>
 
-<p>error 外其他级别处理，汇中统计</p>
+<p>cgi用的是php-fpm，执行的用户www:www，php-fpm.conf配置如下：</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[global]
+pid = /www/server/php/72/var/run/php-fpm.pid
+error_log = /www/server/php/72/var/log/php-fpm.log
+log_level = notice
 
-<p>error 等级别，立即报警</p>
+[www] //执行用户
+listen = /tmp/php-cgi-72.sock
+listen.backlog = -1
+listen.allowed_clients = 127.0.0.1
+listen.owner = www
+listen.group = www
+listen.mode = 0666
+user = www
+group = www
+pm = dynamic
+pm.status_path = /phpfpm_72_status
+pm.max_children = 100
+pm.start_servers = 20
+pm.min_spare_servers = 20
+pm.max_spare_servers = 70
+request_terminate_timeout = 100
+request_slowlog_timeout = 30
+slowlog = var/log/slow.log
+</code></pre></div></div>
+
+<p>如果我们登录linux服务器，用的是onehour这个账户管理与操作，那么执行git clone 下来的项目会是onehour onehour的用户组。</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>onehour@iZwz9at7o13nmv1vs5ps94Z:/www/wwwroot$ ls -lh 
+drwxr-xr-x 20 onehour onehour 4.0K Oct  5 21:57 dev.xxx.com
+</code></pre></div></div>
+
+<p><strong>这样会存在什么问题呢？</strong></p>
+
+<p>如果网站访问，用php-fpm写日志操作，假设写的目录是runtime，如下：</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>onehour@iZwz9at7o13nmv1vs5ps94Z:/www/wwwroot/dev.xxx.com$ ls -la runtime/
+total 28
+drwxr-xr-x  5 onehour onehour  4096 Mar 11  2022 .
+drwxr-xr-x 20 onehour onehour  4096 Oct  5 21:57 ..
+drwxr-xr-x  3 onehour onehour  4096 Mar 10  2022 cache
+drwxr-xr-x 10 onehour onehour  4096 Oct  1 00:30 log
+drwxr-xr-x  2 onehour onehour 12288 Oct 10 11:53 temp
+</code></pre></div></div>
+
+<p>其他用户是r-x，是没有写入权限的。</p>
+
+<p>解决办法，将runtime目录归于权限为www:www</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>onehour@iZwz9at7o13nmv1vs5ps94Z:/www/wwwroot/dev.xxx.com$ sudo chown -R www:www runtime
+onehour@iZwz9at7o13nmv1vs5ps94Z:/www/wwwroot/dev.xxx.com$ ls -la runtime/              
+total 28
+drwxr-xr-x  5 www     www      4096 Mar 11  2022 .
+drwxr-xr-x 20 onehour onehour  4096 Oct  5 21:57 ..
+drwxr-xr-x  3 www     www      4096 Mar 10  2022 cache
+drwxr-xr-x 10 www     www      4096 Oct  1 00:30 log
+drwxr-xr-x  2 www     www     12288 Oct 10 11:53 temp
+</code></pre></div></div>
+
+<p>额外，如果执行脚本，用crontab去跑，这里的执行用户就是登录的账号onehour了,那么写日志是没权限的，这个怎么办呢？</p>
+
+<p>我这边的做法是将执行crontab的用户改为www去执行。
+这里改的话，需要登录对应账号执行crontab -e编辑，或者在root账号下crontab -e -u www。</p>
+
+<p>如果是脚本，像宝塔的计划任务用的是root执行，可以改写成下面这样:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>su -s /bin/bash - www &lt;&lt;EOF
+.......//todo执行的命令
+EOF
+</code></pre></div></div>
 
 <h2 id="迭代">迭代</h2>
 
 <ul>
-  <li>2022年03月26日 23:59:59 初稿</li>
+  <li>2022年10月15日 21:00:00 初稿</li>
 </ul>
 
 <h2 id="参考">参考</h2>
 
-<p>1、</p>
+<p>1、<a href="https://segmentfault.com/a/1190000039202476">一文带你彻底搞懂Linux 文件权限管理</a></p>
 
 
                 <hr>
@@ -175,13 +361,9 @@
                 <ul class="pager">
                     
                     <li class="previous">
-                        <a href="/php-exception.html" data-toggle="tooltip" data-placement="top" title="PHP 异常处理">&larr; Previous Post</a>
+                        <a href="/mysql-slow-log.html" data-toggle="tooltip" data-placement="top" title="处理 Mysql Show Query 实际案例">&larr; Previous Post</a>
                     </li>
                     
-                    
-                    <li class="next">
-                        <a href="/phpunit-test.html" data-toggle="tooltip" data-placement="top" title="PHP 单元测试 与 Gitlab-CI">Next Post &rarr;</a>
-                    </li>
                     
                 </ul>
 
