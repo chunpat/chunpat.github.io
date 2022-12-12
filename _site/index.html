@@ -104,6 +104,29 @@
 		<div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
 			
 <div class="post-preview">
+    <a href="/habit.html">
+        <h2 class="post-title">            
+            避免死循环-记一次问题排查
+        </h2>
+        
+        <div class="post-content-preview">
+            起因
+
+最近有个简单的队列tp-queue时不时出现问题，出问题后就整个队列卡住了。
+使用的是ThinkPHP的think-queue，项目地址：https://github.com/top-think/think-queue。
+
+排查
+
+执行程序
+ nohup /www/server/php...
+        </div>
+    </a>
+    <p class="post-meta">Posted by zzhpeng on December 10, 2022</p>
+</div>
+
+<hr>
+
+<div class="post-preview">
     <a href="/linux-permission.html">
         <h2 class="post-title">            
             Linux角色，目录权限(含实际案例)
@@ -309,30 +332,6 @@ curl -s https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script
         </div>
     </a>
     <p class="post-meta">Posted by zzhpeng on August 27, 2021</p>
-</div>
-
-<hr>
-
-<div class="post-preview">
-    <a href="/mysql-replace.html">
-        <h2 class="post-title">            
-            MySQL的Replace操作
-        </h2>
-        
-        <div class="post-content-preview">
-            缘由
-
-想复现两条重复的数据，但是一直被替换，死死不出来。查看sql日志，发现出现了Replace操作，之前没见过，词义为替换。
-第一时间想的是和索引有关，看了下还真是，去掉索引之后就复现了数据。
-
-日志
-
-tp5.1日志，出现了REPLACE
-
-[ sql ] [ SQL ] REPLACE...
-        </div>
-    </a>
-    <p class="post-meta">Posted by zzhpeng on April 19, 2021</p>
 </div>
 
 <hr>

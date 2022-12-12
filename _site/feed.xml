@@ -7,6 +7,84 @@
 		<atom:link href="/" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>避免死循环-记一次问题排查</title>
+				<description>&lt;h2 id=&quot;起因&quot;&gt;起因&lt;/h2&gt;
+
+&lt;p&gt;最近有个简单的队列tp-queue时不时出现问题，出问题后就整个队列卡住了。
+使用的是ThinkPHP的think-queue，项目地址：https://github.com/top-think/think-queue。&lt;/p&gt;
+
+&lt;h2 id=&quot;排查&quot;&gt;排查&lt;/h2&gt;
+
+&lt;p&gt;执行程序&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; nohup /www/server/php/72/bin/php think queue:listen --queue=storeSystemJobQueue --delay=0 --memory=2048 --sleep=3 --tries=0
+  &amp;gt;&amp;gt; queue.log  2&amp;gt;&amp;amp;1
+
+#  参数解析  
+#      --queue[=QUEUE]      The queue to listen on
+#      --delay[=DELAY]      Amount of time to delay failed jobs [default: 0]
+#      --memory[=MEMORY]    The memory limit in megabytes [default: 128]
+#      --timeout[=TIMEOUT]  Seconds a job may run before timing out [default: 60]
+#      --sleep[=SLEEP]      Seconds to wait before checking queue for jobs [default: 3]
+#      --tries[=TRIES]      Number of times to attempt a job before logging it failed [default: 0]
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;用的是数据库驱动，数据库存储数据。出问题后显示的是队列执行成功，但是没有消化，然后就卡住了。&lt;/p&gt;
+
+&lt;p&gt;数据库sql日志执行的是这三条：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;更新： 将处理数据，但是没有消化的队列数据初始化, 并更新尝试次数+1；&lt;/li&gt;
+  &lt;li&gt;查询:  查询一条有效数据；&lt;/li&gt;
+  &lt;li&gt;更新： 处理完业务，更新；&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;sql语句如下：&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[ 2022-12-01T17:46:04+08:00 ][ sql ] [ SQL ] UPDATE `store_system_jobs`  SET `reserved` = 0 , `reserved_at` = NULL , `attempts` = `attempts` + 1  WHERE  `queue` = 'storeSystemWarehousingJobQueue'  AND `reserved` = 1  AND `reserved_at` &amp;lt;= 1669886164 [ RunTime:0.003657s ]
+[ 2022-12-01T17:46:04+08:00 ][ sql ] [ SQL ] SELECT * FROM `store_system_jobs` WHERE  `queue` = 'storeSystemWarehousingJobQueue'  AND `reserved` = 0  AND `available_at` &amp;lt;= 1669887964 ORDER BY `id` ASC LIMIT 1   FOR UPDATE [ RunTime:0.004706s ]
+[ 2022-12-01T17:46:04+08:00 ][ sql ] [ SQL ] UPDATE `store_system_jobs`  SET `reserved` = 1 , `reserved_at` = 1669887964  WHERE  `id` = 450 [ RunTime:0.004191s ]
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;这里我梳理下，简易流程图如下：
+&lt;img src=&quot;https://img.zzhpeng.cn/queue%400.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;程序挂了，任务不跑，第一开始没思路，临时解决的是重启，但是执行一段时间又不行，特别是高峰的时候很绝望。然后想的是性能问题，是不是数据库介质不行。
+开始查看数据库是不是产生了死锁了，删除锁。查看锁的语句如下：&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;//查锁
+select * from information_schema.innodb_trx
+//删锁 id
+kill 738178711
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;然后又可以了。又过了一段时间，还是不行。只能重新排查，突然发现在重启队列的时候，查看数据库锁看到有条没读锁的sql，一直挂着，然后查看业务代码
+，发现这不就是查看据库数据是否重复数据的sql语句吗？，这里产生了死循环，效果就会出现下面流程图：&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://img.zzhpeng.cn/queue%401.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;由于框架队列默认超时机制是60s，超过了就会重新执行，直到达到一定次数，程序就会die。这里面有日志，但是没留意这个超时异常中断的记录。&lt;/p&gt;
+
+&lt;h2 id=&quot;反思&quot;&gt;反思&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;1、 优化队列，超时记录与报警。&lt;/li&gt;
+  &lt;li&gt;2、 代码不可以留有死循环的可能，一定杜绝，一开始就设定个次数。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;迭代&quot;&gt;迭代&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;2022年12月12日 09:00:00 初稿&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;参考&quot;&gt;参考&lt;/h2&gt;
+
+&lt;p&gt;1、&lt;a href=&quot;https://blog.csdn.net/java__project/article/details/100137526&quot;&gt;Lock wait timeout exceeded; try restarting transaction&lt;/a&gt;&lt;/p&gt;
+</description>
+				<pubDate>Sat, 10 Dec 2022 00:00:00 +0800</pubDate>
+				<link>/habit.html</link>
+				<guid isPermaLink="true">/habit.html</guid>
+			</item>
+		
+			<item>
 				<title>Linux角色，目录权限(含实际案例)</title>
 				<description>&lt;h2 id=&quot;起因&quot;&gt;起因&lt;/h2&gt;
 
@@ -1936,48 +2014,6 @@ $serv-&amp;gt;set(array(
 				<pubDate>Sun, 29 Nov 2020 00:00:00 +0800</pubDate>
 				<link>/tcp.html</link>
 				<guid isPermaLink="true">/tcp.html</guid>
-			</item>
-		
-			<item>
-				<title>Mysql 逻辑数据恢复</title>
-				<description>&lt;h2 id=&quot;起因&quot;&gt;起因&lt;/h2&gt;
-&lt;p&gt;有时候线上出了问题，而原本地数据不好操作，所以想把生产的数据弄一份到本地环境测试。操作步骤：1、阿里云RDS导出逻辑。2、导入本地mysql。&lt;/p&gt;
-
-&lt;h2 id=&quot;阿里云rds生成逻辑&quot;&gt;阿里云RDS生成逻辑&lt;/h2&gt;
-&lt;p&gt;&lt;img src=&quot;http://img.zzhpeng.cn/Fh3k1F_AOs_QW_1tbIFDs3-f9R7M&quot; alt=&quot;Fh3k1F_AOs_QW_1tbIFDs3-f9R7M&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;点击确认后，就会生成，然后下载即可。&lt;/p&gt;
-
-&lt;h2 id=&quot;数据库逻辑恢复&quot;&gt;数据库逻辑恢复&lt;/h2&gt;
-
-&lt;p&gt;解压下载后压缩文件，然后选择对应要恢复的数据库。&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;注意：➜ source 是目录&lt;/code&gt;&lt;/p&gt;
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;➜ source gunzip -c sima_datafull_202009291740_1601372414.sql.gz|mysql -uroot -p sima
-Enter password: 
-ERROR 1840 (HY000) at line 24: @@GLOBAL.GTID_PURGED can only be set when @@GLOBAL.GTID_EXECUTED is empty.
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;上面出现error&lt;/code&gt;，度娘下，提示集群迁移到单实例的设置问题，操作：&lt;/p&gt;
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;➜  source mysql -uroot -p 
-Enter password: 
-mysql&amp;gt; reset master;
-Query OK, 0 rows affected (0.01 sec)
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p&gt;然后重复上面操作即可。&lt;/p&gt;
-
-&lt;h2 id=&quot;迭代&quot;&gt;迭代&lt;/h2&gt;
-&lt;ul&gt;
-  &lt;li&gt;2020年10月10日 14:14:40 初稿&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&quot;参考&quot;&gt;参考：&lt;/h2&gt;
-&lt;ul&gt;
-  &lt;li&gt;1、&lt;a href=&quot;https://book.douban.com/subject/23008813/&quot;&gt;高性能mysql&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;2、&lt;a href=&quot;https://www.cnblogs.com/tonnytangy/p/7779164.html&quot;&gt;ERROR 1840 (HY000) at line 24: @@GLOBAL.GTID_PURGED can only be set when @@GLOBAL.GTID_EXECUTED is empty - tonnytangy - 博客园&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-</description>
-				<pubDate>Sat, 10 Oct 2020 00:00:00 +0800</pubDate>
-				<link>/mysql-recovery.html</link>
-				<guid isPermaLink="true">/mysql-recovery.html</guid>
 			</item>
 		
 	</channel>
