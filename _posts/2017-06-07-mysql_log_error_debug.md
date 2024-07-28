@@ -26,7 +26,7 @@ general_log_file=D:/testlog
 工具链接：http://pan.baidu.com/s/1cxHQge
 
 修改config.php即可，并且配置个站点。
-![](https://img.zzhpeng.cn/FteLS27Ds9P0DoE9LWoLcNY1VC5R)
+![](https://img.chunpat.cn/FteLS27Ds9P0DoE9LWoLcNY1VC5R)
 
 
 

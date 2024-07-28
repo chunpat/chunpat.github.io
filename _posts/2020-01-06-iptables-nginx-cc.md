@@ -104,17 +104,17 @@ grep '2020/01/01 19:02:31' xxx.com.error.log|wc -l   //结果显示62个请求�
 传过来的请求，就会直接返回错误。导致nginx直接将请求，记做错误写入error日志。
 
 画个流程图：
-![图](http://img.zzhpeng.cn/Fk7-M-U3c-LFEmPmzOe_bmNwuRNx)
+![图](http://img.chunpat.cn/Fk7-M-U3c-LFEmPmzOe_bmNwuRNx)
 
 ## iptables学习与测试
 本测试在测试环境测试，环境参数为4g内存2个核心1M带宽，系统环境是ubuntu16.4，该发行版本的默认管理防火墙的工具是ufw。
 
 ### 无任何防御测试
 压测服务器ab命令 ab -c 20 -n 1000 https://dev.xxx.com/，全部通过
-![ab命令](http://img.zzhpeng.cn/FrN6NF5LYoD3J9BZL37rzHsm0OVK)
+![ab命令](http://img.chunpat.cn/FrN6NF5LYoD3J9BZL37rzHsm0OVK)
 
 服务器tcp连接数变化
-![tcp连接数变化](http://img.zzhpeng.cn/FsCP9OnEiddWnKI1bMMQtKdTSEV0)
+![tcp连接数变化](http://img.chunpat.cn/FsCP9OnEiddWnKI1bMMQtKdTSEV0)
 
 ### iptables防御
 
@@ -149,16 +149,16 @@ sudo iptables -nL
 > iptables 测试
 
 压测服务器ab命令 ab -c 20 -n 1000 https://dev.xxx.com/，少部分失败
-![ab命令](http://img.zzhpeng.cn/FjGLx-JepP-Q4JvMxYOOnNIMMQEW)
+![ab命令](http://img.chunpat.cn/FjGLx-JepP-Q4JvMxYOOnNIMMQEW)
 
 服务器tcp连接数变化,压测中的建立连接数不超过20
-![tcp连接数变化](http://img.zzhpeng.cn/FhjpjR9Px6Y4sbo1l6f_d3ek0XIk)
+![tcp连接数变化](http://img.chunpat.cn/FhjpjR9Px6Y4sbo1l6f_d3ek0XIk)
 
 加强压测，压测服务器ab命令 ab -c 25 -n 1000 https://dev.xxx.com/ 
-![ab命令](http://img.zzhpeng.cn/FoJbn_IqOilb6IX1SYq-npWaMxmA)
+![ab命令](http://img.chunpat.cn/FoJbn_IqOilb6IX1SYq-npWaMxmA)
 
 服务器tcp连接数变化，压测中的建立连接数不超过20
-![tcp连接数变化](http://img.zzhpeng.cn/FgjeblbI2m_2fElE8MwK1cs-9Y5M)
+![tcp连接数变化](http://img.chunpat.cn/FgjeblbI2m_2fElE8MwK1cs-9Y5M)
 
 
 ## nginx cc防御设置
@@ -168,13 +168,13 @@ sudo iptables -nL
 > F5模拟测试
 
 F5模拟测试,果然系统抛出502，我按出了浏览器显示差不多1200多个请求。
-![tcp连接数变化](http://img.zzhpeng.cn/FkNU7r-CYTOdCTYzFylfeR4PCdFr)
+![tcp连接数变化](http://img.chunpat.cn/FkNU7r-CYTOdCTYzFylfeR4PCdFr)
 
 然后，我在测试服务器，查看tcp变化数，限制到了20个连接数。自我推测：持续1200个请求下来，
 存在了很多等待连接的。数据库返回数据慢了或者奔溃了，php-fpm响应超时重启出现502。
 
 如图下，为F5请求产生502后，查看服务器tcp情况，还保持着20个连接数，和80个准备连接数。
-![tcp连接数变化](http://img.zzhpeng.cn/FmQH6dfFWvqmgHrcTF_EcpYUjQPW)
+![tcp连接数变化](http://img.chunpat.cn/FmQH6dfFWvqmgHrcTF_EcpYUjQPW)
 
 `结论：iptable的限制20个连接数，能限制流量，但是F5攻击触及到数据库，就存在数据库那边的读的压力。
 如果是静态或者缓存资源的的响应是没问题的，所以这里找到了nginx的cc防御。遇到一个时间段过多的流量可以抛出
@@ -199,12 +199,12 @@ F5模拟测试,果然系统抛出502，我按出了浏览器显示差不多1200�
 `limit_rate 512k： 对每个连接限速512k. 注意，这里是对连接限速，而不是对IP限速。如果一个IP允许两个并发连接，那么这个IP就是限速limit_rate×2。`
 
 配置，这里我直接用了宝塔的UI配置，这里是在server外部配置的，全局。
-![宝塔设置](http://img.zzhpeng.cn/Fp8s437_mKXOffD-bKDyTub_vxg4)
+![宝塔设置](http://img.chunpat.cn/Fp8s437_mKXOffD-bKDyTub_vxg4)
 
 > F5再次模拟测试
 
 再次显示f5 65次就网络出错了，f5防御成功。
-![F5再次模拟测试](http://img.zzhpeng.cn/Fubhh6oFbkaA5UBA9Et61YUcPFLp)
+![F5再次模拟测试](http://img.chunpat.cn/Fubhh6oFbkaA5UBA9Et61YUcPFLp)
 
 
 

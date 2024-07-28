@@ -13,10 +13,10 @@ tags: frp gitlab docker
 ### 基于gitlab的docker镜像安装内网git仓库
 > 1、这里docker-compose管理安装
 
-![FgO-PtshY7SQ52npAmUL4en4WGCO](http://img.zzhpeng.cn/FgO-PtshY7SQ52npAmUL4en4WGCO)
+![FgO-PtshY7SQ52npAmUL4en4WGCO](http://img.chunpat.cn/FgO-PtshY7SQ52npAmUL4en4WGCO)
 然后在当前目录运行docker-compose up,执行时间可能会有点久，请耐性等待。
 当执行到开始写日志的时候，就证明本地的gitlab安装成功了。如下图：
-![](http://img.zzhpeng.cn/FrMofWRxKkWDy7Nn2Lb4JwjAesJz)
+![](http://img.chunpat.cn/FrMofWRxKkWDy7Nn2Lb4JwjAesJz)
 
 > 2、访问127.0.0.1:8686测试
 
@@ -44,7 +44,7 @@ server_port = 7000
 [web] 
 type = http
 local_port = 8686
-custom_domains = gitlab.zzhpeng.cn                               
+custom_domains = gitlab.chunpat.cn                               
 
 ```
 
@@ -54,7 +54,7 @@ custom_domains = gitlab.zzhpeng.cn
 [common]
 bind_port = 7000
 vhost_http_port = 8080
-subdomain_host = gitlab.zzhpeng.cn                            
+subdomain_host = gitlab.chunpat.cn                            
 
 ```
 
@@ -78,23 +78,23 @@ subdomain_host = gitlab.zzhpeng.cn
 ### 外网域名配置与测试
 > 1、做域名解析，腾讯云云服务器如下配置
 
-![](http://img.zzhpeng.cn/Fpud9LMVf-xDNvznnHnfWusl8N7W)
+![](http://img.chunpat.cn/Fpud9LMVf-xDNvznnHnfWusl8N7W)
 
-> 2、域名http://gitlab.zzhpeng.cn:8080访问测试
+> 2、域名http://gitlab.chunpat.cn:8080访问测试
 
-![](http://img.zzhpeng.cn/FuPWVEIWOixgp6wM2vmBfP84_emk)
+![](http://img.chunpat.cn/FuPWVEIWOixgp6wM2vmBfP84_emk)
 
 ### 外网域名访问优化--nginx转发
 ```
 
 server{
     listen 80;
-    server_name  gitlab.zzhpeng.cn;
+    server_name  gitlab.chunpat.cn;
     root /var/www/html/goShares/public; # 该项要修改为你准备存放相关网页的路径
 
     #access_log /dev/null;
     #access_log  /var/log/nginx/nginx.localhost.access.log  main;
-    error_log  /var/log/nginx/wx.zzhpeng.cn.log  warn;
+    error_log  /var/log/nginx/wx.chunpat.cn.log  warn;
 
     location / {
         #resolver 127.0.0.1; #通过配置/etc/dnsmasq.conf，本地解析域名
@@ -103,7 +103,7 @@ server{
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_set_header Host $host;
-        proxy_pass http://gitlab.zzhpeng.cn:8080; #通过域名访问frp服务
+        proxy_pass http://gitlab.chunpat.cn:8080; #通过域名访问frp服务
     }
 
     location = /favicon.ico {
@@ -113,7 +113,7 @@ server{
 }
 ```
 效果图如下：
-![](http://img.zzhpeng.cn/FiasTv3nEaiDaxUK_PcotivGkE9F)
+![](http://img.chunpat.cn/FiasTv3nEaiDaxUK_PcotivGkE9F)
 
 ### 其他优化Q&A
 > Q:本地服务器是宝塔搭建的，已经有nginx环境。不用gitlab的docker镜像安装，用一键安装方法，又会帮你弄一个nginx环境，起冲突。该怎么办？

@@ -133,7 +133,7 @@ final class EmailTest extends TestCase
 
 phpstorm测试结果如下
 ```
-/usr/local/Cellar/php/7.3.9_1/bin/php /Volumes/work/www/zzhpeng/tp6/vendor/phpunit/phpunit/phpunit --no-configuration --filter tests\\EmailTest --test-suffix EmailTest.php /Volumes/work/www/zzhpeng/tp6/tests --teamcity --cache-result-file=/Volumes/work/www/zzhpeng/tp6/.phpunit.result.cache
+/usr/local/Cellar/php/7.3.9_1/bin/php /Volumes/work/www/chunpat/tp6/vendor/phpunit/phpunit/phpunit --no-configuration --filter tests\\EmailTest --test-suffix EmailTest.php /Volumes/work/www/chunpat/tp6/tests --teamcity --cache-result-file=/Volumes/work/www/chunpat/tp6/.phpunit.result.cache
 Testing started at 12:10 AM ...
 PHPUnit 8.5.26 #StandWithUkraine
 

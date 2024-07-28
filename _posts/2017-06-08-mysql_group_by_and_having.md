@@ -8,7 +8,7 @@ tags: mysql
 
 这个sql语句是我分析tpshop2.0.4的登录流程的时候，会检测购物车重复数据问题！
 
-![](http://img.zzhpeng.cn/FuwyoA14FY-Cbc-mhA6qFr6t7EIu)
+![](http://img.chunpat.cn/FuwyoA14FY-Cbc-mhA6qFr6t7EIu)
 这条语句有点不懂，所以查了下某度。http://blog.163.com/hks_blog/blog/static/214926090201382225845920/
 
 这条链接写的挺详细的，并且还有demo，值得参考。

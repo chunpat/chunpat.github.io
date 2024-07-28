@@ -14,7 +14,7 @@ tags: elasticsearch
 vim config/elasticsearch.yml
 ```
 
-![FhoCc45P5ISRy7oFsr5ZQLdhK-3P](http://img.zzhpeng.cn/FqYRhHL4hv5NrrJMumI_wtDGIng1)
+![FhoCc45P5ISRy7oFsr5ZQLdhK-3P](http://img.chunpat.cn/FqYRhHL4hv5NrrJMumI_wtDGIng1)
 
 其他配置：https://www.cnblogs.com/zlslch/p/6419948.html
 
@@ -117,7 +117,7 @@ vm.max_map_count=262144
  
 /**
  * 加属性
- * @author: zzhpeng
+ * @author: chunpat
  * Date: 2019/9/5
  * @param array $param
  */
@@ -128,7 +128,7 @@ public static function addCommonParams(array &$param){
 
  /**
  * 创建索引
- * @author: zzhpeng
+ * @author: chunpat
  * Date: 2019/9/5
  * @param string $index
  * @param array  $param
@@ -189,7 +189,7 @@ public static function setIndex(string $index, array $param = []){
 ```
 /**
  * 删除索引
- * @author: zzhpeng
+ * @author: chunpat
  * Date: 2019/9/5
  * @param string $index
  *
@@ -210,7 +210,7 @@ public static function deleteIndex(string $index){
 ```
 /**
  * 查询索引
- * @author: zzhpeng
+ * @author: chunpat
  * Date: 2019/9/5
  * @param string $index
  *
@@ -235,7 +235,7 @@ static function getIndex(string $index){
 ```
 /**
  * 建立文档
- * @author: zzhpeng
+ * @author: chunpat
  * Date: 2019/9/5
  * @param string $index
  * @param array  $documents
@@ -269,7 +269,7 @@ static function setDocoments(string $index,array $documents){
 
 /**
  * 获取文档
- * @author: zzhpeng
+ * @author: chunpat
  * Date: 2019/9/5
  * @param $index
  * @param $id
@@ -332,7 +332,7 @@ static function searchDocuments($index,array $body){
 
 ### 查看 elasticsearch 使用情况
 curl -X GET "http://192.168.199.254:9200/_cat/indices?v"
-![](http://img.zzhpeng.cn/Fo3ZNz38wF3ij-z9_kAZ0RAAwCzJ)
+![](http://img.chunpat.cn/Fo3ZNz38wF3ij-z9_kAZ0RAAwCzJ)
 
 ### 磁盘容量超过90%会不给链接操作
 报错信息

@@ -45,7 +45,7 @@ https://help.aliyun.com/document_detail/111738.html?spm=a2c4g.11186623.4.1.74dc7
 ## 腾讯云
 
 重装系统扩容
-![](http://img.zzhpeng.cn/FtGTBTeftcin55OCyU8g-J2p_Q4J)
+![](http://img.chunpat.cn/FtGTBTeftcin55OCyU8g-J2p_Q4J)
 
 内容地址：https://cloud.tencent.com/document/product/362/32539
 

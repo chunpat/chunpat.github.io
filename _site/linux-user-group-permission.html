@@ -107,7 +107,7 @@
                     </div>
                     <h1>gitlab出现502问题</h1>
                     
-                    <span class="meta">Posted by zzhpeng on September 22, 2019</span>
+                    <span class="meta">Posted by chunpat on September 22, 2019</span>
                 </div>
             </div>
         </div>
@@ -189,17 +189,17 @@ server
 </code></pre></div></div>
 
 <p>然后报出了502，查看nginx的error日志，提示权限问题。
-<img src="http://img.zzhpeng.cn/Fkn0XGjtnpSN-0bTrMNeFeWo3wxr" alt="" /></p>
+<img src="http://img.chunpat.cn/Fkn0XGjtnpSN-0bTrMNeFeWo3wxr" alt="" /></p>
 
 <h3 id="解决过程">解决过程</h3>
 <p>看到/etc/gitlab/gitlab.rb文件有个说明，当不开启内部的nginx的时候，需要加一个外部的用户。这里的外部用户
 即是指宝塔的nginx开启的用户www。</p>
 
 <p>1、查看nginx的开启用户
-<img src="http://img.zzhpeng.cn/FiqxjiPd1NGzUVLRyb9XmszwI9TE" alt="" /></p>
+<img src="http://img.chunpat.cn/FiqxjiPd1NGzUVLRyb9XmszwI9TE" alt="" /></p>
 
 <p>2、修改/etc/gitlab/gitlab.rb
-<img src="http://img.zzhpeng.cn/Fp5IQkW4PcGC4O_-kF_oelDWhQJF" alt="" /></p>
+<img src="http://img.chunpat.cn/Fp5IQkW4PcGC4O_-kF_oelDWhQJF" alt="" /></p>
 
 <p>应用修改的配置</p>
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code># 重新加载配置
@@ -230,12 +230,12 @@ sudo gitlab-ctl restart
 
 <p>查看socket文件权限</p>
 
-<p><img src="http://img.zzhpeng.cn/FgyLa8Dd6ArOr3F--bvO2qDsoInw" alt="" /></p>
+<p><img src="http://img.chunpat.cn/FgyLa8Dd6ArOr3F--bvO2qDsoInw" alt="" /></p>
 
 
                 <hr>
 
-                <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/4.0/80x15.png" /></a><br />本作品采用<a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/">CC BY-NC-ND 4.0</a>进行许可。转载，请注明原作者 Zzhpeng 及本文源链接。
+                <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/4.0/80x15.png" /></a><br />本作品采用<a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/">CC BY-NC-ND 4.0</a>进行许可。转载，请注明原作者 chunpat 及本文源链接。
 
                 <hr>
 
@@ -397,7 +397,7 @@ sudo gitlab-ctl restart
 
                 </ul>
                 <p class="copyright text-muted">
-                    &copy; 2011~2022 zzhpeng ♪ Powered by Jekyll. <a href="https://beian.miit.gov.cn/" target="_blank">粤ICP备17053344号</a>
+                    &copy; 2011~2024 chunpat ♪ Powered by Jekyll. <a href="https://beian.miit.gov.cn/" target="_blank">粤ICP备17053344号</a>
                 </p>
             </div>
         </div>

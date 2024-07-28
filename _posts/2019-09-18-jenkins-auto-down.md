@@ -10,12 +10,12 @@ tags: jenkins
 启动命令是service jenkins start。
 
 使用lsof -i:8080查看端口使用情况：
-![](http://img.zzhpeng.cn/FhgyPfOl3dr5UBcyGy0iMjavJ_3c)
+![](http://img.chunpat.cn/FhgyPfOl3dr5UBcyGy0iMjavJ_3c)
 
 ## 解决路程
 > 尝试用另外一种方法启动,但还是使用旧的端口问题。
 
-![](http://img.zzhpeng.cn/Fiy7cWxbK29pDZZdUnqaosW5BDfC)
+![](http://img.chunpat.cn/Fiy7cWxbK29pDZZdUnqaosW5BDfC)
 
 搜索了下，找到了可以直接在启动后面加参数，改使用端口。
 

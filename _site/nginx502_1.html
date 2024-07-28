@@ -107,7 +107,7 @@
                     </div>
                     <h1>生产环境出现nginx502,导致十来分钟系统奔溃（Tp5.1的session bug）</h1>
                     
-                    <span class="meta">Posted by zzhpeng on November 25, 2019</span>
+                    <span class="meta">Posted by chunpat on November 25, 2019</span>
                 </div>
             </div>
         </div>
@@ -163,7 +163,7 @@ slowlog = var/log/slow.log
 
 <h3 id="查看php-fpmlog-部分内容">查看php-fpm.log 部分内容</h3>
 
-<p><img src="http://img.zzhpeng.cn/Fu0ZUUtbHNQ0b4nh7d2QN4_LJvtB" alt="Fu0ZUUtbHNQ0b4nh7d2QN4_LJvtB" /></p>
+<p><img src="http://img.chunpat.cn/Fu0ZUUtbHNQ0b4nh7d2QN4_LJvtB" alt="Fu0ZUUtbHNQ0b4nh7d2QN4_LJvtB" /></p>
 
 <p>这张图显示，有两部分内容：</p>
 
@@ -184,20 +184,20 @@ slowlog = var/log/slow.log
 
 <h3 id="查看slowlog-部分内容">查看slow.log 部分内容</h3>
 
-<p><img src="http://img.zzhpeng.cn/FnNWSnsLDg0mjBKt2x4ARGIBrlk6" alt="Fu0ZUUtbHNQ0b4nh7d2QN4_LJvtB" /></p>
+<p><img src="http://img.chunpat.cn/FnNWSnsLDg0mjBKt2x4ARGIBrlk6" alt="Fu0ZUUtbHNQ0b4nh7d2QN4_LJvtB" /></p>
 
 <p>这张图显示，请求处理只到了框架初始代码和权限验证那块，并没用实际到达业务代码程序。可排除sql慢查询或者
 业务代码问题。</p>
 
 <h3 id="查看框架的tp51-log-部分内容">查看框架的TP5.1 log 部分内容</h3>
 
-<p><img src="http://img.zzhpeng.cn/FjPr7FPhs1lf91PR__DOZIN6ZRzO" alt="Fu0ZUUtbHNQ0b4nh7d2QN4_LJvtB" /></p>
+<p><img src="http://img.chunpat.cn/FjPr7FPhs1lf91PR__DOZIN6ZRzO" alt="Fu0ZUUtbHNQ0b4nh7d2QN4_LJvtB" /></p>
 
 <p>这张图显示，请求处理还没到csrf验证层就阻塞了!!!</p>
 
 <h3 id="面板进程情况">面板进程情况</h3>
 
-<p><img src="http://img.zzhpeng.cn/FnfJPvsSClmAGAbKGbCP2bhcVLI7" alt="FnfJPvsSClmAGAbKGbCP2bhcVLI7" /></p>
+<p><img src="http://img.chunpat.cn/FnfJPvsSClmAGAbKGbCP2bhcVLI7" alt="FnfJPvsSClmAGAbKGbCP2bhcVLI7" /></p>
 
 <p>这张图显示是那个时间段抛出502宕机10来分钟php-fpm记录下来的status。数据显示，请求数量有53441,但是活跃进程数只有1个，
 并且产生了450个慢查询数量。</p>
@@ -273,17 +273,17 @@ request_terminate_timeout = 20
 </code></pre></div></div>
 
 <h3 id="火狐浏览器">火狐浏览器</h3>
-<p><img src="http://img.zzhpeng.cn/Fi30BAxREfNBpYLRLMXJrS_vCzop" alt="" /></p>
+<p><img src="http://img.chunpat.cn/Fi30BAxREfNBpYLRLMXJrS_vCzop" alt="" /></p>
 
 <p>火狐浏览器测试，偶尔会出现刚开始返回的session_id不一致问题同时响应的时间a,b,c三个不一样参数请求响应都在5s多一点，
 不过后面返回的session_id就一致了，同时响应的时间也变为了15s+了。</p>
 
 <h3 id="chrome浏览器">chrome浏览器</h3>
-<p><img src="http://img.zzhpeng.cn/FvVEgokNtB95OjJRUcH21E2BCvCY" alt="" />
+<p><img src="http://img.chunpat.cn/FvVEgokNtB95OjJRUcH21E2BCvCY" alt="" />
 chrome浏览器刚开始返回的session_id就一致，但是耗时较长，后面趋于稳定的15s+。</p>
 
 <h3 id="将测试code放到laravel62测试">将测试code放到Laravel6.2测试。</h3>
-<p><img src="http://img.zzhpeng.cn/Fn6BmTtjJNXJgOyGdGe74yt10cpd" alt="" /></p>
+<p><img src="http://img.chunpat.cn/Fn6BmTtjJNXJgOyGdGe74yt10cpd" alt="" /></p>
 
 <p>稳定输出5s+，那就是TP5.1的session出现bug了！！！</p>
 
@@ -292,11 +292,11 @@ chrome浏览器刚开始返回的session_id就一致，但是耗时较长，后�
 查看TP5.1源码：</p>
 
 <p>1、
-<img src="http://img.zzhpeng.cn/FqC_5ivD1cFKjx2A06w6gALb4pzo" alt="" />
+<img src="http://img.chunpat.cn/FqC_5ivD1cFKjx2A06w6gALb4pzo" alt="" />
 2、
-<img src="http://img.zzhpeng.cn/FsD9JQa5VlMSAhK-ijYmwEMx0t01" alt="" />
+<img src="http://img.chunpat.cn/FsD9JQa5VlMSAhK-ijYmwEMx0t01" alt="" />
 3、
-<img src="http://img.zzhpeng.cn/FjgcLLdJglPrpHiWnnbjfIyQMit2" alt="" /></p>
+<img src="http://img.chunpat.cn/FjgcLLdJglPrpHiWnnbjfIyQMit2" alt="" /></p>
 
 <p>还真是TP5.1没close，这bug就很容易让系统处于502状态，竟然没人遇到过并且修复吗？反映并且提交issue修复！看了下最新的TP6,借鉴Laravel的Session、Cookies组件化了
 TP的这个bug也就不存在了。</p>
@@ -318,7 +318,7 @@ TP的这个bug也就不存在了。</p>
 </code></pre></div></div>
 
 <p>修改后，响应时间正常了
-<img src="http://img.zzhpeng.cn/FiRwyQzfDp9ZYp8EzPCH6GCWXEb7" alt="" /></p>
+<img src="http://img.chunpat.cn/FiRwyQzfDp9ZYp8EzPCH6GCWXEb7" alt="" /></p>
 
 <h2 id="注意与疑惑">注意与疑惑</h2>
 <h3 id="注意">注意</h3>
@@ -342,7 +342,7 @@ https://www.cnblogs.com/zenghansen/p/4647004.html</p>
 
                 <hr>
 
-                <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/4.0/80x15.png" /></a><br />本作品采用<a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/">CC BY-NC-ND 4.0</a>进行许可。转载，请注明原作者 Zzhpeng 及本文源链接。
+                <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/4.0/80x15.png" /></a><br />本作品采用<a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/">CC BY-NC-ND 4.0</a>进行许可。转载，请注明原作者 chunpat 及本文源链接。
 
                 <hr>
 
@@ -504,7 +504,7 @@ https://www.cnblogs.com/zenghansen/p/4647004.html</p>
 
                 </ul>
                 <p class="copyright text-muted">
-                    &copy; 2011~2022 zzhpeng ♪ Powered by Jekyll. <a href="https://beian.miit.gov.cn/" target="_blank">粤ICP备17053344号</a>
+                    &copy; 2011~2024 chunpat ♪ Powered by Jekyll. <a href="https://beian.miit.gov.cn/" target="_blank">粤ICP备17053344号</a>
                 </p>
             </div>
         </div>

@@ -12,7 +12,7 @@ tags: docker
 # 虚拟机与docker对比
 [What is a Container | Docker](https://www.docker.com/resources/what-container)
 
-![FlUbUkJUdU9WSBqD9IBYzHZ3gkSp](http://img.zzhpeng.cn/FlUbUkJUdU9WSBqD9IBYzHZ3gkSp)
+![FlUbUkJUdU9WSBqD9IBYzHZ3gkSp](http://img.chunpat.cn/FlUbUkJUdU9WSBqD9IBYzHZ3gkSp)
 # docker-ce 和 docker-ee
 ### About Docker CE（Community Edition）
 Docker Community Edition (CE) is ideal for developers and small teams looking to get started with Docker and experimenting with container-based apps. Docker CE has three types of update channels, stable, test, and nightly:
@@ -29,7 +29,7 @@ Docker Enterprise is designed for enterprise development as well as IT teams who
 
 ### Docker CE 和 Docker EE 对比
 
-![FrnYjbS3hXBqxik_zQFpF-SiH-c5](http://img.zzhpeng.cn/FrnYjbS3hXBqxik_zQFpF-SiH-c5)
+![FrnYjbS3hXBqxik_zQFpF-SiH-c5](http://img.chunpat.cn/FrnYjbS3hXBqxik_zQFpF-SiH-c5)
 
 
 # docker安装
@@ -47,7 +47,7 @@ docker-compose 镜像组合技术 组合成服务service
 * 1、docker build --rm --tag nodejs_test .  （基于官网node:11-alpine镜像，构建镜像）
 * 2、docker run -it --rm --name node_test -v "$PWD/store_system/":/usr/src/app -w /usr/src/app nodejs_test npm run dev
 
-![Frlszrq6fwzOO7WJjCdeIaEB80rG](http://img.zzhpeng.cn/Frlszrq6fwzOO7WJjCdeIaEB80rG)
+![Frlszrq6fwzOO7WJjCdeIaEB80rG](http://img.chunpat.cn/Frlszrq6fwzOO7WJjCdeIaEB80rG)
 
 ### 案例2，构建一小时后端php&nginx开发环境
 php 相关资料 如何加扩展 [Docker Hub](https://hub.docker.com/_/php) 
@@ -64,7 +64,7 @@ php 相关资料 如何加扩展 [Docker Hub](https://hub.docker.com/_/php)
 
 ### 案例3，构建python开发环境
 scrapy爬虫项目 [codePool/python/autohome_spider at master · LittleLory/codePool · GitHub](https://github.com/LittleLory/codePool/tree/master/python/autohome_spider)
-![Fg7kWIhRoHX5GSrOs_Jl1VDXWla8](http://img.zzhpeng.cn/Fg7kWIhRoHX5GSrOs_Jl1VDXWla8)
+![Fg7kWIhRoHX5GSrOs_Jl1VDXWla8](http://img.chunpat.cn/Fg7kWIhRoHX5GSrOs_Jl1VDXWla8)
 
 
 
@@ -89,7 +89,7 @@ docker network create --subnet=172.18.0.0/16 net1
 [Use bridge networks | Docker Documentation](https://docs.docker.com/network/bridge/)
 
 ### docker-compose下的设置
-![FgW7P1v9FCatiIQMo-4xmqOx26Gm](http://img.zzhpeng.cn/FgW7P1v9FCatiIQMo-4xmqOx26Gm)
+![FgW7P1v9FCatiIQMo-4xmqOx26Gm](http://img.chunpat.cn/FgW7P1v9FCatiIQMo-4xmqOx26Gm)
 
 参考文献
 <https://github.com/buxiaomo/MarkdownBooks/blob/master/Docker%E5%85%A5%E9%97%A8%E7%BA%A7%E7%AE%80%E6%98%93%E6%89%8B%E5%86%8C.md>

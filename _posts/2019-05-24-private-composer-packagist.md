@@ -38,7 +38,7 @@ touch satis.json
 ```
 
 {
-  "name": "zzhpeng packages",
+  "name": "chunpat packages",
   
   "homepage": "http://packages.example.org", 
   
@@ -53,7 +53,7 @@ touch satis.json
     }
   ],
   "require": {
-    "zzhpeng/export": "dev-master",
+    "chunpat/export": "dev-master",
     "topthink/framework": "5.1.*"
   }
 }

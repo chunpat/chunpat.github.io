@@ -77,17 +77,17 @@ server
 ```
 
 然后报出了502，查看nginx的error日志，提示权限问题。
-![](http://img.zzhpeng.cn/Fkn0XGjtnpSN-0bTrMNeFeWo3wxr)
+![](http://img.chunpat.cn/Fkn0XGjtnpSN-0bTrMNeFeWo3wxr)
 
 ### 解决过程
 看到/etc/gitlab/gitlab.rb文件有个说明，当不开启内部的nginx的时候，需要加一个外部的用户。这里的外部用户
 即是指宝塔的nginx开启的用户www。
 
 1、查看nginx的开启用户
-![](http://img.zzhpeng.cn/FiqxjiPd1NGzUVLRyb9XmszwI9TE)
+![](http://img.chunpat.cn/FiqxjiPd1NGzUVLRyb9XmszwI9TE)
 
 2、修改/etc/gitlab/gitlab.rb
-![](http://img.zzhpeng.cn/Fp5IQkW4PcGC4O_-kF_oelDWhQJF)
+![](http://img.chunpat.cn/Fp5IQkW4PcGC4O_-kF_oelDWhQJF)
 
 应用修改的配置
 ```
@@ -120,4 +120,4 @@ cat /etc/group
 
 查看socket文件权限
 
-![](http://img.zzhpeng.cn/FgyLa8Dd6ArOr3F--bvO2qDsoInw)
+![](http://img.chunpat.cn/FgyLa8Dd6ArOr3F--bvO2qDsoInw)

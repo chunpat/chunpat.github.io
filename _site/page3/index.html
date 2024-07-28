@@ -104,6 +104,32 @@
 		<div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
 			
 <div class="post-preview">
+    <a href="/frp-ssl.html">
+        <h2 class="post-title">            
+            局域网Web服务配置frp穿透与SSL证书
+        </h2>
+        
+        <div class="post-content-preview">
+            搭建frp穿透结构图与ssl思路
+
+  结构图
+
+
+
+
+
+  SSL思路
+
+
+Frp(https://github.com/fatedier/frp)有提供ssl设置。但是为了方便管理，把证书设置都放在nginx中。然后外网frp server到局域网都是用的是http type服务而不是ht...
+        </div>
+    </a>
+    <p class="post-meta">Posted by chunpat on February 11, 2020</p>
+</div>
+
+<hr>
+
+<div class="post-preview">
     <a href="/mycat-introduction.html">
         <h2 class="post-title">            
             mycat 数据库分库分表中间件学习
@@ -120,7 +146,7 @@
 mycat是基于java的，需要环境依赖...
         </div>
     </a>
-    <p class="post-meta">Posted by zzhpeng on January 11, 2020</p>
+    <p class="post-meta">Posted by chunpat on January 11, 2020</p>
 </div>
 
 <hr>
@@ -140,7 +166,7 @@ mycat是基于java的，需要环境依赖...
 sudo iptables -I INPUT -p tcp --dport 443 -m connlimit --conn...
         </div>
     </a>
-    <p class="post-meta">Posted by zzhpeng on January 6, 2020</p>
+    <p class="post-meta">Posted by chunpat on January 6, 2020</p>
 </div>
 
 <hr>
@@ -163,7 +189,7 @@ nginx抛出502，证明是它的反向代理出错，这个代理php-cgi出了�
 查看php-fpm 日志，...
         </div>
     </a>
-    <p class="post-meta">Posted by zzhpeng on December 26, 2019</p>
+    <p class="post-meta">Posted by chunpat on December 26, 2019</p>
 </div>
 
 <hr>
@@ -182,7 +208,7 @@ nginx抛出502，证明是它的反向代理出错，这个代理php-cgi出了�
 nginx抛出502,证明是它的反向代理出错，这个代理php-cgi挂掉了，我用的是php-fpm，...
         </div>
     </a>
-    <p class="post-meta">Posted by zzhpeng on November 25, 2019</p>
+    <p class="post-meta">Posted by chunpat on November 25, 2019</p>
 </div>
 
 <hr>
@@ -201,7 +227,7 @@ nginx抛出502,证明是它的反向代理出错，这个代理php-cgi挂掉了�
 出库数量，冻结数frozen_num - 出库数量。...
         </div>
     </a>
-    <p class="post-meta">Posted by zzhpeng on November 2, 2019</p>
+    <p class="post-meta">Posted by chunpat on November 2, 2019</p>
 </div>
 
 <hr>
@@ -221,7 +247,7 @@ nginx抛出502,证明是它的反向代理出错，这个代理php-cgi挂掉了�
 mysql&gt;show variables like '%max_a...
         </div>
     </a>
-    <p class="post-meta">Posted by zzhpeng on October 7, 2019</p>
+    <p class="post-meta">Posted by chunpat on October 7, 2019</p>
 </div>
 
 <hr>
@@ -241,27 +267,7 @@ mysql&gt;show variables like '%max_a...
 原本的源是github的，由于墙的问题可能会有点慢...
         </div>
     </a>
-    <p class="post-meta">Posted by zzhpeng on September 30, 2019</p>
-</div>
-
-<hr>
-
-<div class="post-preview">
-    <a href="/linux-user-group-permission.html">
-        <h2 class="post-title">            
-            gitlab出现502问题
-        </h2>
-        
-        <div class="post-content-preview">
-            问题概述
-上周，公司内部服务器重启，自搭建的gitlab仓库返回502。在这里先说明gitlab的搭建情况，用了宝塔管理，已经有了
-nginx，所以不用gitlab自带的nginx服务，修改过程如下。
-
-1、修改配置文件，禁用内嵌 nginx
-sudo vim /etc/gitlab/gitl...
-        </div>
-    </a>
-    <p class="post-meta">Posted by zzhpeng on September 22, 2019</p>
+    <p class="post-meta">Posted by chunpat on September 30, 2019</p>
 </div>
 
 <hr>
@@ -395,7 +401,7 @@ sudo vim /etc/gitlab/gitl...
 
                 </ul>
                 <p class="copyright text-muted">
-                    &copy; 2011~2022 zzhpeng ♪ Powered by Jekyll. <a href="https://beian.miit.gov.cn/" target="_blank">粤ICP备17053344号</a>
+                    &copy; 2011~2024 chunpat ♪ Powered by Jekyll. <a href="https://beian.miit.gov.cn/" target="_blank">粤ICP备17053344号</a>
                 </p>
             </div>
         </div>

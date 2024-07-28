@@ -7,6 +7,79 @@
 		<atom:link href="/" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>github个人首页自动展示你最近写的blog文章</title>
+				<description>&lt;h2 id=&quot;起因&quot;&gt;起因&lt;/h2&gt;
+
+&lt;p&gt;看到篇文章，可以将自己的Blog最近的几篇文章自动同步在github自己的首页上。如下面：
+&lt;img src=&quot;https://user-images.githubusercontent.com/8397274/88047382-29b8b280-cb6f-11ea-9efb-2af2b10f3e0c.png&quot; alt=&quot;案例1&quot; /&gt;
+感觉挺有意思就弄起来了。&lt;/p&gt;
+
+&lt;h2 id=&quot;动手&quot;&gt;动手&lt;/h2&gt;
+
+&lt;p&gt;原理是开发者基于 GitHub Actions 开发新的小功能。我这里用到一个开源项目叫 &lt;a href=&quot;https://github.com/gautamkrishnar/blog-post-workflow&quot;&gt;blog-post-workflow&lt;/a&gt;，它可以通过
+RSS（订阅源）来获取到博客的最新文章。以下是实现的步骤：&lt;/p&gt;
+
+&lt;p&gt;1.将以下部分添加到您的 README.md 文件中，您可以指定您想要的任何标题。只需确保在自述文件中使用&lt;!-- BLOG-POST-LIST:START --&gt;&lt;!-- BLOG-POST-LIST:END --&gt; 即可。工作流程将用实际的
+博客文章列表替换此评论：&lt;/p&gt;
+
+&lt;div class=&quot;language-md highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gh&quot;&gt;# Blog posts (可修改这部分)&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;&amp;lt;!-- BLOG-POST-LIST:START --&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;&amp;lt;!-- BLOG-POST-LIST:END --&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;2、打开&lt;a href=&quot;https://github.com/yourname/yourname/actions&quot;&gt;https://github.com/YOUR_NAME/YOUR_NAME/actions&lt;/a&gt;，建个文件 new workflow。&lt;/p&gt;
+
+&lt;p&gt;3、新建一个blog-post-workflow.yml文件，复制下面的内容。&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;language-angular2html&quot;&gt;name: Latest blog post workflow
+on:
+  schedule: # Run workflow automatically
+    - cron: '0 * * * *' # Runs every hour, on the hour
+  workflow_dispatch: # Run workflow manually (without waiting for the cron to be called), through the GitHub Actions Workflow page directly
+permissions:
+  contents: write # To write the generated contents to the readme
+
+jobs:
+  update-readme-with-blog:
+    name: Update this repo's README with latest blog posts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Pull in dev.to posts
+        uses: gautamkrishnar/blog-post-workflow@v1
+        with:
+          feed_list: &quot;https://dev.to/feed/gautamkrishnar,https://www.gautamkrishnar.com/feed/&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;4、修改上面的feed_list的url为你想要的Blog的RSS链接，我的Blog是jekyll搭建的，有RSS的功能，所以填了http://chunpat.com/feed.xml。&lt;/p&gt;
+
+&lt;p&gt;5、查看 GitHub Actions。&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;img/2024-07-28-github-readme-add-post/github-page.jpg&quot; alt=&quot;github-page&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;6、效果&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;img/2024-07-28-github-readme-add-post/myhome.jpg&quot; alt=&quot;github-page&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;迭代&quot;&gt;迭代&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;2024年07月28日 14:50:54 初稿&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;参考&quot;&gt;参考&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;1、&lt;a href=&quot;https://shenxianpeng.github.io/2021/11/special-repository/&quot;&gt;GitHub Actions 还能这么玩？自动将发布的博客文章更新到 GitHub 个人主页&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;2、&lt;a href=&quot;https://github.com/gautamkrishnar/blog-post-workflow&quot;&gt;https://github.com/gautamkrishnar/blog-post-workflow&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+				<pubDate>Sun, 28 Jul 2024 00:00:00 +0800</pubDate>
+				<link>/github-readme-add-post.html</link>
+				<guid isPermaLink="true">/github-readme-add-post.html</guid>
+			</item>
+		
+			<item>
 				<title>避免死循环-记一次问题排查</title>
 				<description>&lt;h2 id=&quot;起因&quot;&gt;起因&lt;/h2&gt;
 
@@ -45,7 +118,7 @@
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;这里我梳理下，简易流程图如下：
-&lt;img src=&quot;https://img.zzhpeng.cn/queue%400.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+&lt;img src=&quot;https://img.chunpat.cn/queue%400.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;程序挂了，任务不跑，第一开始没思路，临时解决的是重启，但是执行一段时间又不行，特别是高峰的时候很绝望。然后想的是性能问题，是不是数据库介质不行。
 开始查看数据库是不是产生了死锁了，删除锁。查看锁的语句如下：&lt;/p&gt;
@@ -58,7 +131,7 @@ kill 738178711
 &lt;p&gt;然后又可以了。又过了一段时间，还是不行。只能重新排查，突然发现在重启队列的时候，查看数据库锁看到有条没读锁的sql，一直挂着，然后查看业务代码
 ，发现这不就是查看据库数据是否重复数据的sql语句吗？，这里产生了死循环，效果就会出现下面流程图：&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;https://img.zzhpeng.cn/queue%401.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;https://img.chunpat.cn/queue%401.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;由于框架队列默认超时机制是60s，超过了就会重新执行，直到达到一定次数，程序就会die。这里面有日志，但是没留意这个超时异常中断的记录。&lt;/p&gt;
 
@@ -608,7 +681,7 @@ final class EmailTest extends TestCase
 &lt;/blockquote&gt;
 
 &lt;p&gt;phpstorm测试结果如下&lt;/p&gt;
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;/usr/local/Cellar/php/7.3.9_1/bin/php /Volumes/work/www/zzhpeng/tp6/vendor/phpunit/phpunit/phpunit --no-configuration --filter tests\\EmailTest --test-suffix EmailTest.php /Volumes/work/www/zzhpeng/tp6/tests --teamcity --cache-result-file=/Volumes/work/www/zzhpeng/tp6/.phpunit.result.cache
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;/usr/local/Cellar/php/7.3.9_1/bin/php /Volumes/work/www/chunpat/tp6/vendor/phpunit/phpunit/phpunit --no-configuration --filter tests\\EmailTest --test-suffix EmailTest.php /Volumes/work/www/chunpat/tp6/tests --teamcity --cache-result-file=/Volumes/work/www/chunpat/tp6/.phpunit.result.cache
 Testing started at 12:10 AM ...
 PHPUnit 8.5.26 #StandWithUkraine
 
@@ -1620,7 +1693,7 @@ upstream gitlab-workhorse {
 &lt;p&gt;搜索Metamask，看到狐狸，点击第一个进入，然后点击按钮 ‘添加到Chrome’。&lt;/p&gt;
 
 &lt;p&gt;安装成功后，如下图；
-&lt;img src=&quot;http://img.zzhpeng.cn/FlL0LgTjt2miSjMcqfVaFaSJAVOx&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+&lt;img src=&quot;http://img.chunpat.cn/FlL0LgTjt2miSjMcqfVaFaSJAVOx&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;然后就是新建钱包或者导入其他钱包的&lt;strong&gt;私钥（私钥是命，要保管好）。&lt;/strong&gt;&lt;/p&gt;
 
@@ -1629,19 +1702,19 @@ https://academy.binance.com/zh/articles/connecting-metamask-to-binance-smart-cha
 
 &lt;p&gt;创建好后，基于bsc链加 zoon 合约地址 0x9d173e6c594f479b4d47001f8e6a95a7adda42bc&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;http://img.zzhpeng.cn/FhttIQe6deo38nATVqv-5H-JgxhM&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://img.chunpat.cn/FhttIQe6deo38nATVqv-5H-JgxhM&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
 &lt;h2 id=&quot;4购买zoon代币买宠物&quot;&gt;4、购买zoon代币，买宠物&lt;/h2&gt;
 
 &lt;p&gt;查看代币的行情与购买：https://www.dextools.io/app/pancakeswap/pair-explorer/0xdf7646371fd995dfe3f9665e6382b40cd008e889&lt;/p&gt;
 
 &lt;p&gt;购买的话，可以用上面的网址，链接小狐狸，bnb购买（Binance网址：http://accounts.binancezh.cz/zh-CN/register?ref=91791353）, 如下图
-&lt;img src=&quot;http://img.zzhpeng.cn/FlcwLZQ4h8cQWmj2Ad3ZdeZ-O8Ig&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+&lt;img src=&quot;http://img.chunpat.cn/FlcwLZQ4h8cQWmj2Ad3ZdeZ-O8Ig&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;进官网：https://app.cryptozoon.io/&lt;/p&gt;
 
 &lt;p&gt;用钱包连接登录，登录后，如下图：
-&lt;img src=&quot;http://img.zzhpeng.cn/Fla79qXsoq5-9J6QD_SMZTsPrs2D&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+&lt;img src=&quot;http://img.chunpat.cn/Fla79qXsoq5-9J6QD_SMZTsPrs2D&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;购买宠物可以去市场买。&lt;/p&gt;
 
@@ -1781,239 +1854,6 @@ https://academy.binance.com/zh/articles/connecting-metamask-to-binance-smart-cha
 				<pubDate>Mon, 19 Apr 2021 00:00:00 +0800</pubDate>
 				<link>/mysql-replace.html</link>
 				<guid isPermaLink="true">/mysql-replace.html</guid>
-			</item>
-		
-			<item>
-				<title>关于TCP</title>
-				<description>&lt;h2 id=&quot;tcp-简介&quot;&gt;TCP 简介&lt;/h2&gt;
-
-&lt;p&gt;传输控制协议（TCP，Transmission Control Protocol）,是一种面向连接的，可靠的，基于字节流的传输层通讯协议。&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://img.zzhpeng.cn/FpwQJ6gLG0ZnS8oh83PpPVDyEPxN&quot; alt=&quot;FpwQJ6gLG0ZnS8oh83PpPVDyEPxN&quot; /&gt;&lt;/p&gt;
-
-&lt;h2 id=&quot;tcp-三次握手常见的问题&quot;&gt;TCP 三次握手常见的问题&lt;/h2&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;1、连接拒绝 Operation now in progress （前提tcp_abort_on_overflow=0）&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;丢包: 路由器丢包&lt;/li&gt;
-  &lt;li&gt;错误ip：ip错误、port服务端应用没用&lt;/li&gt;
-  &lt;li&gt;backlog满了：  第三次握手的时候把建立好的连接放到全连接backlog队列里面，backlog长度有限,此参数将决定最多同时有多少个等待 &lt;strong&gt;accept&lt;/strong&gt; 的连接。&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;2、连接被重置 Connection reset by peer （前提tcp_abort_on_overflow=1）&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;backlog满了：客户端发送SYN，服务端返回Rst让客户端重连&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;3、SYN FLOOD&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;客户端第三次ACK不发送，半连接backlog满了&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;查看backlog满，服务端阻塞&lt;/strong&gt;&lt;/p&gt;
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;netstat -s |grep ‘times the listen queue of a socket overflowed’
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h2 id=&quot;tcp-四次挥手常见的问题&quot;&gt;TCP 四次挥手常见的问题&lt;/h2&gt;
-
-&lt;p&gt;主要是客户端的TIME WAIT和服务端的CLOSE WAIT引起&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;四元组&lt;/strong&gt;，(客户端ip + 客户端port + 服务端ip + 服务端port) 确认一个链接&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;1、持续一分钟，包的存活时间&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;挥手第四个步骤，服务端没有收到客户端的ACK，过一段时间会重传FIN，客户端的TIME WAIT阶段会存留一分钟。&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;2、Cannot assign requested address&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;客户端端口用光了，主要是客户端一分钟TIME WAIT占用端口&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;php-fpm经常会遇到，因为是用完即释放&lt;/strong&gt;&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;3、Address already in use&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;重启服务，客户端TIME WAIT占用端口。解决：设置so REUSEADDR （swoole 默认开启）&lt;/p&gt;
-
-&lt;p&gt;其他解决办法&lt;/p&gt;
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;net.ipv4.tcp_timestamps=1
-net.ipv4.tcp_tw_reuse=1
-net.ipv4.ip_local_port_range调大
-不要开启net.ipv4.tcp_tw_recycle=1
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;4、大量 CLOSE WAIT 链接占用服务端资源&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;服务端应用close方法出现异常，没有调用close方法。&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;扩展&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;swoole server SWOOLE_PROCESS模式close方法决定是否释放close
-swoole server SWOOLE_BASE模式 会自动调用底层FIN close释放，不会存在大量close wait&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$serv = new Swoole\Server(&quot;0.0.0.0&quot;, 9501, SWOOLE_BASE); //SWOOLE_PROCESS
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h2 id=&quot;tcp-短连接问题&quot;&gt;TCP 短连接问题&lt;/h2&gt;
-
-&lt;p&gt;短连接顾名思义：用完即释放&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;1、多余传输&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;需要握手，挥手&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;2、TCP慢启动&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;TCP建立连接需要网络评估&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;3、握手阶段丢包&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;网络抖动，如发生在握手阶段重传耗秒级别，而在连接阶段重传在毫秒级别。&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;4、对连接的占用约等于长连接&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;占用资源和长连接差不多&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;优点&lt;/strong&gt;&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;1、简单&lt;/li&gt;
-  &lt;li&gt;2、理论上连接数相对少&lt;/li&gt;
-  &lt;li&gt;3、无状态对LB负载均衡友好，效果好（长连接不释放连接一直占用，分发负载不了）&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&quot;tcp-长连接的常见问题&quot;&gt;TCP 长连接的常见问题&lt;/h2&gt;
-
-&lt;p&gt;举例图：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://img.zzhpeng.cn/FunbR-4EnUkQ12hoYtV2KXFfgxbF&quot; alt=&quot;FunbR-4EnUkQ12hoYtV2KXFfgxbF&quot; /&gt;&lt;/p&gt;
-
-&lt;h3 id=&quot;1链接失效&quot;&gt;1、链接失效&lt;/h3&gt;
-
-&lt;p&gt;长连接应用层表现：&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;Redis ：timeout(Error while reading line from the server)&lt;/li&gt;
-  &lt;li&gt;Mysql: wait timeout &amp;amp; interactive_timeout(has gone away)&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;&lt;strong&gt;解决办法：&lt;/strong&gt;&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;1、用的时候重试，但是存在以下问题&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;1、server 断开后占用连接资源（内存、端口、句柄），被动断开close_wait永远不会消失&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;举例：以上图为例，服务端超时没收到东西，发送FIN到php客户端，php 底层tcp回ACK确认收到。但是长连接处于被动状态不发FIN到服务端主动关闭链接。
-这样服务端就处于在FIN_WAIT2、客户端在CLOSE_WAIT状态。
-客户端就一直处于CLOSE_WAIT，相反服务端由于有系统设置服务端自动断开连接（os系统超时时间）&lt;/p&gt;
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;net.ipv4.tcp_fin_timesout = 30
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p&gt;所以服务端不会保持在FIN_WAIT2状态。&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;
-    &lt;p&gt;2、面临短连接的问题&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;3、优点简单&lt;/p&gt;
-  &lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;2、定时发心跳维持连接 tcp_keepalive&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;需要解决的问题&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;1、心跳检测时间不够灵活&lt;/li&gt;
-  &lt;li&gt;2、设置定时时间段检测 (早上八点检测)&lt;/li&gt;
-  &lt;li&gt;3、无法检测假死，两个连接，依赖第三方redis服务&lt;/li&gt;
-  &lt;li&gt;4、依赖网络环境，需要稳定&lt;/li&gt;
-  &lt;li&gt;5、不是直连，通过代理链接，如socks5只转发应用层的包，不转发探测包&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;1、tcp_keepalive&lt;/p&gt;
-
-&lt;p&gt;2、swoole tcp_keepalive&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$serv = new Swoole\Server(&quot;192.168.2.194&quot;, 6666, SWOOLE_PROCESS);
-$serv-&amp;gt;set(array(
-    'worker_num' =&amp;gt; 1,
-    'open_tcp_keepalive' =&amp;gt; true,
-    'tcp_keepidle' =&amp;gt; 4, //4s没有数据传输就进行检测
-    'tcp_keepinterval' =&amp;gt; 1, //1s探测一次
-    'tcp_keepcount' =&amp;gt; 5, //探测的次数，超过5次后还没回包close此连接
-));
-
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;3、swoole heartbeat_idle_time(连接最大允许空闲的时间)&lt;/p&gt;
-
-&lt;p&gt;上面两个keepalive的缺点就是无法检测死链接，死链接会自动回ping检测。&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;array(
-    'heartbeat_idle_time'      =&amp;gt; 600, // 表示一个连接如果600秒内未向服务器发送任何数据，此连接将被强制关闭
-    'heartbeat_check_interval' =&amp;gt; 60,  // 表示每60秒遍历一次
-);
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;结合应用层设置定时心跳发送&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;1、指定ping/pong协议（mysql等自带ping协议）&lt;/li&gt;
-  &lt;li&gt;2、客户端灵活的发送ping心跳包&lt;/li&gt;
-  &lt;li&gt;3、服务端OnRecive检测可用性回复Pong&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;和检测转发的长连接服务，这相应的可以处理问题3、4、5，对于1、2无法解决。&lt;/p&gt;
-
-&lt;h2 id=&quot;面试常问&quot;&gt;面试常问&lt;/h2&gt;
-
-&lt;p&gt;1、挥手一定是四次吗？&lt;/p&gt;
-
-&lt;p&gt;2、握手为什么是三次？&lt;/p&gt;
-
-&lt;p&gt;3、长连接有哪些问题？&lt;/p&gt;
-
-&lt;h2 id=&quot;迭代&quot;&gt;迭代&lt;/h2&gt;
-&lt;ul&gt;
-  &lt;li&gt;2020年11月29日 22:28:12 初稿&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&quot;参考&quot;&gt;参考：&lt;/h2&gt;
-&lt;ul&gt;
-  &lt;li&gt;1、&lt;a href=&quot;https://my.oschina.net/costaxu/blog/127394&quot;&gt;几种TCP连接中出现RST的情况 - costaxu的个人页面 - OSCHINA - 中文开源技术交流社区&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;2、&lt;a href=&quot;https://www.cnblogs.com/Orgliny/p/5780796.html&quot;&gt;TCP/IP协议中backlog参数 - Orgliny - 博客园&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;3、&lt;a href=&quot;https://course.swoole-cloud.com/videos/1&quot;&gt;Swoole微课程&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-</description>
-				<pubDate>Sun, 29 Nov 2020 00:00:00 +0800</pubDate>
-				<link>/tcp.html</link>
-				<guid isPermaLink="true">/tcp.html</guid>
 			</item>
 		
 	</channel>

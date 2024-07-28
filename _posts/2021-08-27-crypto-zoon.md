@@ -31,7 +31,7 @@ Panda: https://www.pantavv.xyz/i/46214283
 搜索Metamask，看到狐狸，点击第一个进入，然后点击按钮 '添加到Chrome'。
 
 安装成功后，如下图；
-![](http://img.zzhpeng.cn/FlL0LgTjt2miSjMcqfVaFaSJAVOx)
+![](http://img.chunpat.cn/FlL0LgTjt2miSjMcqfVaFaSJAVOx)
 
 然后就是新建钱包或者导入其他钱包的**私钥（私钥是命，要保管好）。**
 
@@ -40,19 +40,19 @@ https://academy.binance.com/zh/articles/connecting-metamask-to-binance-smart-cha
 
 创建好后，基于bsc链加 zoon 合约地址 0x9d173e6c594f479b4d47001f8e6a95a7adda42bc
 
-![](http://img.zzhpeng.cn/FhttIQe6deo38nATVqv-5H-JgxhM)
+![](http://img.chunpat.cn/FhttIQe6deo38nATVqv-5H-JgxhM)
 
 ## 4、购买zoon代币，买宠物
 
 查看代币的行情与购买：https://www.dextools.io/app/pancakeswap/pair-explorer/0xdf7646371fd995dfe3f9665e6382b40cd008e889
 
 购买的话，可以用上面的网址，链接小狐狸，bnb购买（Binance网址：http://accounts.binancezh.cz/zh-CN/register?ref=91791353）, 如下图
-![](http://img.zzhpeng.cn/FlcwLZQ4h8cQWmj2Ad3ZdeZ-O8Ig)
+![](http://img.chunpat.cn/FlcwLZQ4h8cQWmj2Ad3ZdeZ-O8Ig)
 
 进官网：https://app.cryptozoon.io/
 
 用钱包连接登录，登录后，如下图：
-![](http://img.zzhpeng.cn/Fla79qXsoq5-9J6QD_SMZTsPrs2D)
+![](http://img.chunpat.cn/Fla79qXsoq5-9J6QD_SMZTsPrs2D)
 
 
 购买宠物可以去市场买。

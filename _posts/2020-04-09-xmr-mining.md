@@ -57,7 +57,7 @@ sudo make install
 
 ## 5、后话
 2台四核服务器收益图，跑了9个小时左右，收益有点低，当时xmr市场价格为57.84USD。
-![](http://img.zzhpeng.cn/Fr9Zq23WuchKUcBHAZB7gwhCIZvR)
+![](http://img.chunpat.cn/Fr9Zq23WuchKUcBHAZB7gwhCIZvR)
 
 ## 迭代
 * 2020年04月09日 09:00:00 初稿

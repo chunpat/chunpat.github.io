@@ -9,7 +9,7 @@ tags: mysql mysql-logic-recovery
 有时候线上出了问题，而原本地数据不好操作，所以想把生产的数据弄一份到本地环境测试。操作步骤：1、阿里云RDS导出逻辑。2、导入本地mysql。
 
 ## 阿里云RDS生成逻辑
-![Fh3k1F_AOs_QW_1tbIFDs3-f9R7M](http://img.zzhpeng.cn/Fh3k1F_AOs_QW_1tbIFDs3-f9R7M)
+![Fh3k1F_AOs_QW_1tbIFDs3-f9R7M](http://img.chunpat.cn/Fh3k1F_AOs_QW_1tbIFDs3-f9R7M)
 
 点击确认后，就会生成，然后下载即可。
 

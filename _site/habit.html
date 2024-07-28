@@ -101,7 +101,7 @@
                     </div>
                     <h1>避免死循环-记一次问题排查</h1>
                     
-                    <span class="meta">Posted by zzhpeng on December 10, 2022</span>
+                    <span class="meta">Posted by chunpat on December 10, 2022</span>
                 </div>
             </div>
         </div>
@@ -151,7 +151,7 @@
 </code></pre></div></div>
 
 <p>这里我梳理下，简易流程图如下：
-<img src="https://img.zzhpeng.cn/queue%400.png" alt="" /></p>
+<img src="https://img.chunpat.cn/queue%400.png" alt="" /></p>
 
 <p>程序挂了，任务不跑，第一开始没思路，临时解决的是重启，但是执行一段时间又不行，特别是高峰的时候很绝望。然后想的是性能问题，是不是数据库介质不行。
 开始查看数据库是不是产生了死锁了，删除锁。查看锁的语句如下：</p>
@@ -164,7 +164,7 @@ kill 738178711
 <p>然后又可以了。又过了一段时间，还是不行。只能重新排查，突然发现在重启队列的时候，查看数据库锁看到有条没读锁的sql，一直挂着，然后查看业务代码
 ，发现这不就是查看据库数据是否重复数据的sql语句吗？，这里产生了死循环，效果就会出现下面流程图：</p>
 
-<p><img src="https://img.zzhpeng.cn/queue%401.png" alt="" /></p>
+<p><img src="https://img.chunpat.cn/queue%401.png" alt="" /></p>
 
 <p>由于框架队列默认超时机制是60s，超过了就会重新执行，直到达到一定次数，程序就会die。这里面有日志，但是没留意这个超时异常中断的记录。</p>
 
@@ -188,7 +188,7 @@ kill 738178711
 
                 <hr>
 
-                <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/4.0/80x15.png" /></a><br />本作品采用<a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/">CC BY-NC-ND 4.0</a>进行许可。转载，请注明原作者 Zzhpeng 及本文源链接。
+                <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/4.0/80x15.png" /></a><br />本作品采用<a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/">CC BY-NC-ND 4.0</a>进行许可。转载，请注明原作者 chunpat 及本文源链接。
 
                 <hr>
 
@@ -198,6 +198,10 @@ kill 738178711
                         <a href="/linux-permission.html" data-toggle="tooltip" data-placement="top" title="Linux角色，目录权限(含实际案例)">&larr; Previous Post</a>
                     </li>
                     
+                    
+                    <li class="next">
+                        <a href="/github-readme-add-post.html" data-toggle="tooltip" data-placement="top" title="github个人首页自动展示你最近写的blog文章">Next Post &rarr;</a>
+                    </li>
                     
                 </ul>
 
@@ -346,7 +350,7 @@ kill 738178711
 
                 </ul>
                 <p class="copyright text-muted">
-                    &copy; 2011~2022 zzhpeng ♪ Powered by Jekyll. <a href="https://beian.miit.gov.cn/" target="_blank">粤ICP备17053344号</a>
+                    &copy; 2011~2024 chunpat ♪ Powered by Jekyll. <a href="https://beian.miit.gov.cn/" target="_blank">粤ICP备17053344号</a>
                 </p>
             </div>
         </div>

@@ -1,7 +1,7 @@
 ---
 layout: page
 title: "About"
-description: "Hi,fromChinaBoy is zzhpeng"
+description: "Hi,fromChinaBoy is chunpat"
 header-img: "img/plane.jpg"
 ---
 

@@ -46,7 +46,7 @@ nohup /command/svscanboot &
 
 启动之后，查看进程，可以发现svscan做为svscanboot的子进程在运行。
 
-![](http://www.zzhpeng.cn/wp-content/uploads/2018/05/ps_svs.png)
+![](http://www.chunpat.cn/wp-content/uploads/2018/05/ps_svs.png)
 
 
 >实战
@@ -76,7 +76,7 @@ ln -s /opt/svc/nginx/  /service/
 
 之后svscan会自动检测，并添加任务，每隔几秒执行一次该文件。
 查看进程树形图
-![](http://www.zzhpeng.cn/wp-content/uploads/2018/05/pstree.png)
+![](http://www.chunpat.cn/wp-content/uploads/2018/05/pstree.png)
 
 从中可以看出来，svscanboot负责启动svscan服务，svscan管理supervise进程。而具体的客户进程，是通过supervise进程来统一管理的。
 

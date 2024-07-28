@@ -4,16 +4,16 @@ header-img: "img/autumn2.jpg"
 tagline: "吉光片羽"
 description: "chunpat"
 baseurl: ""
-# url: "https://www.zzhpeng.com"
+# url: "https://www.chunpat.com"
 # url: "http://localhost:4000"
 
-url: https://www.zzhpeng.com
+url: https://www.chunpat.com
 
 # enforce_ssl:
 
 # About/contact
 owner:
-  name: "zzhpeng"
+  name: "chunpat"
   email: zhangzhenpeng008@email.com
   bio: "明朝即長路 惜取此時心"
 
@@ -60,7 +60,7 @@ defaults:
       type: "posts"
     values:
       layout: "post"
-      author: "zzhpeng"
+      author: "chunpat"
       header-img: "img/fantasy.jpg" # We don't want posts without a header image, that whould mean white on white
 
 

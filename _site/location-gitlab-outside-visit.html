@@ -105,7 +105,7 @@
                     </div>
                     <h1>基于frp,gitlab的docker镜像实现本地gitlab外网访问(一)</h1>
                     
-                    <span class="meta">Posted by zzhpeng on July 15, 2019</span>
+                    <span class="meta">Posted by chunpat on July 15, 2019</span>
                 </div>
             </div>
         </div>
@@ -133,10 +133,10 @@
   <p>1、这里docker-compose管理安装</p>
 </blockquote>
 
-<p><img src="http://img.zzhpeng.cn/FgO-PtshY7SQ52npAmUL4en4WGCO" alt="FgO-PtshY7SQ52npAmUL4en4WGCO" />
+<p><img src="http://img.chunpat.cn/FgO-PtshY7SQ52npAmUL4en4WGCO" alt="FgO-PtshY7SQ52npAmUL4en4WGCO" />
 然后在当前目录运行docker-compose up,执行时间可能会有点久，请耐性等待。
 当执行到开始写日志的时候，就证明本地的gitlab安装成功了。如下图：
-<img src="http://img.zzhpeng.cn/FrMofWRxKkWDy7Nn2Lb4JwjAesJz" alt="" /></p>
+<img src="http://img.chunpat.cn/FrMofWRxKkWDy7Nn2Lb4JwjAesJz" alt="" /></p>
 
 <blockquote>
   <p>2、访问127.0.0.1:8686测试</p>
@@ -180,7 +180,7 @@ server_port = 7000
 [web] 
 type = http
 local_port = 8686
-custom_domains = gitlab.zzhpeng.cn                               
+custom_domains = gitlab.chunpat.cn                               
 
 </code></pre></div></div>
 
@@ -191,7 +191,7 @@ custom_domains = gitlab.zzhpeng.cn
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[common]
 bind_port = 7000
 vhost_http_port = 8080
-subdomain_host = gitlab.zzhpeng.cn                            
+subdomain_host = gitlab.chunpat.cn                            
 
 </code></pre></div></div>
 
@@ -218,24 +218,24 @@ subdomain_host = gitlab.zzhpeng.cn
   <p>1、做域名解析，腾讯云云服务器如下配置</p>
 </blockquote>
 
-<p><img src="http://img.zzhpeng.cn/Fpud9LMVf-xDNvznnHnfWusl8N7W" alt="" /></p>
+<p><img src="http://img.chunpat.cn/Fpud9LMVf-xDNvznnHnfWusl8N7W" alt="" /></p>
 
 <blockquote>
-  <p>2、域名http://gitlab.zzhpeng.cn:8080访问测试</p>
+  <p>2、域名http://gitlab.chunpat.cn:8080访问测试</p>
 </blockquote>
 
-<p><img src="http://img.zzhpeng.cn/FuPWVEIWOixgp6wM2vmBfP84_emk" alt="" /></p>
+<p><img src="http://img.chunpat.cn/FuPWVEIWOixgp6wM2vmBfP84_emk" alt="" /></p>
 
 <h3 id="外网域名访问优化nginx转发">外网域名访问优化–nginx转发</h3>
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
 server{
     listen 80;
-    server_name  gitlab.zzhpeng.cn;
+    server_name  gitlab.chunpat.cn;
     root /var/www/html/goShares/public; # 该项要修改为你准备存放相关网页的路径
 
     #access_log /dev/null;
     #access_log  /var/log/nginx/nginx.localhost.access.log  main;
-    error_log  /var/log/nginx/wx.zzhpeng.cn.log  warn;
+    error_log  /var/log/nginx/wx.chunpat.cn.log  warn;
 
     location / {
         #resolver 127.0.0.1; #通过配置/etc/dnsmasq.conf，本地解析域名
@@ -244,7 +244,7 @@ server{
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_set_header Host $host;
-        proxy_pass http://gitlab.zzhpeng.cn:8080; #通过域名访问frp服务
+        proxy_pass http://gitlab.chunpat.cn:8080; #通过域名访问frp服务
     }
 
     location = /favicon.ico {
@@ -254,7 +254,7 @@ server{
 }
 </code></pre></div></div>
 <p>效果图如下：
-<img src="http://img.zzhpeng.cn/FiasTv3nEaiDaxUK_PcotivGkE9F" alt="" /></p>
+<img src="http://img.chunpat.cn/FiasTv3nEaiDaxUK_PcotivGkE9F" alt="" /></p>
 
 <h3 id="其他优化qa">其他优化Q&amp;A</h3>
 <blockquote>
@@ -300,7 +300,7 @@ server{
 
                 <hr>
 
-                <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/4.0/80x15.png" /></a><br />本作品采用<a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/">CC BY-NC-ND 4.0</a>进行许可。转载，请注明原作者 Zzhpeng 及本文源链接。
+                <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/4.0/80x15.png" /></a><br />本作品采用<a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/">CC BY-NC-ND 4.0</a>进行许可。转载，请注明原作者 chunpat 及本文源链接。
 
                 <hr>
 
@@ -462,7 +462,7 @@ server{
 
                 </ul>
                 <p class="copyright text-muted">
-                    &copy; 2011~2022 zzhpeng ♪ Powered by Jekyll. <a href="https://beian.miit.gov.cn/" target="_blank">粤ICP备17053344号</a>
+                    &copy; 2011~2024 chunpat ♪ Powered by Jekyll. <a href="https://beian.miit.gov.cn/" target="_blank">粤ICP备17053344号</a>
                 </p>
             </div>
         </div>
