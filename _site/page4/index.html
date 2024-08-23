@@ -104,6 +104,46 @@
 		<div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
 			
 <div class="post-preview">
+    <a href="/mysql-in.html">
+        <h2 class="post-title">            
+            Mysql使用IN功能相关与性能对比
+        </h2>
+        
+        <div class="post-content-preview">
+            问题概述
+平时Mysql喜欢先sql语句找出id字符串，然后用in后面接（id，id，……）去查找数据。查阅相关文章，说sql语句长度有限制，随着数据增长就不能执行，但是
+这个长度却很大，一般可以不用考虑。
+
+查看方法。
+mysql&gt;show variables like '%max_a...
+        </div>
+    </a>
+    <p class="post-meta">Posted by chunpat on October 7, 2019</p>
+</div>
+
+<hr>
+
+<div class="post-preview">
+    <a href="/zsh.html">
+        <h2 class="post-title">            
+            更换mac默认bash shell为zsh
+        </h2>
+        
+        <div class="post-content-preview">
+            问题概述
+原本的bash shell用起来也挺快捷，但是在git操作切换分支之类的没有提醒用起来没那么爽。很久前老大推荐我用，
+之前回复是勤奋点，多打几个字母也有好处。今天再次看到相关的blog，决定换起来，结果就是，真香！
+
+更换brew源
+原本的源是github的，由于墙的问题可能会有点慢...
+        </div>
+    </a>
+    <p class="post-meta">Posted by chunpat on September 30, 2019</p>
+</div>
+
+<hr>
+
+<div class="post-preview">
     <a href="/linux-user-group-permission.html">
         <h2 class="post-title">            
             gitlab出现502问题
@@ -257,49 +297,6 @@ outp...
         </div>
     </a>
     <p class="post-meta">Posted by chunpat on September 7, 2019</p>
-</div>
-
-<hr>
-
-<div class="post-preview">
-    <a href="/timed-out.html">
-        <h2 class="post-title">            
-            web服务超时处理
-        </h2>
-        
-        <div class="post-content-preview">
-            事由
-执行285675条mysql数据操作的时候，页面出现nginx异常An error occurred.报错。查看日志，详情如下：
-
-2019/09/06 14:32:46 [error] 9#9: *7 upstream timed out (110: Connection timed ...
-        </div>
-    </a>
-    <p class="post-meta">Posted by chunpat on September 6, 2019</p>
-</div>
-
-<hr>
-
-<div class="post-preview">
-    <a href="/elasticsearch-learning.html">
-        <h2 class="post-title">            
-            elasticsearch学习
-        </h2>
-        
-        <div class="post-content-preview">
-            安装
-下载相应版本 https://www.elastic.co/cn/downloads/elasticsearch
-
-配置
-1、修改配置，其他主机可以访问，单节点部署
-vim config/elasticsearch.yml
-
-
-
-
-其他配置：https://www.cnblogs.com...
-        </div>
-    </a>
-    <p class="post-meta">Posted by chunpat on September 2, 2019</p>
 </div>
 
 <hr>

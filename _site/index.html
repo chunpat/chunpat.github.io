@@ -104,6 +104,57 @@
 		<div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
 			
 <div class="post-preview">
+    <a href="/gmk-setting.html">
+        <h2 class="post-title">            
+            gmk mini主机
+        </h2>
+        
+        <div class="post-content-preview">
+            pve 网卡竟然不是开启的，需要手动开启
+
+买了两个硬盘，一个装win，一个装pve，原先装了pve, 之后win装了驱动后，回到pve里面的时候，网口的指示灯是不亮的，
+ip addr 显示网卡state down。
+
+通过命令开启。
+ip link set enp1s0 up
+
+
+迭代
+
+...
+        </div>
+    </a>
+    <p class="post-meta">Posted by chunpat on August 4, 2024</p>
+</div>
+
+<hr>
+
+<div class="post-preview">
+    <a href="/pve-add-openwrt.html">
+        <h2 class="post-title">            
+            搭建旁路由+科学上网
+        </h2>
+        
+        <div class="post-content-preview">
+            起因
+
+旁路由可以不影响主路由的稳定，又可以解决多设备科学上网。
+
+镜像安装
+
+素材地址，点击谷歌云盘下载
+
+将文件镜像上传到PVE宿主机
+scp -r -P 22 /Users/zzhpeng/Downloads/openwrt.zip  root@192.168.199.225:/tmp
+...
+        </div>
+    </a>
+    <p class="post-meta">Posted by chunpat on August 4, 2024</p>
+</div>
+
+<hr>
+
+<div class="post-preview">
     <a href="/github-readme-add-post.html">
         <h2 class="post-title">            
             github个人首页自动展示你最近写的blog文章
@@ -290,53 +341,6 @@ composer requir...
         </div>
     </a>
     <p class="post-meta">Posted by chunpat on March 26, 2022</p>
-</div>
-
-<hr>
-
-<div class="post-preview">
-    <a href="/php-exception.html">
-        <h2 class="post-title">            
-            PHP 异常处理
-        </h2>
-        
-        <div class="post-content-preview">
-            PHP 错误处理
-
-PHP因为便捷灵活，入门门槛低，严谨包容性大，如果使用不当，就容易写出很多难以入目与维护的代码。至此，如果想项目长久发展。
-配置好相应的设置，加强把控至关重要。
-
-PHP 的错误级别种类
-
-摘取了宝塔管理软件下的php.ini 配置下关于错误处理与记录的描述。
-
-;;;;;...
-        </div>
-    </a>
-    <p class="post-meta">Posted by chunpat on March 18, 2022</p>
-</div>
-
-<hr>
-
-<div class="post-preview">
-    <a href="/gitlab.html">
-        <h2 class="post-title">            
-            Self-host Gitlab的相关操作
-        </h2>
-        
-        <div class="post-content-preview">
-            安装（Debian 系列系统为例）
-
-apt-get 直接安装
-
-更新gitlab源
-curl -s https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.deb.sh | sudo bash
-
-
-安装...
-        </div>
-    </a>
-    <p class="post-meta">Posted by chunpat on January 8, 2022</p>
 </div>
 
 <hr>
